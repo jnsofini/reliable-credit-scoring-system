@@ -3,23 +3,34 @@ from typing import Optional
 import fire
 import pandas as pd
 
+from prefect import flow, task
+
 from feature_pipeline.etl import cleaning, load, extract, validation
 from feature_pipeline import utils
 
 logger = utils.get_logger(__name__)
 
-GREEN_TAXI = "https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2023-01.parquet"
-MODELLING_COLUMNS_TYPES = {
-    'pulocationid': str, 
-    'dolocationid': str, 
-    'duration': str
-}
-MODELLING_COLUMNS = ['pulocationid', 'dolocationid', 'duration']
+DATA_PATH = "/home/fini/github-projects/mlops/capstone/data/raw_heloc_dataset_v3.parquet"
+TARGET = "RiskPerformance"
+MODELLING_COLUMNS = ['RiskPerformance', 'ExternalRiskEstimate', 'MSinceOldestTradeOpen',
+       'MSinceMostRecentTradeOpen', 'AverageMInFile', 'NumSatisfactoryTrades',
+       'NumTrades60Ever2DerogPubRec', 'NumTrades90Ever2DerogPubRec',
+       'PercentTradesNeverDelq', 'MSinceMostRecentDelq',
+       'MaxDelq2PublicRecLast12M', 'MaxDelqEver', 'NumTotalTrades',
+       'NumTradesOpeninLast12M', 'PercentInstallTrades',
+       'MSinceMostRecentInqexcl7days', 'NumInqLast6M', 'NumInqLast6Mexcl7days',
+       'NetFractionRevolvingBurden', 'NetFractionInstallBurden',
+       'NumRevolvingTradesWBalance', 'NumInstallTradesWBalance',
+       'NumBank2NatlTradesWHighUtilization', 'PercentTradesWBalance',
+       'operation_date', 'id']
 
+FEATURE_GROUP_VERSION = 1
+
+@flow
 def run(
-    url: str = GREEN_TAXI,
-    feature_group_version: int = 1,
-) -> dict:
+    source_path: str = DATA_PATH,
+    feature_group_version: int = FEATURE_GROUP_VERSION,
+) -> None:
     """
     Extract data from the API.
 
@@ -37,12 +48,7 @@ def run(
     """
 
     logger.info(f"Extracting data from API.")
-    data_and_metadata = extract.get_data_url(url=url)
-    if data_and_metadata:
-        data, metadata = data_and_metadata
-    else:
-        return {}
-    
+    data = extract.get_data(path=source_path)
     # TODO: Add handling of empy data returned
     
     logger.info("Successfully extracted data from API.")
@@ -51,6 +57,7 @@ def run(
     logger.info(f"Transforming data.")
     data = transform(data)
     logger.info("Successfully transformed data.")
+    print(data.head())
 
     logger.info("Building validation expectation suite.")
     validation_expectation_suite = validation.build_expectation_suite()
@@ -62,34 +69,36 @@ def run(
         validation_expectation_suite=validation_expectation_suite,
         feature_group_version=feature_group_version,
     )
-    metadata["feature_group_version"] = feature_group_version
+    # metadata["feature_group_version"] = feature_group_version
     logger.info("Successfully validated data and loaded it to the feature store.")
 
-    logger.info(f"Wrapping up the pipeline.")
-    utils.save_json(metadata, file_name="feature_pipeline_metadata.json")
-    logger.info("Done!")
+    # logger.info(f"Wrapping up the pipeline.")
+    # # utils.save_json(metadata, file_name="feature_pipeline_metadata.json")
+    # logger.info("Done!")
 
-    return metadata
+    # return metadata
 
-
-def transform(data: pd.DataFrame):
+@task
+def transform(data: pd.DataFrame) -> pd.DataFrame:
     """
     Wrapper containing all the transformations from the ETL pipeline.
     """
 
+    columns_types = cleaning.get_columns_types(data, exemption=["operation_date", "id", "RiskPerformance"])
+    logger.info("Cleaning data: Casting columns")
+    # print(columns_types)
+    data = cleaning.cast_columns(df=data, columns_type=columns_types)
+    data = cleaning.replace(df=data, replacement={TARGET: {"Bad":1, "Good": 0}})  
+    logger.info("Cleaning data: Renaming columns")
     data = cleaning.rename_columns(data)
-    data = cleaning.add_trip_duration(
-        data, 
-        pick_up_time = "lpep_pickup_datetime",
-        drop_off_time = "lpep_dropoff_datetime"
-        )
-    data = cleaning.remove_outliers(
-        data, 
-        strategy={"duration": {"min": 1, "max": 60}}
-            )
-    data = cleaning.cast_columns(data, MODELLING_COLUMNS_TYPES)
+    print("--------------------", data.columns)  
+    
+    # data = cleaning.remove_outliers(
+    #     data, 
+    #     strategy={"duration": {"min": 1, "max": 60}}
+    #         )
 
-    return data.reset_index()#data[MODELLING_COLUMNS].reset_index()
+    return data
 
 
 if __name__ == "__main__":

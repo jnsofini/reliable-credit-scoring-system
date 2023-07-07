@@ -1,3 +1,5 @@
+import json
+
 import hopsworks
 import pandas as pd
 from great_expectations.core import ExpectationSuite
@@ -25,17 +27,17 @@ def to_feature_store(
     feature_store = project.get_feature_store()
 
     # Create feature group.
-    nyc_taxi_feature_group = feature_store.get_or_create_feature_group(
-        name="nyc_green_taxi",
+    store_feature_group = feature_store.get_or_create_feature_group(
+        name="credit_score",
         version=feature_group_version,
-        description="New York Green taxi data for the time period in file.",
-        primary_key=["index"],
+        description="Explainable Machine Learning Challenge credit risk data.",
+        primary_key=["id"],
         # event_time="datetime_utc",
         online_enabled=False,
         expectation_suite=validation_expectation_suite,
     )
     # Upload data.
-    nyc_taxi_feature_group.insert(
+    store_feature_group.insert(
         features=data,
         overwrite=False,
         write_options={
@@ -44,42 +46,46 @@ def to_feature_store(
     )
 
     # Add feature descriptions.
-    feature_descriptions = [
-        {
-            "name": "pulocationid",
-            "description": """
-                            Describe the pick-up location of the passenger.
-                            """,
-            "validation_rules": "Always have a code",
-        },
-        {
-            "name": "dolocationid",
-            "description": """
-                            Describe the drop-off location of the passenger
-                            """,
-            "validation_rules": "It is a valid code",
-        },
-        {
-            "name": "duration",
-            "description": """
-                            The ride duration in minutes.
-                            """,
-            "validation_rules": ">1 (float) < 60",
-        },
-    ]
+    with open("metadata.json", "r") as f:
+        meta_data = json.load(f)
+        feature_descriptions = meta_data["feature_descriptions"]
+    # feature_descriptions = [
+    #     {
+    #         "name": "riskperformance",
+    #         "description": """
+    #                         Describe the risk indicator of the customer. 
+    #                         1 if they ran into financial difficulty and 0 otherwise.
+    #                         """,
+    #         "validation_rules": "Always have a code",
+    #     },
+    #     {
+    #         "name": "numtrades60ever2derogpubrec",
+    #         "description": """
+    #                         Describes the number of trades that are 60 and older
+    #                         """,
+    #         "validation_rules": ">0 int",
+    #     },
+    #     {
+    #         "name": "numtrades90ever2derogpubrec",
+    #         "description": """
+    #                         Describes the number of trades that are 60 and older
+    #                         """,
+    #         "validation_rules": ">0 (int)",
+    #     },
+    # ]
     
     for description in feature_descriptions:
-        nyc_taxi_feature_group.update_feature_description(
-            description["name"], description["description"]
+        store_feature_group.update_feature_description(
+            description["name"].lower(), description["description"]
         )
 
     # Update statistics.
-    nyc_taxi_feature_group.statistics_config = {
+    store_feature_group.statistics_config = {
         "enabled": True,
         "histograms": True,
         "correlations": True,
     }
-    nyc_taxi_feature_group.update_statistics_config()
-    nyc_taxi_feature_group.compute_statistics()
+    store_feature_group.update_statistics_config()
+    store_feature_group.compute_statistics()
 
-    return nyc_taxi_feature_group
+    return store_feature_group

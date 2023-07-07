@@ -1,76 +1,80 @@
-import pandas as pd
 from typing import Dict, List
+import pandas as pd
+import numpy as np
+import datetime
+import uuid
 
-COLUMNS_RENAME = {
-    "tpep_pickup_datetime": "pickup_time",
-    "tpep_dropoff_datetime": "dropoff_time",
-    "improvement_surcharge": "improvement_charge",
-    "congestion_surcharge": "congestion_charge",
-    "store_and_fwd_flag": "store_flag"
-}
-# TODO: Add more types
-COLUMNS_TYPES = {
-    "pickup_time": "datetime[64]",
-    "dropoff_time": "datetime[64]",
-    "payment_tyme": "int8"
-}
+def get_columns_types(df: pd.DataFrame, exemption=None)-> Dict[str, str]:
+    if exemption is None:
+        exemption = ["operation_date", "id", "RiskPerformance"]
+    columns_types = {column: "int32" for column in df.columns if column not in exemption}
+    columns_types["id"] = "str"
 
+    return columns_types
 
-MODELLING_COLUMNS = ['pulocationid', 'dolocationid', 'duration']
-
-def rename_columns(df: pd.DataFrame, columns: Dict[str, str] = COLUMNS_RENAME) -> pd.DataFrame:
+def rename_columns(df: pd.DataFrame, columns: Dict[str, str] | None = None) -> pd.DataFrame:
     """
     Rename columns to match our schema.
     """
 
-    data = df.drop(                       # Drop irrelevant columns.
-        columns=["VendorID", "RatecodeID"]
-        ).rename(                           # Rename columns
-        columns=COLUMNS_RENAME
-    ) # Return a copy
+    if columns is not None:
+        df = df.rename(                           # Rename columns
+            columns=columns
+        ) # Return a copy
 
-    data.columns = data.columns.str.lower()
+    df.columns = df.columns.str.lower()
 
-    return data
+    return df
+
+def add_date(data: pd.DataFrame)-> None:
+    """Adds a date column called 'operation_date' to the dataframe.
+
+    Our original data didn't have a date. We added this date to make the data
+    richer and suitable for the project.
+
+    Args:
+        data (pd.DataFrame): The data without date column
+    """
+    data["operation_date"] = [datetime.date(2023, month, 1) for month in np.random.randint(1, 9, size=data.shape[0])]
+
+def add_ids(data: pd.DataFrame)-> None:
+    """Adds a date column called 'is' to the dataframe
+
+    Our original data didn't have a primary key. We added the 'id' ciolumn to make the data
+    richer and suitable for the project.
+
+    Args:
+        data (pd.DataFrame): The data without a primary column
+    """
+    data["id"] = [uuid.uuid4() for _ in range(data.shape[0])]
+
+def replace(df: pd.DataFrame, replacement: Dict[str, dict])-> pd.DataFrame:
+    """Takes a dataframe and replace values in columns with values provided.
+
+    Args:
+        df (pd.DataFrame): Dataframe which carries multiple columns
+        replacement (dict): Dict with keys the string name and values dict of values to replace as keys and replament as values.
+
+    Returns:
+        pd.DataFrame: Dataframe with updated values
+    """
+    return df.replace(to_replace=replacement)
 
 
 def cast_columns(df: pd.DataFrame, columns_type: Dict[str, str]) -> pd.DataFrame:
-    """
-    Cast columns to the correct data type.
+    """Cast columns to the correct data type.
+
+    Args:
+        df (pd.DataFrame): Dataframe which carries multiple columns
+        columns_type (dict): Dict with keys the column name and values a string representation of the type.
+
+    Returns:
+        pd.DataFrame: Dataframe with updated values
     """
 
     data = df.astype(columns_type)
 
     return data
-
-
-
-def add_trip_duration(
-    df: pd.DataFrame,
-    pick_up_time: str = "tpep_pickup_datetime",
-    drop_off_time: str = "tpep_dropoff_datetime",
-) -> pd.DataFrame:
-    """Adds the column `duration` to the DataFrame.
-
-    The column duration is derived from the pickup and drop off time stamps.
-
-    Args:
-        df (pd.DataFrame): Raw data of the taxi trip data
-        pick_up_time (str, optional): The pickup time. Defaults to "tpep_pickup_datetime".
-        drop_off_time (str, optional): Dropoff time. Defaults to "tpep_dropoff_datetime".
-
-    Returns:
-        pd.DataFrame: The taxi data with duration added
-    """
-    df[pick_up_time] = pd.to_datetime(df[pick_up_time])
-    df[drop_off_time] = pd.to_datetime(df[drop_off_time])
-    df = df.assign(
-        duration=df[drop_off_time] - df[pick_up_time]
-        )
-    df.duration = df.duration.apply(lambda td: td.total_seconds() / 60)
-
-    return df
-
 
 def remove_outliers(
     df: pd.DataFrame, strategy: Dict[str, Dict[str, float]]
@@ -116,36 +120,5 @@ def categorial_feature_prepocessing(
         pd.DataFrame: Process dataframe
     """
     df[categorical_features] = df[categorical_features].astype(str)
-
-    return df
-
-
-def preprocess_taxi_data(
-    df: pd.DataFrame,
-    pickup_dropoff: Dict[str, str],
-    strategy: Dict[str, Dict[str, float]],
-    categorical_features: List[str],
-) -> pd.DataFrame:
-    """Adds duration data using `add_trip_duration` and removes outliers using `remove_outliers.`
-
-    Args:
-        df (pd.DataFrame): DataFrame with outliers present.
-        strategy (Dict[str, Dict[str, float]]): The strategy to remove outliers
-        categorical_features (List[str]): List of categorical features to pass to categoricla feature processing
-
-    Returns:
-        pd.DataFrame: The processed data with ourliers removed.
-    """
-    print(df.columns)
-    if not "duration" in df.columns:
-        df = add_trip_duration(
-            df=df,
-            pick_up_time=pickup_dropoff["pickup"],
-            drop_off_time=pickup_dropoff["dropoff"],
-        )
-    df = remove_outliers(df=df, strategy=strategy)
-    df = categorial_feature_prepocessing(
-        df, categorical_features=categorical_features
-    )
 
     return df

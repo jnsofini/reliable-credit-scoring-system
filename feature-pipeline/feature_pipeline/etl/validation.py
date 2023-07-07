@@ -1,18 +1,28 @@
 from great_expectations.core import ExpectationSuite, ExpectationConfiguration
 
-MODELLING_COLUMNS = ['pulocationid', 'dolocationid', 'duration']
+MODELLING_COLUMNS = ['riskperformance', 'externalriskestimate', 'msinceoldesttradeopen',
+       'msincemostrecenttradeopen', 'averageminfile', 'numsatisfactorytrades',
+       'numtrades60ever2derogpubrec', 'numtrades90ever2derogpubrec',
+       'percenttradesneverdelq', 'msincemostrecentdelq',
+       'maxdelq2publicreclast12m', 'maxdelqever', 'numtotaltrades',
+       'numtradesopeninlast12m', 'percentinstalltrades',
+       'msincemostrecentinqexcl7days', 'numinqlast6m', 'numinqlast6mexcl7days',
+       'netfractionrevolvingburden', 'netfractioninstallburden',
+       'numrevolvingtradeswbalance', 'numinstalltradeswbalance',
+       'numbank2natltradeswhighutilization', 'percenttradeswbalance',
+       'operation_date', 'id']
 
 def build_expectation_suite() -> ExpectationSuite:
     """
     Builder used to retrieve an instance of the validation expectation suite.
     """
 
-    expectation_suite_taxi_fare = ExpectationSuite(
-        expectation_suite_name="taxi_fare_suite"
+    expectation_suite_credit_score = ExpectationSuite(
+        expectation_suite_name="credit_score_suite"
     )
 
     # Columns.
-    expectation_suite_taxi_fare.add_expectation(
+    expectation_suite_credit_score.add_expectation(
         ExpectationConfiguration(
             expectation_type="expect_table_columns_to_match_ordered_list",
             kwargs={
@@ -20,54 +30,56 @@ def build_expectation_suite() -> ExpectationSuite:
             },
         )
     )
-    expectation_suite_taxi_fare.add_expectation(
+    expectation_suite_credit_score.add_expectation(
         ExpectationConfiguration(
-            expectation_type="expect_table_column_count_to_equal", kwargs={"value": 3}
+            expectation_type="expect_table_column_count_to_equal", kwargs={"value": 26}
         )
     )
 
     # Duration values
-    expectation_suite_taxi_fare.add_expectation(
+    expectation_suite_credit_score.add_expectation(
         ExpectationConfiguration(
             expectation_type="expect_column_values_to_not_be_null",
-            kwargs={"column": "duration"},
+            kwargs={"column": "riskperformance"},
         )
     )
 
-    expectation_suite_taxi_fare.add_expectation(
+    expectation_suite_credit_score.add_expectation(
         ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_of_type",
-            kwargs={"column": "pulocationid", "type_": "str"},
+            kwargs={"column": "riskperformance", "type_": "bool"},
         )
     )
 
-    expectation_suite_taxi_fare.add_expectation(
+    expectation_suite_credit_score.add_expectation(
         ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_of_type",
-            kwargs={"column": "dolocationid", "type_": "str"},
+            kwargs={"column": "id", "type_": "str"},
         )
     )
+
+    for col in MODELLING_COLUMNS[:-2]:
+        expectation_suite_credit_score.add_expectation(
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_of_type",
+                kwargs={"column": col, "type_": "int"},
+            )
+        )
 
     
 
-    # Energy consumption
-    expectation_suite_taxi_fare.add_expectation(
+    # RiskPerformance
+    expectation_suite_credit_score.add_expectation(
         ExpectationConfiguration(
             expectation_type="expect_column_min_to_be_between",
             kwargs={
-                "column": "duration",
-                "min_value": 1,
+                "column": "riskperformance",
+                "min_value": 0,
                 "strict_min": False,
-                "max_value": 60,
+                "max_value": 1,
                 "strict_max": False,
             },
         )
     )
-    expectation_suite_taxi_fare.add_expectation(
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_of_type",
-            kwargs={"column": "duration", "type_": "float64"},
-        )
-    )
 
-    return expectation_suite_taxi_fare
+    return expectation_suite_credit_score

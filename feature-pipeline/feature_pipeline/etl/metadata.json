@@ -1,0 +1,134 @@
+{
+    "feature_descriptions": [
+        {
+            "name": "id",
+            "description": "Describe the risk indicator of the customer.  1 if they ran into financial difficulty and 0 otherwise.",
+            "validation_rules": "Always have a code"
+        },
+        {
+            "name": "operation_date",
+            "description": "The date the transaction took place.",
+            "validation_rules": "Date"
+        },
+        {
+            "name": "RiskPerformance",
+            "description": "Risk performance indicator",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "ExternalRiskEstimate",
+            "description": "Estimated external risk level",
+            "validation_rules": ">0 float"
+        },
+        {
+            "name": "MSinceOldestTradeOpen",
+            "description": "Months since the oldest trade account was opened",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "MSinceMostRecentTradeOpen",
+            "description": "Months since the most recent trade account was opened",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "AverageMInFile",
+            "description": "Average months reported since the file was created",
+            "validation_rules": ">0 float"
+        },
+        {
+            "name": "NumSatisfactoryTrades",
+            "description": "Number of satisfactory trades",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "NumTrades60Ever2DerogPubRec",
+            "description": "Number of trades with 60+ days past due or derogatory public records ever",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "NumTrades90Ever2DerogPubRec",
+            "description": "Number of trades with 90+ days past due or derogatory public records ever",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "PercentTradesNeverDelq",
+            "description": "Percentage of trades never delinquent",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "MSinceMostRecentDelq",
+            "description": "Months since the most recent delinquency",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "MaxDelq2PublicRecLast12M",
+            "description": "Maximum delinquency reported in the last 12 months",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "MaxDelqEver",
+            "description": "Maximum delinquency ever reported",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "NumTotalTrades",
+            "description": "Total number of trades",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "NumTradesOpeninLast12M",
+            "description": "Number of trades opened in the last 12 months",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "PercentInstallTrades",
+            "description": "Percentage of installment trades",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "MSinceMostRecentInqexcl7days",
+            "description": "Months since the most recent inquiry excluding the last 7 days",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "NumInqLast6M",
+            "description": "Number of inquiries in the last 6 months",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "NumInqLast6Mexcl7days",
+            "description": "Number of inquiries in the last 6 months excluding the last 7 days",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "NetFractionRevolvingBurden",
+            "description": "Net fraction revolving burden",
+            "validation_rules": ">0 float"
+        },
+        {
+            "name": "NetFractionInstallBurden",
+            "description": "Net fraction installment burden",
+            "validation_rules": ">0 float"
+        },
+        {
+            "name": "NumRevolvingTradesWBalance",
+            "description": "Number of revolving trades with balance",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "NumInstallTradesWBalance",
+            "description": "Number of installment trades with balance",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "NumBank2NatlTradesWHighUtilization",
+            "description": "Number of bank/national trades with high utilization",
+            "validation_rules": ">0 int"
+        },
+        {
+            "name": "PercentTradesWBalance",
+            "description": "Percentage of trades with balance",
+            "validation_rules": ">0 float"
+        }
+    ]
+}

@@ -40,22 +40,7 @@ def create(
 
     """
 
-    if feature_group_version is None:
-        feature_pipeline_metadata = utils.load_json("feature_pipeline_metadata.json")
-        feature_group_version = feature_pipeline_metadata["feature_group_version"]
-
-    if start_datetime is None or end_datetime is None:
-        feature_pipeline_metadata = utils.load_json("feature_pipeline_metadata.json")
-        print(feature_pipeline_metadata)
-        start_datetime = datetime.strptime(
-            feature_pipeline_metadata["export_datetime_utc_start"],
-            feature_pipeline_metadata["datetime_format"],
-        )
-        end_datetime = datetime.strptime(
-            feature_pipeline_metadata["export_datetime_utc_end"],
-            feature_pipeline_metadata["datetime_format"],
-        )
-
+    
     project = hopsworks.login(
         api_key_value=settings.SETTINGS["FS_API_KEY"], project=settings.SETTINGS["FS_PROJECT_NAME"]
     )
@@ -63,33 +48,43 @@ def create(
 
     # Delete old feature views as the free tier only allows 100 feature views.
     # NOTE: Normally you would not want to delete feature views. We do it here just to stay in the free tier.
-    try:
-        feature_views = fs.get_feature_views(name=data_views)
-    except hsfs.client.exceptions.RestAPIError:
-        logger.info(f"No feature views found for {data_views}.")
-
-        feature_views = []
-
-    for feature_view in feature_views:
-        try:
-            feature_view.delete_all_training_datasets()
-        except hsfs.client.exceptions.RestAPIError:
-            logger.error(
-                f"Failed to delete training datasets for feature view {feature_view.name} with version {feature_view.version}."
-            )
-
-        try:
-            feature_view.delete()
-        except hsfs.client.exceptions.RestAPIError:
-            logger.error(
-                f"Failed to delete feature view {feature_view.name} with version {feature_view.version}."
-            )
+    _remove_unused_views(fs)
 
     # Create feature view in the given feature group version.
     store_fg = fs.get_feature_group(
         FEATURE_GROUP, version=feature_group_version
     )
     ds_query = store_fg.select_all()
+
+    # ## Added this but not tested
+    # train_test_period = ds_query.filter(ds_query.operation_date != "2023-08-01")
+    # oot_query = ds_query.filter(ds_query.operation_date == "2023-08-01")
+    # oot_feature_view = fs.create_feature_view(
+    #     name=f"{FEATURE_GROUP}_oot_view",
+    #     description="Out of time data to use for model validation",
+    #     labels=[TARGET],
+    #     query=oot_query,
+    #     labels=[],
+    # )
+    # # Train test split
+    # train_test_feature_view = fs.create_feature_view(
+    #     name=f"{FEATURE_GROUP}_train_test_view",
+    #     description="Data for the period to be used for model train and test",
+    #     labels=[TARGET],
+    #     query=train_test_period,
+    #     labels=[],
+    # )
+    #     # create a training dataset 
+    # X_train, y_train, X_test, y_test = train_test_feature_view.train_test_split(test_size=0.2, strategy=)
+
+    # # materialise a training dataset
+    # version, job = feature_view.create_train_test_split(
+    #     test_size = 0.2,
+    #     description = 'transactions_dataset_jan_feb',
+    #     data_format = 'csv'
+    # )
+
+
     feature_view = fs.create_feature_view(
         name=f"{FEATURE_GROUP}_view",
         description="Credit score data for risk scoring model.",
@@ -121,6 +116,30 @@ def create(
     )
 
     return metadata
+
+def _remove_unused_views(fs):
+    try:
+        feature_views = fs.get_feature_views(name=data_views)
+    except hsfs.client.exceptions.RestAPIError:
+        logger.info(f"No feature views found for {data_views}.")
+
+        feature_views = []
+
+    for feature_view in feature_views:
+        try:
+            feature_view.delete_all_training_datasets()
+        except hsfs.client.exceptions.RestAPIError:
+            logger.error(
+                f"Failed to delete training datasets for feature view {feature_view.name} with version {feature_view.version}."
+            )
+
+        try:
+            feature_view.delete()
+        except hsfs.client.exceptions.RestAPIError:
+            logger.error(
+                f"Failed to delete feature view {feature_view.name} with version {feature_view.version}."
+            )
+
 
 
 if __name__ == "__main__":

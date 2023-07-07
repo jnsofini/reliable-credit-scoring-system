@@ -3,6 +3,8 @@ import hopsworks
 
 from feature_pipeline import settings
 
+groups_to_delete = "deveopment-data"
+views_to_delete = "credit_score_view"
 
 def clean():
     """
@@ -16,7 +18,8 @@ def clean():
 
     print("Deleting feature views and training datasets...")
     try:
-        feature_views = fs.get_feature_views(name="energy_consumption_denmark_view")
+        feature_views = fs.get_feature_views(name=views_to_delete)
+        print("Deleting the views: ", feature_views)
 
         for feature_view in feature_views:
             try:
@@ -24,17 +27,20 @@ def clean():
             except Exception as e:
                 print(e)
     except Exception as e:
+        print("---------------------")
         print(e)
 
     print("Deleting feature groups...")
     try:
-        feature_groups = fs.get_feature_groups(name="energy_consumption_denmark")
+        feature_groups = fs.get_feature_groups(name=groups_to_delete)
+        print("Deleting the groups: ", feature_groups)
         for feature_group in feature_groups:
             try:
                 feature_group.delete()
             except Exception as e:
                 print(e)
     except Exception as e:
+        print("---------------------")
         print(e)
 
 
