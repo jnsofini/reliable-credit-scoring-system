@@ -1,3 +1,34 @@
+
+# Uncomment after chapter 5
+# 05-monitoring
+ayoub.md
+# Uncomment after chapter 4
+streaming/demo
+# images
+thumbnail-*
+capstone/notebooks
+setup
+# homework
+
+
+# Things to uncomment at the end
+# ----------------
+fonts
+mlflow-server-aws
+data
+HW
+artifacts_store
+models
+*/refactored/etl
+# infrastructure
+*.pkl
+artifacts
+output
+wandb
+notebooks/*
+*.db
+# ------------------------------------
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -158,3 +189,10 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+
+# Remove data files for now
+*.parquet
+
+.DS_Store
+mlruns
