@@ -4,6 +4,7 @@
 ## Prerequisites
 
 You need following tools installed:
+
 - `docker`
 - `docker-compose` (included to Docker Desktop for Mac and Docker Desktop for Windows )
 
@@ -13,31 +14,33 @@ Note: all actions expected to be executed in repo folder.
 
 - Create virtual environment and activate it (eg. `python -m venv venv && source ./venv/bin/activate` or `conda create -n venv python=3.11 && conda activate venv`)
 - Install required packages `pip install -r requirements.txt`
-- Run `baseline_model_nyc_taxi_data.ipynb` for downloading datasets, training model and creating reference dataset 
+- Run `baseline_model_nyc_taxi_data.ipynb` for downloading datasets, training model and creating reference dataset
 
 ## Monitoring Example
 
 ### Starting services
 
 To start all required services, execute:
+
 ```bash
 docker-compose up
 ```
 
 It will start following services:
+
 - `db` - PostgreSQL, for storing metrics data
 - `adminer` - database management tool
-- `grafana` - Visual dashboarding tool 
-
+- `grafana` - Visual dashboarding tool
 
 ### Sending data
 
 To calculate evidently metrics with prefect and send them to database, execute:
+
 ```bash
 python evidently_metrics_calculation.py
 ```
 
-This script will simulate batch monitoring. Every 10 secinds it will collect data for a daily batch, cacluate metrics and insert them into database. This metrics will be avaliable in Grafana in preconfigured dashboard. 
+This script will simulate batch monitoring. Every 10 secinds it will collect data for a daily batch, cacluate metrics and insert them into database. This metrics will be avaliable in Grafana in preconfigured dashboard.
 
 ### Accsess dashboard
 
@@ -55,6 +58,7 @@ Run `debugging_nyc_taxi_data.ipynb` to see how you can perform a debugging with 
 ### Stopping services
 
 To stop all services, execute:
+
 ```bash
 docker-compose down
 ```
