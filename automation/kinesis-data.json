@@ -1,0 +1,116 @@
+{
+    "Records": [
+        {
+            "kinesis": {
+                "kinesisSchemaVersion": "1.0",
+                "partitionKey": "1",
+                "sequenceNumber": "49642151314650539583851738197927844639227077687685152770",
+                "data": "ewogICAgICAgICJjdXN0IjogewogICAgICAicmlza3BlcmZvcm1hbmNlIjogMCwKICAgICAgImV4dGVybmFscmlza2VzdGltYXRlIjogNTcsCiAgICAgICJtc2luY2VvbGRlc3R0cmFkZW9wZW4iOiAxNzYsCiAgICAgICJtc2luY2Vtb3N0cmVjZW50dHJhZGVvcGVuIjogNCwKICAgICAgImF2ZXJhZ2VtaW5maWxlIjogODcsCiAgICAgICJudW1zYXRpc2ZhY3Rvcnl0cmFkZXMiOiAxOCwKICAgICAgIm51bXRyYWRlczYwZXZlcjJkZXJvZ3B1YnJlYyI6IDAsCiAgICAgICJudW10cmFkZXM5MGV2ZXIyZGVyb2dwdWJyZWMiOiAwLAogICAgICAicGVyY2VudHRyYWRlc25ldmVyZGVscSI6IDg5LAogICAgICAibXNpbmNlbW9zdHJlY2VudGRlbHEiOiAyLAogICAgICAibWF4ZGVscTJwdWJsaWNyZWNsYXN0MTJtIjogNCwKICAgICAgIm1heGRlbHFldmVyIjogNiwKICAgICAgIm51bXRvdGFsdHJhZGVzIjogMTgsCiAgICAgICJudW10cmFkZXNvcGVuaW5sYXN0MTJtIjogMSwKICAgICAgInBlcmNlbnRpbnN0YWxsdHJhZGVzIjogNTYsCiAgICAgICJtc2luY2Vtb3N0cmVjZW50aW5xZXhjbDdkYXlzIjogNCwKICAgICAgIm51bWlucWxhc3Q2bSI6IDEsCiAgICAgICJudW1pbnFsYXN0Nm1leGNsN2RheXMiOiAxLAogICAgICAibmV0ZnJhY3Rpb25yZXZvbHZpbmdidXJkZW4iOiA5MywKICAgICAgIm5ldGZyYWN0aW9uaW5zdGFsbGJ1cmRlbiI6IDcyLAogICAgICAibnVtcmV2b2x2aW5ndHJhZGVzd2JhbGFuY2UiOiA1LAogICAgICAibnVtaW5zdGFsbHRyYWRlc3diYWxhbmNlIjogMywKICAgICAgIm51bWJhbmsybmF0bHRyYWRlc3doaWdodXRpbGl6YXRpb24iOiAxLAogICAgICAicGVyY2VudHRyYWRlc3diYWxhbmNlIjogMTAwCiAgICB9LCAKICAgICAgICAiY3VzdF9pZCI6IDE1NgogICAgfQ==",
+                "approximateArrivalTimestamp": 1687988043.067
+            },
+            "eventSource": "aws:kinesis",
+            "eventVersion": "1.0",
+            "eventID": "shardId-000000000000: 49642151314650539583851738197927844639227077687685152770",
+            "eventName": "aws:kinesis:record",
+            "invokeIdentityArn": "arn:aws:iam: : 410605826834:role/lambda-kinesis-role",
+            "awsRegion": "us-west-2",
+            "eventSourceARN": "arn:aws:kinesis:us-west-2: 410605826834:stream/ride_events"
+        },
+        {
+            "kinesis": {
+                "kinesisSchemaVersion": "1.0",
+                "partitionKey": "1",
+                "sequenceNumber": "49642151314650539583851738197927844639227077687685152770",
+                "data": "ewogICAgICAgICJjdXN0IjogewogICAgICAicmlza3BlcmZvcm1hbmNlIjogMCwKICAgICAgImV4dGVybmFscmlza2VzdGltYXRlIjogNTcsCiAgICAgICJtc2luY2VvbGRlc3R0cmFkZW9wZW4iOiAxNzYsCiAgICAgICJtc2luY2Vtb3N0cmVjZW50dHJhZGVvcGVuIjogNCwKICAgICAgImF2ZXJhZ2VtaW5maWxlIjogODcsCiAgICAgICJudW1zYXRpc2ZhY3Rvcnl0cmFkZXMiOiAxOCwKICAgICAgIm51bXRyYWRlczYwZXZlcjJkZXJvZ3B1YnJlYyI6IDAsCiAgICAgICJudW10cmFkZXM5MGV2ZXIyZGVyb2dwdWJyZWMiOiAwLAogICAgICAicGVyY2VudHRyYWRlc25ldmVyZGVscSI6IDg5LAogICAgICAibXNpbmNlbW9zdHJlY2VudGRlbHEiOiAyLAogICAgICAibWF4ZGVscTJwdWJsaWNyZWNsYXN0MTJtIjogNCwKICAgICAgIm1heGRlbHFldmVyIjogNiwKICAgICAgIm51bXRvdGFsdHJhZGVzIjogMTgsCiAgICAgICJudW10cmFkZXNvcGVuaW5sYXN0MTJtIjogMSwKICAgICAgInBlcmNlbnRpbnN0YWxsdHJhZGVzIjogNTYsCiAgICAgICJtc2luY2Vtb3N0cmVjZW50aW5xZXhjbDdkYXlzIjogNCwKICAgICAgIm51bWlucWxhc3Q2bSI6IDEsCiAgICAgICJudW1pbnFsYXN0Nm1leGNsN2RheXMiOiAxLAogICAgICAibmV0ZnJhY3Rpb25yZXZvbHZpbmdidXJkZW4iOiA5MywKICAgICAgIm5ldGZyYWN0aW9uaW5zdGFsbGJ1cmRlbiI6IDcyLAogICAgICAibnVtcmV2b2x2aW5ndHJhZGVzd2JhbGFuY2UiOiA1LAogICAgICAibnVtaW5zdGFsbHRyYWRlc3diYWxhbmNlIjogMywKICAgICAgIm51bWJhbmsybmF0bHRyYWRlc3doaWdodXRpbGl6YXRpb24iOiAxLAogICAgICAicGVyY2VudHRyYWRlc3diYWxhbmNlIjogMTAwCiAgICB9LCAKICAgICAgICAiY3VzdF9pZCI6IDE1NgogICAgfQ==",
+                "approximateArrivalTimestamp": 1687988043.067
+            },
+            "eventSource": "aws:kinesis",
+            "eventVersion": "1.0",
+            "eventID": "shardId-000000000000: 49642151314650539583851738197927844639227077687685152770",
+            "eventName": "aws:kinesis:record",
+            "invokeIdentityArn": "arn:aws:iam: : 410605826834:role/lambda-kinesis-role",
+            "awsRegion": "us-west-2",
+            "eventSourceARN": "arn:aws:kinesis:us-west-2: 410605826834:stream/ride_events"
+        },
+        {
+            "kinesis": {
+                "kinesisSchemaVersion": "1.0",
+                "partitionKey": "1",
+                "sequenceNumber": "49642151314650539583851738197929053565046715887640379394",
+                "data": "ewogICAgICAgICJjdXN0IjogewogICAgICAicmlza3BlcmZvcm1hbmNlIjogMCwKICAgICAgImV4dGVybmFscmlza2VzdGltYXRlIjogNzksCiAgICAgICJtc2luY2VvbGRlc3R0cmFkZW9wZW4iOiAxMzMsCiAgICAgICJtc2luY2Vtb3N0cmVjZW50dHJhZGVvcGVuIjogMiwKICAgICAgImF2ZXJhZ2VtaW5maWxlIjogNjgsCiAgICAgICJudW1zYXRpc2ZhY3Rvcnl0cmFkZXMiOiAyNywKICAgICAgIm51bXRyYWRlczYwZXZlcjJkZXJvZ3B1YnJlYyI6IDAsCiAgICAgICJudW10cmFkZXM5MGV2ZXIyZGVyb2dwdWJyZWMiOiAwLAogICAgICAicGVyY2VudHRyYWRlc25ldmVyZGVscSI6IDEwMCwKICAgICAgIm1zaW5jZW1vc3RyZWNlbnRkZWxxIjogLTcsCiAgICAgICJtYXhkZWxxMnB1YmxpY3JlY2xhc3QxMm0iOiA3LAogICAgICAibWF4ZGVscWV2ZXIiOiA4LAogICAgICAibnVtdG90YWx0cmFkZXMiOiAzMCwKICAgICAgIm51bXRyYWRlc29wZW5pbmxhc3QxMm0iOiAzLAogICAgICAicGVyY2VudGluc3RhbGx0cmFkZXMiOiAzNiwKICAgICAgIm1zaW5jZW1vc3RyZWNlbnRpbnFleGNsN2RheXMiOiAwLAogICAgICAibnVtaW5xbGFzdDZtIjogNCwKICAgICAgIm51bWlucWxhc3Q2bWV4Y2w3ZGF5cyI6IDQsCiAgICAgICJuZXRmcmFjdGlvbnJldm9sdmluZ2J1cmRlbiI6IDEsCiAgICAgICJuZXRmcmFjdGlvbmluc3RhbGxidXJkZW4iOiA5MywKICAgICAgIm51bXJldm9sdmluZ3RyYWRlc3diYWxhbmNlIjogNCwKICAgICAgIm51bWluc3RhbGx0cmFkZXN3YmFsYW5jZSI6IDIsCiAgICAgICJudW1iYW5rMm5hdGx0cmFkZXN3aGlnaHV0aWxpemF0aW9uIjogMCwKICAgICAgInBlcmNlbnR0cmFkZXN3YmFsYW5jZSI6IDYwCiAgICB9LCAKICAgICAgICAiY3VzdF9pZCI6IDIKICAgIH0=",
+                "approximateArrivalTimestamp": 1687988385.903
+            },
+            "eventSource": "aws:kinesis",
+            "eventVersion": "1.0",
+            "eventID": "shardId-000000000000: 49642151314650539583851738197929053565046715887640379394",
+            "eventName": "aws:kinesis:record",
+            "invokeIdentityArn": "arn:aws:iam: : 410605826834:role/lambda-kinesis-role",
+            "awsRegion": "us-west-2",
+            "eventSourceARN": "arn:aws:kinesis:us-west-2: 410605826834:stream/ride_events"
+        },
+        {
+            "kinesis": {
+                "kinesisSchemaVersion": "1.0",
+                "partitionKey": "1",
+                "sequenceNumber": "49642151314650539583851738197930262490866334708703166466",
+                "data": "ewogICAgICAgICJjdXN0IjogewogICAgICAicmlza3BlcmZvcm1hbmNlIjogMSwKICAgICAgImV4dGVybmFscmlza2VzdGltYXRlIjogNzUsCiAgICAgICJtc2luY2VvbGRlc3R0cmFkZW9wZW4iOiA0MTAsCiAgICAgICJtc2luY2Vtb3N0cmVjZW50dHJhZGVvcGVuIjogMiwKICAgICAgImF2ZXJhZ2VtaW5maWxlIjogMTIxLAogICAgICAibnVtc2F0aXNmYWN0b3J5dHJhZGVzIjogMzcsCiAgICAgICJudW10cmFkZXM2MGV2ZXIyZGVyb2dwdWJyZWMiOiAxLAogICAgICAibnVtdHJhZGVzOTBldmVyMmRlcm9ncHVicmVjIjogMSwKICAgICAgInBlcmNlbnR0cmFkZXNuZXZlcmRlbHEiOiA4MywKICAgICAgIm1zaW5jZW1vc3RyZWNlbnRkZWxxIjogMTAsCiAgICAgICJtYXhkZWxxMnB1YmxpY3JlY2xhc3QxMm0iOiA0LAogICAgICAibWF4ZGVscWV2ZXIiOiAzLAogICAgICAibnVtdG90YWx0cmFkZXMiOiA0MywKICAgICAgIm51bXRyYWRlc29wZW5pbmxhc3QxMm0iOiAxLAogICAgICAicGVyY2VudGluc3RhbGx0cmFkZXMiOiA3LAogICAgICAibXNpbmNlbW9zdHJlY2VudGlucWV4Y2w3ZGF5cyI6IDEsCiAgICAgICJudW1pbnFsYXN0Nm0iOiAxLAogICAgICAibnVtaW5xbGFzdDZtZXhjbDdkYXlzIjogMSwKICAgICAgIm5ldGZyYWN0aW9ucmV2b2x2aW5nYnVyZGVuIjogMzQsCiAgICAgICJuZXRmcmFjdGlvbmluc3RhbGxidXJkZW4iOiAtOCwKICAgICAgIm51bXJldm9sdmluZ3RyYWRlc3diYWxhbmNlIjogNywKICAgICAgIm51bWluc3RhbGx0cmFkZXN3YmFsYW5jZSI6IDEsCiAgICAgICJudW1iYW5rMm5hdGx0cmFkZXN3aGlnaHV0aWxpemF0aW9uIjogMSwKICAgICAgInBlcmNlbnR0cmFkZXN3YmFsYW5jZSI6IDUzCiAgICB9LCAKICAgICAgICAiY3VzdF9pZCI6IDMKICAgIH0=",
+                "approximateArrivalTimestamp": 1687988447.104
+            },
+            "eventSource": "aws:kinesis",
+            "eventVersion": "1.0",
+            "eventID": "shardId-000000000000: 49642151314650539583851738197930262490866334708703166466",
+            "eventName": "aws:kinesis:record",
+            "invokeIdentityArn": "arn:aws:iam: : 410605826834:role/lambda-kinesis-role",
+            "awsRegion": "us-west-2",
+            "eventSourceARN": "arn:aws:kinesis:us-west-2: 410605826834:stream/ride_events"
+        },
+        {
+            "kinesis": {
+                "kinesisSchemaVersion": "1.0",
+                "partitionKey": "1",
+                "sequenceNumber": "49642151314650539583851738197931471416685952017937465346",
+                "data": "ewogICAgICAgICJjdXN0IjogewogICAgICAicmlza3BlcmZvcm1hbmNlIjogMSwKICAgICAgImV4dGVybmFscmlza2VzdGltYXRlIjogNjUsCiAgICAgICJtc2luY2VvbGRlc3R0cmFkZW9wZW4iOiAxNDcsCiAgICAgICJtc2luY2Vtb3N0cmVjZW50dHJhZGVvcGVuIjogMzksCiAgICAgICJhdmVyYWdlbWluZmlsZSI6IDY4LAogICAgICAibnVtc2F0aXNmYWN0b3J5dHJhZGVzIjogMTEsCiAgICAgICJudW10cmFkZXM2MGV2ZXIyZGVyb2dwdWJyZWMiOiAwLAogICAgICAibnVtdHJhZGVzOTBldmVyMmRlcm9ncHVicmVjIjogMCwKICAgICAgInBlcmNlbnR0cmFkZXNuZXZlcmRlbHEiOiA5MiwKICAgICAgIm1zaW5jZW1vc3RyZWNlbnRkZWxxIjogMjgsCiAgICAgICJtYXhkZWxxMnB1YmxpY3JlY2xhc3QxMm0iOiA2LAogICAgICAibWF4ZGVscWV2ZXIiOiA2LAogICAgICAibnVtdG90YWx0cmFkZXMiOiAxMiwKICAgICAgIm51bXRyYWRlc29wZW5pbmxhc3QxMm0iOiAwLAogICAgICAicGVyY2VudGluc3RhbGx0cmFkZXMiOiA0MiwKICAgICAgIm1zaW5jZW1vc3RyZWNlbnRpbnFleGNsN2RheXMiOiAxLAogICAgICAibnVtaW5xbGFzdDZtIjogMSwKICAgICAgIm51bWlucWxhc3Q2bWV4Y2w3ZGF5cyI6IDEsCiAgICAgICJuZXRmcmFjdGlvbnJldm9sdmluZ2J1cmRlbiI6IDg2LAogICAgICAibmV0ZnJhY3Rpb25pbnN0YWxsYnVyZGVuIjogNTMsCiAgICAgICJudW1yZXZvbHZpbmd0cmFkZXN3YmFsYW5jZSI6IDIsCiAgICAgICJudW1pbnN0YWxsdHJhZGVzd2JhbGFuY2UiOiAyLAogICAgICAibnVtYmFuazJuYXRsdHJhZGVzd2hpZ2h1dGlsaXphdGlvbiI6IDEsCiAgICAgICJwZXJjZW50dHJhZGVzd2JhbGFuY2UiOiA4MAogICAgfSwgCiAgICAgICAgImN1c3RfaWQiOiA0CiAgICB9",
+                "approximateArrivalTimestamp": 1687988485.884
+            },
+            "eventSource": "aws:kinesis",
+            "eventVersion": "1.0",
+            "eventID": "shardId-000000000000: 49642151314650539583851738197931471416685952017937465346",
+            "eventName": "aws:kinesis:record",
+            "invokeIdentityArn": "arn:aws:iam: : 410605826834:role/lambda-kinesis-role",
+            "awsRegion": "us-west-2",
+            "eventSourceARN": "arn:aws:kinesis:us-west-2: 410605826834:stream/ride_events"
+        },
+        {
+            "kinesis": {
+                "kinesisSchemaVersion": "1.0",
+                "partitionKey": "1",
+                "sequenceNumber": "49642151314650539583851738197932680342505570564122345474",
+                "data": "ewogICAgICAgICJjdXN0IjogewogICAgICAicmlza3BlcmZvcm1hbmNlIjogMSwKICAgICAgImV4dGVybmFscmlza2VzdGltYXRlIjogNzQsCiAgICAgICJtc2luY2VvbGRlc3R0cmFkZW9wZW4iOiAxMjksCiAgICAgICJtc2luY2Vtb3N0cmVjZW50dHJhZGVvcGVuIjogNiwKICAgICAgImF2ZXJhZ2VtaW5maWxlIjogNjQsCiAgICAgICJudW1zYXRpc2ZhY3Rvcnl0cmFkZXMiOiAxOCwKICAgICAgIm51bXRyYWRlczYwZXZlcjJkZXJvZ3B1YnJlYyI6IDEsCiAgICAgICJudW10cmFkZXM5MGV2ZXIyZGVyb2dwdWJyZWMiOiAxLAogICAgICAicGVyY2VudHRyYWRlc25ldmVyZGVscSI6IDEwMCwKICAgICAgIm1zaW5jZW1vc3RyZWNlbnRkZWxxIjogLTcsCiAgICAgICJtYXhkZWxxMnB1YmxpY3JlY2xhc3QxMm0iOiA2LAogICAgICAibWF4ZGVscWV2ZXIiOiA4LAogICAgICAibnVtdG90YWx0cmFkZXMiOiAxOCwKICAgICAgIm51bXRyYWRlc29wZW5pbmxhc3QxMm0iOiAxLAogICAgICAicGVyY2VudGluc3RhbGx0cmFkZXMiOiAzMywKICAgICAgIm1zaW5jZW1vc3RyZWNlbnRpbnFleGNsN2RheXMiOiAzLAogICAgICAibnVtaW5xbGFzdDZtIjogNCwKICAgICAgIm51bWlucWxhc3Q2bWV4Y2w3ZGF5cyI6IDQsCiAgICAgICJuZXRmcmFjdGlvbnJldm9sdmluZ2J1cmRlbiI6IDYsCiAgICAgICJuZXRmcmFjdGlvbmluc3RhbGxidXJkZW4iOiAtOCwKICAgICAgIm51bXJldm9sdmluZ3RyYWRlc3diYWxhbmNlIjogNSwKICAgICAgIm51bWluc3RhbGx0cmFkZXN3YmFsYW5jZSI6IC04LAogICAgICAibnVtYmFuazJuYXRsdHJhZGVzd2hpZ2h1dGlsaXphdGlvbiI6IDAsCiAgICAgICJwZXJjZW50dHJhZGVzd2JhbGFuY2UiOiA1NgogICAgfSwgCiAgICAgICAgImN1c3RfaWQiOiA1CiAgICB9",
+                "approximateArrivalTimestamp": 1687988542.519
+            },
+            "eventSource": "aws:kinesis",
+            "eventVersion": "1.0",
+            "eventID": "shardId-000000000000: 49642151314650539583851738197932680342505570564122345474",
+            "eventName": "aws:kinesis:record",
+            "invokeIdentityArn": "arn:aws:iam: : 410605826834:role/lambda-kinesis-role",
+            "awsRegion": "us-west-2",
+            "eventSourceARN": "arn:aws:kinesis:us-west-2: 410605826834:stream/ride_events"
+        },
+        {
+            "kinesis": {
+                "kinesisSchemaVersion": "1.0",
+                "partitionKey": "1",
+                "sequenceNumber": "49642151314650539583851738197933889268325189522624086018",
+                "data": "ewogICAgICAgICJjdXN0IjogewogICAgICAicmlza3BlcmZvcm1hbmNlIjogMCwKICAgICAgImV4dGVybmFscmlza2VzdGltYXRlIjogNzksCiAgICAgICJtc2luY2VvbGRlc3R0cmFkZW9wZW4iOiAxMzMsCiAgICAgICJtc2luY2Vtb3N0cmVjZW50dHJhZGVvcGVuIjogMiwKICAgICAgImF2ZXJhZ2VtaW5maWxlIjogNjgsCiAgICAgICJudW1zYXRpc2ZhY3Rvcnl0cmFkZXMiOiAyNywKICAgICAgIm51bXRyYWRlczYwZXZlcjJkZXJvZ3B1YnJlYyI6IDAsCiAgICAgICJudW10cmFkZXM5MGV2ZXIyZGVyb2dwdWJyZWMiOiAwLAogICAgICAicGVyY2VudHRyYWRlc25ldmVyZGVscSI6IDEwMCwKICAgICAgIm1zaW5jZW1vc3RyZWNlbnRkZWxxIjogLTcsCiAgICAgICJtYXhkZWxxMnB1YmxpY3JlY2xhc3QxMm0iOiA3LAogICAgICAibWF4ZGVscWV2ZXIiOiA4LAogICAgICAibnVtdG90YWx0cmFkZXMiOiAzMCwKICAgICAgIm51bXRyYWRlc29wZW5pbmxhc3QxMm0iOiAzLAogICAgICAicGVyY2VudGluc3RhbGx0cmFkZXMiOiAzNiwKICAgICAgIm1zaW5jZW1vc3RyZWNlbnRpbnFleGNsN2RheXMiOiAwLAogICAgICAibnVtaW5xbGFzdDZtIjogNCwKICAgICAgIm51bWlucWxhc3Q2bWV4Y2w3ZGF5cyI6IDQsCiAgICAgICJuZXRmcmFjdGlvbnJldm9sdmluZ2J1cmRlbiI6IDEsCiAgICAgICJuZXRmcmFjdGlvbmluc3RhbGxidXJkZW4iOiA5MywKICAgICAgIm51bXJldm9sdmluZ3RyYWRlc3diYWxhbmNlIjogNCwKICAgICAgIm51bWluc3RhbGx0cmFkZXN3YmFsYW5jZSI6IDIsCiAgICAgICJudW1iYW5rMm5hdGx0cmFkZXN3aGlnaHV0aWxpemF0aW9uIjogMCwKICAgICAgInBlcmNlbnR0cmFkZXN3YmFsYW5jZSI6IDYwCiAgICB9LCAKICAgICAgICAiY3VzdF9pZCI6IDYKICAgIH0=",
+                "approximateArrivalTimestamp": 1687988605.277
+            },
+            "eventSource": "aws:kinesis",
+            "eventVersion": "1.0",
+            "eventID": "shardId-000000000000: 49642151314650539583851738197933889268325189522624086018",
+            "eventName": "aws:kinesis:record",
+            "invokeIdentityArn": "arn:aws:iam: : 410605826834:role/lambda-kinesis-role",
+            "awsRegion": "us-west-2",
+            "eventSourceARN": "arn:aws:kinesis:us-west-2: 410605826834:stream/ride_events"
+        }
+    ]
+}
