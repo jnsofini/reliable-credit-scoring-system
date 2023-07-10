@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+boto3 = "*"
+mlflow = "*"
+scikit-learn = "==1.2.2"
+pytest = "*"
+optbinning = "*"
+pandas = "*"
+s3fs = "*"
+
+[dev-packages]
+pytest = "*"
+deepdiff = "*"
+pylint = "*"
+black = "*"
+isort = "*"
+
+[requires]
+python_version = "3.10"
