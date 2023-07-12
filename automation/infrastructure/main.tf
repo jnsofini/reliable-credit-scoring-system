@@ -3,7 +3,7 @@ terraform {
   required_version = ">= 1.0"
   backend "s3" {
     bucket  = "moose-solutions-terraform-remote-state"
-    key     = "mlops-zoomcamp-stg.tfstate"
+    key     = "mlops-moose-solutions-stg.tfstate"
     region  = "us-west-2"
     encrypt = true
   }
@@ -11,7 +11,7 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
-  profile = "mlops"
+  # profile = "mlops" # Removed to prevent job failing in GitHub Action
 }
 
 data "aws_caller_identity" "current_identity" {}

@@ -7,7 +7,7 @@ import boto3
 import mlflow
 import pandas as pd
 from s3fs.core import S3FileSystem
-
+from optbinning import Scorecard
 from config import col_map
 
 
@@ -48,14 +48,19 @@ def load_model_mlflow(run_id):
 #     model = Scorecard.load(f"{model_path}/model.pkl")
 #     return model
 
+def load_with_scorecard(path):
+    return Scorecard.load(path)
+
 
 def load_model(run_id):
+    model_path = get_model_location(run_id=run_id)
+    if not model_path.startswith("s3://"):
+        return load_with_scorecard(f"{model_path}/model.pkl")
     s3_file = S3FileSystem(
         anon=False,
         secret=os.getenv("AWS_SECRET_ACCESS_KEY"),
         key=os.getenv("AWS_ACCESS_KEY_ID"),
     )
-    model_path = get_model_location(run_id=run_id)
     model = pickle.load(s3_file.open(f"{model_path}/model.pkl"))
     return model
 
