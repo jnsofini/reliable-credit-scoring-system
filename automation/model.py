@@ -51,20 +51,21 @@ def load_model_mlflow(run_id):
 def load_with_scorecard(path):
     return Scorecard.load(path)
 
-
+# # Working code when tested locally
 # def load_model(run_id):
 #     model_path = get_model_location(run_id=run_id)
 #     if not model_path.startswith("s3://"):
 #         return load_with_scorecard(f"{model_path}/model.pkl")
 #     s3_file = S3FileSystem(
-#         # anon=False,
-#         # secret=os.getenv("AWS_SECRET_ACCESS_KEY"),
-#         # key=os.getenv("AWS_ACCESS_KEY_ID"),
+#         anon=False,
+#         secret=os.getenv("AWS_SECRET_ACCESS_KEY"),
+#         key=os.getenv("AWS_ACCESS_KEY_ID"),
 #     )
 #     print(model_path)
 #     model = pickle.load(s3_file.open(f"{model_path}/model.pkl"))
 #     return model
 
+# New code using boto3
 def load_model(run_id):
     """Loading model with boto3 package only
 
@@ -81,8 +82,8 @@ def load_model(run_id):
     
     s3client = boto3.client('s3')
     response = s3client.get_object(
-        Bucket='moose-solutions-mlops-registry', 
-        Key='scorecards/dev/model.pkl'
+        Bucket=os.getenv('MODEL_BUCKET', 'moose-solutions-mlops-registry'), 
+        Key=f'scorecards/{run_id}/model.pkl'
         )
 
     body = response['Body'].read()
