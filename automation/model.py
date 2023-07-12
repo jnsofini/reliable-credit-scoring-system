@@ -61,6 +61,7 @@ def load_model(run_id):
         # secret=os.getenv("AWS_SECRET_ACCESS_KEY"),
         # key=os.getenv("AWS_ACCESS_KEY_ID"),
     )
+    print(model_path)
     model = pickle.load(s3_file.open(f"{model_path}/model.pkl"))
     return model
 
