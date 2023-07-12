@@ -6,13 +6,17 @@ services:
     environment:
       - PREDICTIONS_STREAM_NAME=${PREDICTIONS_STREAM_NAME}
       - RUN_ID=Test123
+      # - TEST_RUN=True
       - AWS_DEFAULT_REGION=us-west-2
-      # - MODEL_LOCATION=/app/model
+      - MODEL_LOCATION=/model # Used when we copy or mount model repo to the container
       - KINESIS_ENDPOINT_URL=http://kinesis:4566/
       - AWS_ACCESS_KEY_ID=abc
       - AWS_SECRET_ACCESS_KEY=xyz
+      # - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      # - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      # - AWS_DEFAULT_REGION=${REGION}
     volumes:
-      - "./model:/app/model"
+      - ./model:/model:ro
   kinesis:
     image: localstack/localstack
     ports:
