@@ -57,7 +57,7 @@ def load_model(run_id):
     if not model_path.startswith("s3://"):
         return load_with_scorecard(f"{model_path}/model.pkl")
     s3_file = S3FileSystem(
-        anon=False,
+        # anon=False,
         # secret=os.getenv("AWS_SECRET_ACCESS_KEY"),
         # key=os.getenv("AWS_ACCESS_KEY_ID"),
     )
