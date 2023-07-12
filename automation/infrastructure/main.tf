@@ -11,7 +11,7 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
-  profile = "mlops"
+  # profile = "mlops" # Removed to prevent job failing in GitHub Action
 }
 
 data "aws_caller_identity" "current_identity" {}
