@@ -14,7 +14,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=xyz
       # - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       # - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      # - AWS_DEFAULT_REGION=${REGION}
+      ## - AWS_DEFAULT_REGION=${REGION} # Don't uncomment this and leave the one above. Errors will occure
     volumes:
       - ./model:/model:ro
   kinesis:
