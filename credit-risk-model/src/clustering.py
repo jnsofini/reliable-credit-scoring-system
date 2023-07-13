@@ -1,13 +1,21 @@
+"""
+Module for feature clustering.
+"""
+
 import json
 import os
 import time
 
 import pandas as pd
-from varclushi import VarClusHi
 
-import config as config
-from util import (filter_iv_table, get_best_feature_from_each_cluster,
-                  get_iv_from_binning_obj)
+import config
+
+from util import (
+    filter_iv_table,
+    get_best_feature_from_each_cluster,
+    get_iv_from_binning_obj,
+)
+from varclushi import VarClusHi
 
 MAX_EIGEN_SPLIT = 0.7
 # SEGMENTATION = None #"alnc-vs-non-alnc"
@@ -57,7 +65,7 @@ def main():
     # model_data = raw_data[transformed_data.columns]
 
     # Using the transform data to get features and clusters
-    # TODO: Do we want to use a cutoff of 1.0 or 0.7 for max eigenvalue?
+
     clusters = VarClusHi(transformed_data, maxeigval2=MAX_EIGEN_SPLIT, maxclus=None)
     clusters.varclus()
 
@@ -74,11 +82,13 @@ def main():
     # breakpoint()
 
     # Selected features by variable clustering
-    selected_features_varclushi = get_best_feature_from_each_cluster(r_square_iv_table)
-    with open(os.path.join(path, "selected-features-varclushi.json"), mode="w") as f:
-        json.dump(
-            {f"selected-features-varclushi": selected_features_varclushi}, f, indent=6
-        )
+    selected_features = get_best_feature_from_each_cluster(r_square_iv_table)
+    with open(
+        file=os.path.join(path, "selected-features-varclushi.json"),
+        mode="w",
+        encoding="uff-8",
+    ) as f:
+        json.dump({"selected-features-varclushi": selected_features}, f, indent=6)
 
     print(f"Time taken : {round(time.perf_counter() - start_time, 2)} seconds")
 

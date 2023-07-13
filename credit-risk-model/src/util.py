@@ -9,7 +9,7 @@ SPECIAL_CODES = [-9]
 MISSING = [-99_000_000]
 
 
-binning_fit_params = {
+BINNING_FIT_PARAMS = {
     "ExternalRiskEstimate": {"monotonic_trend": "descending"},
     "MSinceOldestTradeOpen": {"monotonic_trend": "descending"},
     "MSinceMostRecentTradeOpen": {"monotonic_trend": "descending"},
@@ -42,7 +42,6 @@ def setup_binning(df, *, target=None, features=None, binning_fit_params=None):
     Returns: Optbinning functional to bin the data BinningProcess()
 
     """
-    # TODO: Use features as None to assume all features are used to fit model
     # Remove target if present in data
     if target:
         df = df[list(set(df.columns.values) - {target})]
@@ -62,7 +61,8 @@ def setup_binning(df, *, target=None, features=None, binning_fit_params=None):
     return BinningProcess(
         categorical_variables=categorical_variables,
         variable_names=binning_features,
-        # Uncomment the below line and pass a binning fit parameter to stop doing automatic binning
+        # Uncomment the below line and pass a binning fit parameter
+        # to stop doing automatic binning
         binning_fit_params=binning_fit_params,
         # This is the prebin size that should make the feature set usable
         min_prebin_size=10e-5,
@@ -71,8 +71,18 @@ def setup_binning(df, *, target=None, features=None, binning_fit_params=None):
 
 
 def get_best_feature_from_each_cluster(clusters):
-    # The best feature from each cluster is the one with the min RS Ratio from that cluster
-    # If the feature with the highest IV is different than the one with the highest RS Ratio, it is included as well.
+    """The best feature from each cluster is selected.
+
+      The best feature, defined as one with the min RS Ratio from that cluster.
+      If the feature with the highest IV is different than the one with the
+      highest RS Ratio, it is included as well.
+
+    Args:
+        clusters (pd.DataFrame): Table containing the clusters and characteristics
+
+    Returns:
+        List: List of selected features
+    """
     highest_iv = clusters.loc[clusters.groupby(["Cluster"])["iv"].idxmax()][
         "Variable"
     ].tolist()

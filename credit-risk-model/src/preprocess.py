@@ -1,10 +1,14 @@
+"""
+Preprocessing of data.
+
+This script performs the preprocessing of the data used to build the model.
+"""
 import os
 import time
 import warnings
 
-import pandas as pd
-
 import config
+import pandas as pd
 from util import setup_binning
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -56,7 +60,7 @@ def main(use_manual_bins=True):
     X_train = load_data(path=os.path.join(DATA_DIR, "X_train.parquet"))
     y_train = pd.read_parquet(path=os.path.join(DATA_DIR, "y_train.parquet"))
 
-    print(f"Using automatic bins")
+    print("Using automatic bins")
     features_ = [col for col in X_train.columns if X_train[col].nunique() > 1]
     # Log removed columns
 
