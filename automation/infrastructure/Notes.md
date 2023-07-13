@@ -1,4 +1,4 @@
-# 06-Best-Practices
+# Best-Practices
 
 ## Testing the code
 
@@ -212,6 +212,7 @@ __worked__ by copying the old one from the repo. Ran it and then checked the hac
 ```
 
 We can try to send and event to kinesis.
+
 ```sh
 export KINESIS_STREAM_INPUT="stg_ride_events-mlops-zoomcamp"
 
@@ -319,3 +320,14 @@ echo ${RESULT} | jq -r '.Records[0].Data' | base64 --decode | jq
 ```
 
 However, nothing worked. Let's test locally again
+
+
+## Destroying Infrastructure
+
+The infrastructure is created via continuous delivery. We destroyed it by using lines from the CD script as follows
+
+```sh
+terraform init -backend-config="key=mlops-moose-solutions-prod.tfstate" -reconfigure 
+terraform plan -var-file=vars/prod.tfvars
+terraform destroy -var-file=vars/prod.tfvars
+```
