@@ -1,6 +1,7 @@
 import pandas as pd
-from optbinning import Scorecard, BinningProcess
+from optbinning import BinningProcess, Scorecard
 from sklearn.linear_model import LogisticRegression
+
 # from statsmodels.stats.outliers_influence import variance_inflation_factor
 # from patsy import dmatrices
 
@@ -24,17 +25,11 @@ binning_fit_params = {
     "NumInqLast6Mexcl7days": {"monotonic_trend": "ascending"},
     "NetFractionRevolvingBurden": {"monotonic_trend": "ascending"},
     "NetFractionInstallBurden": {"monotonic_trend": "ascending"},
-    "NumBank2NatlTradesWHighUtilization": {"monotonic_trend": "ascending"}
+    "NumBank2NatlTradesWHighUtilization": {"monotonic_trend": "ascending"},
 }
 
 
-def setup_binning(
-    df, 
-    *, 
-    target=None,
-    features=None, 
-    binning_fit_params=None
-):
+def setup_binning(df, *, target=None, features=None, binning_fit_params=None):
     """
     Setup the binning process for optbinning.
 
@@ -57,26 +52,27 @@ def setup_binning(
         binning_features = features
     else:
         binning_features = df.columns.values
-    
-    categorical_variables = df[binning_features].select_dtypes(
-            include=["object", "category", "string"]
-        ).columns.values
 
+    categorical_variables = (
+        df[binning_features]
+        .select_dtypes(include=["object", "category", "string"])
+        .columns.values
+    )
 
     return BinningProcess(
         categorical_variables=categorical_variables,
         variable_names=binning_features,
-        # Uncomment the below line and pass a binning fit parameter to stop doing automatic binning 
+        # Uncomment the below line and pass a binning fit parameter to stop doing automatic binning
         binning_fit_params=binning_fit_params,
-        # This is the prebin size that should make the feature set usable 
+        # This is the prebin size that should make the feature set usable
         min_prebin_size=10e-5,
-        special_codes=SPECIAL_CODES
+        special_codes=SPECIAL_CODES,
     )
 
 
 def get_best_feature_from_each_cluster(clusters):
     # The best feature from each cluster is the one with the min RS Ratio from that cluster
-    # If the feature with the highest IV is different than the one with the highest RS Ratio, it is included as well. 
+    # If the feature with the highest IV is different than the one with the highest RS Ratio, it is included as well.
     highest_iv = clusters.loc[clusters.groupby(["Cluster"])["iv"].idxmax()][
         "Variable"
     ].tolist()
@@ -92,9 +88,11 @@ def get_iv_from_binning_obj(path):
     iv_table["iv"] = iv_table["iv"].astype("float").round(3)
     return iv_table[["iv", "name", "n_bins"]]
 
+
 def filter_iv_table(iv_table, iv_cutoff=0.02, min_n_bins=2):
     # Filter based on IV and min_number of bins
     return iv_table.query(f"n_bins >= {min_n_bins} and iv >= {iv_cutoff}").name.values
+
 
 # def calculate_vif(data, features, target):
 #     data = data[list(features) + [target]]
@@ -127,11 +125,7 @@ def scorecard(process, *, method=None):
     #     "min": 350,
     #     "max": 850,
     # }
-    scaling_method_data = {
-        "pdo": 30,
-        "odds": 20,
-        "scorecard_points": 750
-    }
+    scaling_method_data = {"pdo": 30, "odds": 20, "scorecard_points": 750}
     return Scorecard(
         binning_process=process,
         estimator=method,
