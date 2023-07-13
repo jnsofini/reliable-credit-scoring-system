@@ -1,0 +1,29 @@
+{
+  "cust": {
+      "riskperformance": 0,
+      "externalriskestimate": 79,
+      "msinceoldesttradeopen": 133,
+      "msincemostrecenttradeopen": 2,
+      "averageminfile": 68,
+      "numsatisfactorytrades": 27,
+      "numtrades60ever2derogpubrec": 0,
+      "numtrades90ever2derogpubrec": 0,
+      "percenttradesneverdelq": 100,
+      "msincemostrecentdelq": -7,
+      "maxdelq2publicreclast12m": 7,
+      "maxdelqever": 8,
+      "numtotaltrades": 30,
+      "numtradesopeninlast12m": 3,
+      "percentinstalltrades": 36,
+      "msincemostrecentinqexcl7days": 0,
+      "numinqlast6m": 4,
+      "numinqlast6mexcl7days": 4,
+      "netfractionrevolvingburden": 1,
+      "netfractioninstallburden": 93,
+      "numrevolvingtradeswbalance": 4,
+      "numinstalltradeswbalance": 2,
+      "numbank2natltradeswhighutilization": 0,
+      "percenttradeswbalance": 60
+  },
+  "cust_id": 6
+}
