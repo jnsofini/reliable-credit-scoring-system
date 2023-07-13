@@ -249,3 +249,73 @@ aws kinesis put-record \
             "cust_id": 19
         }'
 ```
+
+
+## CICD
+
+We successful tested the CICD pipeline and it is working. Let's run a prediction on it.
+
+```sh
+export KINESIS_STREAM_INPUT="prod_score_events-risk-score-mlops"
+
+aws kinesis put-record \
+    --stream-name ${KINESIS_STREAM_INPUT} \
+    --partition-key 1 \
+    --cli-binary-format raw-in-base64-out \
+    --data '{
+            "cust": {
+                "riskperformance": 0,
+                "externalriskestimate": 57,
+                "msinceoldesttradeopen": 176,
+                "msincemostrecenttradeopen": 4,
+                "averageminfile": 87,
+                "numsatisfactorytrades": 18,
+                "numtrades60ever2derogpubrec": 0,
+                "numtrades90ever2derogpubrec": 0,
+                "percenttradesneverdelq": 89,
+                "msincemostrecentdelq": 2,
+                "maxdelq2publicreclast12m": 4,
+                "maxdelqever": 6,
+                "numtotaltrades": 18,
+                "numtradesopeninlast12m": 1,
+                "percentinstalltrades": 56,
+                "msincemostrecentinqexcl7days": 4,
+                "numinqlast6m": 1,
+                "numinqlast6mexcl7days": 1,
+                "netfractionrevolvingburden": 93,
+                "netfractioninstallburden": 72,
+                "numrevolvingtradeswbalance": 5,
+                "numinstalltradeswbalance": 3,
+                "numbank2natltradeswhighutilization": 1,
+                "percenttradeswbalance": 100
+            },
+            "cust_id": 19
+        }'
+```
+
+In the lambda logs in cloud watch we can see the events.
+
+The we check the destination via the following ensuring we check both shards, i.e 
+`SHARD='shardId-000000000000'` and `SHARD='shardId-000000000001'`
+
+```sh
+KINESIS_STREAM_OUTPUT='prod_score_predictions-risk-score-mlops'
+SHARD='shardId-000000000000'
+
+SHARD_ITERATOR=$(aws kinesis \
+    get-shard-iterator \
+        --shard-id ${SHARD} \
+        --shard-iterator-type TRIM_HORIZON \
+        --stream-name ${KINESIS_STREAM_OUTPUT} \
+        --query 'ShardIterator' \
+)
+
+RESULT=$(aws kinesis get-records --shard-iterator $SHARD_ITERATOR)
+```
+
+We can parse the results via
+```sh
+echo ${RESULT} | jq -r '.Records[0].Data' | base64 --decode | jq
+```
+
+However, nothing worked. Let's test locally again
