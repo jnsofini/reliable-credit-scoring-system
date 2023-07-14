@@ -1,96 +1,156 @@
-"""
-Module for feature clustering.
-"""
-
 import json
 import os
 import time
+from typing import Dict, Union
 
+import hydra
 import pandas as pd
-
-import config
-
-from util import (
-    filter_iv_table,
-    get_best_feature_from_each_cluster,
-    get_iv_from_binning_obj,
-)
+from omegaconf import DictConfig
 from varclushi import VarClusHi
+import logging as log
+from sklearn.feature_selection import VarianceThreshold
+from pathlib import Path
+from src.tools import stage_info
 
-MAX_EIGEN_SPLIT = 0.7
-# SEGMENTATION = None #"alnc-vs-non-alnc"
+DATA_DIR = "data"
+PREV_STAGE = "preprocessing"
+STAGE = "clustering"
+test_dir = 'dev-test'
+
+root_dir = Path(DATA_DIR).joinpath(test_dir)
+predecessor_dir = root_dir.joinpath("preprocessing")
+dest_dir = root_dir.joinpath(STAGE)
+
+def remove_feature_with_low_variance(df):
+    var_reductor = VarianceThreshold().set_output(transform="pandas")
+    data_ = var_reductor.fit_transform(df)
+    return data_
+
+# log = Logger(stream_level="DEBUG", file_level="DEBUG").getLogger()
+log.basicConfig(
+    format='%(levelname)s:%(message)s', encoding='utf-8', level=log.DEBUG
+)
 
 
-def load_transformed_data(path):
+class Cluster:
+    def __init__(self, data: pd.DataFrame, iv_table: Union[pd.DataFrame, None]= None, max_eigen=1) -> None:
+        # self.data = data
+        self.iv_table = iv_table
+        self.clusters = VarClusHi(data, maxeigval2=max_eigen, maxclus=None)
+
+    def get_clusters(self):
+        self.clusters.varclus()
+        self.clusters.rsquare
+        if self.iv_table is None:
+            log.info("Retriving clusters without IVs")
+            return self.clusters.rsquare
+        else:
+            log.info("Retriving clusters with IV for each feature")
+            return pd.merge(
+                self.clusters.rsquare,
+                self.iv_table,
+                how="left",
+                left_on="Variable",
+                right_on="name"
+            )
+
+    @staticmethod
+    def get_best_feature_from_each_cluster(
+        cluster_table: pd.DataFrame, feature: str="Variable"
+    ):
+        # The best feature from each cluster is the one with the min RS Ratio from that cluster
+        # If the feature with the highest IV is different than the one with the highest RS Ratio, it is included as well.
+        if "iv" in cluster_table.columns:
+            highest_iv = cluster_table.loc[
+                cluster_table.groupby(["Cluster"])["iv"].idxmax()
+            ][feature].tolist()
+        else:
+            highest_iv = []
+
+        lowest_rs_ratio = cluster_table.loc[
+            cluster_table.groupby(["Cluster"])["RS_Ratio"].idxmin()
+        ][feature].tolist()
+
+        return list(set(highest_iv + lowest_rs_ratio))
+
+    @classmethod
+    def read_iv_table(cls, path: str, cutoff: float=0.0):
+        # Read IV table from path and filter based on cutoff
+        return pd.read_csv(path).query(
+            f"iv >= {cutoff}"
+        )
+    
+    @classmethod
+    def save(cls, data: Dict, path):
+        with open(path, mode="w") as f:
+            json.dump(data, f, indent=6)
+
+
+# TODO: Move this function to a centralized location
+def load_transformed_data(path, **kwargs):
     # Load transformed data and return only cols with non singular value
-    transformed_data = pd.read_parquet(path)
-    select_columns = transformed_data.columns[transformed_data.nunique() != 1]
-    removed_columns = transformed_data.columns[transformed_data.nunique() == 1]
-    print("The following columns are removed", removed_columns)
-    return transformed_data[select_columns]
+    # Opportunity to check type
+    # Things to check includes:
+    # 1. All columns are numerical
+    # 2. All columns have some variance
+    data = pd.read_parquet(path, **kwargs)
+    data = remove_feature_with_low_variance(data)
+    return data
 
+# FIXME: Remove this if not needed
+def load_json(filename):
+    with open(file=filename, mode="r", encoding="utf-8") as file_header:
+        data = json.load(file_header)
 
-def main():
-    print("===========================================================")
-    print("==================Clustering===============================")
-    print("===========================================================")
+    return data
+
+# TODO: Add data classes thatensure params in cfg are pasrsed as specidied
+@hydra.main(version_base=None, config_path="..", config_name="params")
+def main(cfg: DictConfig):
+
+    log.info(stage_info(stage=STAGE))
     start_time = time.perf_counter()
-    os.makedirs(path := config.BASE_PATH, exist_ok=True)
+    # Define storage for data
+    os.makedirs(path := dest_dir, exist_ok=True)
+    log.debug("Working dir is:  {path}".format(path=path))
 
-    print(f"Artifacts directory is:  {path}")
+    iv_table_name = "manual_iv_table.csv" if cfg.preprocessing.auto_bins else "auto_iv_table.csv"
+    iv_table = Cluster.read_iv_table(
+        path = predecessor_dir.joinpath(iv_table_name),
+        cutoff = cfg.iv_criteria.min
+        )
+    transformed_data = load_transformed_data(
+        path=predecessor_dir.joinpath("transform-data.parquet"), 
+        columns=iv_table.name.to_list()
+        )
 
-    iv_table = get_iv_from_binning_obj(
-        os.path.join(path, config.BINNING_TRANSFORM_PATH)
+    # Clustering
+    clusters = Cluster(
+        data=transformed_data, 
+        iv_table=iv_table,  
+        max_eigen=cfg.cluster.max_eigen_split
     )
-    transformed_data_all = load_transformed_data(
-        os.path.join(path, config.TRANSFORM_DATA_PATH)
-    )
-
-    modelling_features = list(
-        set(
-            filter_iv_table(iv_table, iv_cutoff=0.1, min_n_bins=2)
-        )  # .intersection(params.model_features)
-    )
-
-    transformed_data = transformed_data_all[modelling_features]
-
-    print(
-        [
-            col
-            for col in transformed_data.columns
-            if transformed_data[col].nunique() == 1
-        ]
-    )
-
-    # model_data = raw_data[transformed_data.columns]
-
-    # Using the transform data to get features and clusters
-
-    clusters = VarClusHi(transformed_data, maxeigval2=MAX_EIGEN_SPLIT, maxclus=None)
-    clusters.varclus()
-
-    # Select best feature from each cluster
-    r_square_iv_table = pd.merge(
-        clusters.rsquare,
-        iv_table[iv_table.name.isin(modelling_features)],
-        how="left",
-        left_on="Variable",
-        right_on="name",
-    ).round(3)
-
-    r_square_iv_table.to_csv(os.path.join(path, "r_square_iv_table.csv"))
-    # breakpoint()
+    # Get rsquare and IV table and save
+    r_square_iv_table = clusters.get_clusters()
+    if "iv" in r_square_iv_table.columns:
+        r_square_iv_table.to_csv(os.path.join(path, "r_square_iv_table.csv"))
+    else:
+        r_square_iv_table.to_csv(os.path.join(path, "r_square_table.csv"))
 
     # Selected features by variable clustering
-    selected_features = get_best_feature_from_each_cluster(r_square_iv_table)
-    with open(
-        file=os.path.join(path, "selected-features-varclushi.json"),
-        mode="w",
-        encoding="uff-8",
-    ) as f:
-        json.dump({"selected-features-varclushi": selected_features}, f, indent=6)
+    selected_features_varclushi = clusters.get_best_feature_from_each_cluster(
+        r_square_iv_table, feature="Variable"
+    )
 
-    print(f"Time taken : {round(time.perf_counter() - start_time, 2)} seconds")
+    Cluster.save(
+        data={f"selected-features-varclushi": selected_features_varclushi},
+        path=os.path.join(path, "selected-features-varclushi.json"),
+    )
+
+    print("===============================================")
+    log.debug("Time taken:  {duration} seconds".format(
+        duration=round(time.perf_counter() - start_time, 2))
+        )
 
 
 if __name__ == "__main__":
