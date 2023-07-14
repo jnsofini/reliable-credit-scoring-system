@@ -11,6 +11,9 @@ import config
 import pandas as pd
 from util import setup_binning
 
+from sklearn.feature_selection import VarianceThreshold
+
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 TARGET: str = "RiskPerformance"
@@ -39,6 +42,25 @@ BINNING_FIT_PARAMS = {
     "NetFractionInstallBurden": {"monotonic_trend": "ascending"},
     "NumBank2NatlTradesWHighUtilization": {"monotonic_trend": "ascending"},
 }
+
+def _remove_feature(df: pd.DataFrame, columns_to_drop: str | list[str] | None = None):
+    if columns_to_drop is None:
+        return df
+    if isinstance(columns_to_drop, str):
+        columns_to_drop = [columns_to_drop]
+
+    columns_to_drop = list(
+        set(columns_to_drop).intersection(
+        set(df.columns.values)
+        )
+        )
+    return df.drop(columns=columns_to_drop)
+
+
+def remove_feature_with_low_variance(df):
+    var_reductor = VarianceThreshold()
+    data_ = var_reductor.fit_transform(df)
+    return data_
 
 
 def load_data(path, drop_cols=None):
