@@ -1,5 +1,3 @@
-
-
 # You can change the data storage location
 # If you don't change it the code will saved in the default value
 # Folder to store your data:
