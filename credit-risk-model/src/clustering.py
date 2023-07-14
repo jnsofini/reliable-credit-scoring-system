@@ -87,13 +87,15 @@ class Cluster:
 
 
 # TODO: Move this function to a centralized location
-def load_transformed_data(path, **kwargs):
+def load_transformed_data(path, keep_columns=None, **kwargs):
     # Load transformed data and return only cols with non singular value
     # Opportunity to check type
     # Things to check includes:
     # 1. All columns are numerical
     # 2. All columns have some variance
     data = pd.read_parquet(path, **kwargs)
+    if keep_columns:
+        data = data[keep_columns]
     data = remove_feature_with_low_variance(data)
     return data
 
@@ -114,14 +116,14 @@ def main(cfg: DictConfig):
     os.makedirs(path := dest_dir, exist_ok=True)
     log.debug("Working dir is:  {path}".format(path=path))
 
-    iv_table_name = "manual_iv_table.csv" if cfg.preprocessing.auto_bins else "auto_iv_table.csv"
+    iv_table_name = "manual_iv_table.csv" if cfg.preprocessing.auto_bins=="True" else "auto_iv_table.csv"
     iv_table = Cluster.read_iv_table(
         path = predecessor_dir.joinpath(iv_table_name),
         cutoff = cfg.iv_criteria.min
         )
     transformed_data = load_transformed_data(
         path=predecessor_dir.joinpath("transform-data.parquet"), 
-        columns=iv_table.name.to_list()
+        keep_columns=iv_table.name.to_list()
         )
 
     # Clustering
