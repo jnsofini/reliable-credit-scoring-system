@@ -10,7 +10,7 @@ import warnings
 import config
 import pandas as pd
 from util import setup_binning
-
+from optbinning import BinningProcess
 from sklearn.feature_selection import VarianceThreshold
 
 
@@ -20,6 +20,8 @@ TARGET: str = "RiskPerformance"
 SAVE_BINNING_OBJ = True
 QUARTER_TO_REMOVE: str = "2016-3-31"
 INCLUDE_FINANCIALS: bool = False
+SPECIAL_CODES = [-9]
+MISSING = [-99_000_000]
 
 DATA_DIR = "data"
 
@@ -43,22 +45,19 @@ BINNING_FIT_PARAMS = {
     "NumBank2NatlTradesWHighUtilization": {"monotonic_trend": "ascending"},
 }
 
+
 def _remove_feature(df: pd.DataFrame, columns_to_drop: str | list[str] | None = None):
     if columns_to_drop is None:
         return df
     if isinstance(columns_to_drop, str):
         columns_to_drop = [columns_to_drop]
 
-    columns_to_drop = list(
-        set(columns_to_drop).intersection(
-        set(df.columns.values)
-        )
-        )
+    columns_to_drop = list(set(columns_to_drop).intersection(set(df.columns.values)))
     return df.drop(columns=columns_to_drop)
 
 
 def remove_feature_with_low_variance(df):
-    var_reductor = VarianceThreshold()
+    var_reductor = VarianceThreshold().set_output(transform="pandas")
     data_ = var_reductor.fit_transform(df)
     return data_
 
@@ -71,7 +70,34 @@ def load_data(path, drop_cols=None):
     return df
 
 
-def main(use_manual_bins=True):
+def _get_binning_features(df, *, target=None, features=None):
+    """
+    Setup the binning process for optbinning.
+
+    Args:
+        binning_fit_params: fit parameters object, including splits
+        features: the list of features that we are interested in
+        target: the target variable
+        df (DataFrame): Dataframe containing features and a target column called 'target'
+
+    Returns: Optbinning functional to bin the data BinningProcess()
+
+    """
+    # Remove target if present in data
+    if target:
+        df = _remove_feature(df=df, columns_to_drop=target)
+
+    binning_features = features or df.columns.to_list()
+    categorical_features = (
+        df[binning_features]
+        .select_dtypes(include=["object", "category", "string"])
+        .columns.values
+    )
+
+    return binning_features, categorical_features
+
+
+def main(use_manual_bins=True, binning_fit_params=BINNING_FIT_PARAMS):
     print("===========================================================")
     print("==================Preprocessing============================")
     print("===========================================================")
@@ -83,31 +109,46 @@ def main(use_manual_bins=True):
     y_train = pd.read_parquet(path=os.path.join(DATA_DIR, "y_train.parquet"))
 
     print("Using automatic bins")
-    features_ = [col for col in X_train.columns if X_train[col].nunique() > 1]
-    # Log removed columns
-
-    X = X_train[features_]
+    X = remove_feature_with_low_variance(X_train)
     y = y_train.astype("int8").values.reshape(-1)
 
-    binning_process = setup_binning(X, binning_fit_params=BINNING_FIT_PARAMS)
+    binning_features, categorical_features = _get_binning_features(df=X)
+    # print(binning_features, categorical_features)
+    binning_process = BinningProcess(
+        categorical_variables=categorical_features,
+        variable_names=binning_features,
+        # Uncomment the below line and pass a binning fit parameter
+        # to stop doing automatic binning
+        binning_fit_params=binning_fit_params,
+        # This is the prebin size that should make the feature set usable
+        min_prebin_size=10e-5,
+        special_codes=SPECIAL_CODES,
+    )
     binning_process.fit(X, y)
 
-    # save binning table
-    iv_table_name = "manual_iv_table" if use_manual_bins else "auto_iv_table"
-    auto_iv_table = binning_process.summary()
-    os.makedirs(path := os.path.join(DATA_DIR, "artifacts"), exist_ok=True)
-    auto_iv_table.to_csv(os.path.join(path, f"{iv_table_name}.csv"))
+    preprocess_data = binning_process.transform(X, metric="bins")
+    preprocess_data[TARGET] = y
 
-    # Save Tranform data and binning_process
-    X_transformed = binning_process.transform(X)
-    X_transformed[TARGET] = y
-    # print(X_transformed.head())
-    X_transformed.to_parquet(os.path.join(path, config.TRANSFORM_DATA_PATH))
+    # save binning process and table
+    save_artifacts(use_manual_bins, binning_process, preprocess_data)
+
+    print(f"Time taken : {round(time.perf_counter() - start_time, 2)} seconds")
+
+
+def save_artifacts(
+    use_manual_bins: bool,
+    binning_process: BinningProcess,
+    preprocess_data: pd.DataFrame,
+):
+    iv_table_name = "manual_iv_table" if use_manual_bins else "auto_iv_table"
+    iv_table = binning_process.summary()
+    os.makedirs(path := os.path.join(DATA_DIR, "artifacts"), exist_ok=True)
+    iv_table.to_csv(os.path.join(path, f"{iv_table_name}.csv"))
+
+    preprocess_data.to_parquet(os.path.join(path, config.TRANSFORM_DATA_PATH))
 
     if SAVE_BINNING_OBJ:
         binning_process.save(os.path.join(path, config.BINNING_TRANSFORM_PATH))
-
-    print(f"Time taken : {round(time.perf_counter() - start_time, 2)} seconds")
 
 
 if __name__ == "__main__":
