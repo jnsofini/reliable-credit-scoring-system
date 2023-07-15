@@ -1,5 +1,5 @@
-from src import preprocess, Clustering
+from src import preprocess, clustering
 # Add typer and parameters
 if __name__ == "__main__":
     # preprocess.main()
-    Clustering.main()
+    clustering.main()
