@@ -15,6 +15,7 @@ boto3 = "*"
 mlflow = "==2.4"
 scipy = "==1.10.1"
 s3fs = "*"
+deepdiff = "*"
 
 [dev-packages]
 mlflow = "2.4"
