@@ -35,9 +35,7 @@ def feature_selection_pipeline(X, y, *, feature_selector="", is_binned=True):
     if feature_selector in ["forward", "backward", "rfe", "rfecv"]:
         print(f"Feature selection process: {feature_selector}")
     else:
-        print(f"NOT Implemented Feature selection process: {feature_selector}")
-        sys.exit()
-
+        NotImplemented(f"NOT Implemented Feature selection process: {feature_selector}")
     # if X.shape[1] > TOP_FEATURE_NUM:
     #     num_feat_to_select = TOP_FEATURE_NUM
     #     num_feat_to_select_rfe = TOP_FEATURE_NUM
@@ -155,7 +153,7 @@ def main(feature_selector=FEATURE_SELECTION_TYPE):
     print(selected_features_pl)
 
     with open(
-        file=f"{path}/{feature_selector}/selected-features-{feature_selector}.json",
+        file=f"{path}/selected-features-{feature_selector}.json",
         mode="w",
         encoding="utf-8",
     ) as f:
