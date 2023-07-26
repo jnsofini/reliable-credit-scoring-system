@@ -2,27 +2,28 @@ import json
 import os
 import time
 
+import config
 import pandas as pd
 from optbinning.scorecard import plot_auc_roc, plot_cap, plot_ks
-from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
-
-import config
-from util import load_data, scorecard, setup_binning
-
-# from util import *
-# Set MLFLOW
-db = "/home/fini/github-projects/mlops/data/experiment-tracking/mlflow.db"
+from sklearn.linear_model import LogisticRegression  # , LogisticRegressionCV
+from util import scorecard, setup_binning #,load_data
 import mlflow
+
+# Set MLFLOW
+db = (
+    "/home/fini/github-projects/reliable-credit-scoring-system/"
+    "data/experiment-tracking/mlflow.db"
+)
+
+
 mlflow.set_tracking_uri(f"sqlite:///{db}")
 mlflow.set_experiment("scorecard-experiment")
 
 
 TARGET: str = "RiskPerformance"
 
-MAX_ITERATIONS_FOR_LOGISTIC_REGRESSION: int = 1000
+MAX_ITER_LOGREG: int = 1000
 FEATURE_SELECTION_TYPE: str = "rfecv"
-
-INCLUDE_FINANCIALS: bool = False
 
 BINNING_FIT_PARAMS = {
     "ExternalRiskEstimate": {"monotonic_trend": "descending"},
@@ -53,7 +54,6 @@ def save_metrics_to_output(y, y_pred, path):
 
 
 def scorecard_pipeline(data, selected_features, target=TARGET, binning_fit_params=None):
-
     binning_process = setup_binning(
         data[selected_features],
         target=target,
@@ -61,13 +61,18 @@ def scorecard_pipeline(data, selected_features, target=TARGET, binning_fit_param
         binning_fit_params=binning_fit_params,
     )
 
-    scorecard_ = scorecard(
-        binning_process,
-        # method=LogisticRegressionCV(Cs=3, cv=5, penalty="l1", scoring="roc_auc", solver="liblinear", max_iter=MAX_ITERATIONS_FOR_LOGISTIC_REGRESSION, random_state=42)
-        method=LogisticRegression(
-            C=3, max_iter=MAX_ITERATIONS_FOR_LOGISTIC_REGRESSION, random_state=42
-        ),
-    )
+    # method = LogisticRegressionCV(
+    #     Cs=3,
+    #     cv=5,
+    #     penalty="l1",
+    #     scoring="roc_auc",
+    #     solver="liblinear",
+    #     max_iter=MAX_ITER_LOGREG,
+    #     random_state=42,
+    # )
+    method = LogisticRegression(C=3, max_iter=MAX_ITER_LOGREG, random_state=42)
+
+    scorecard_ = scorecard(binning_process, method=method)
 
     X = data[selected_features]
     y = data[target].astype("int8")
@@ -87,22 +92,24 @@ def scorecard_pl(X, y, binning_obj):
     #     features=selected_features
     # )
 
-    scorecard_ = scorecard(
-        process=binning_obj,
-        # method=LogisticRegressionCV(Cs=3, cv=5, penalty="l1", scoring="roc_auc", solver="liblinear", max_iter=MAX_ITERATIONS_FOR_LOGISTIC_REGRESSION, random_state=42)
-        method=LogisticRegression(
-            C=3, max_iter=MAX_ITERATIONS_FOR_LOGISTIC_REGRESSION, random_state=42
-        ),
-    )
+    # method = LogisticRegressionCV(
+    #     Cs=3,
+    #     cv=5,
+    #     penalty="l1",
+    #     scoring="roc_auc",
+    #     solver="liblinear",
+    #     max_iter=MAX_ITER_LOGREG,
+    #     random_state=42,
+    # )
+    method = LogisticRegression(C=3, max_iter=MAX_ITER_LOGREG, random_state=42)
+    scorecard_ = scorecard(process=binning_obj, method=method)
 
     return scorecard_.fit(X, y)
 
 
 def main(
     feature_selector=FEATURE_SELECTION_TYPE,
-    use_manual_bins=True,
-    # include_financials=INCLUDE_FINANCIALS,
-    remove_quarter=False,
+    # use_manual_bins=True,
 ):
     print("===========================================================")
     print("==================Scorecard-Generation=====================")
@@ -122,14 +129,22 @@ def main(
     train_data[TARGET] = y_train
 
     with open(
-        os.path.join(config.BASE_PATH, feature_selector, f"selected-features-{feature_selector}.json")
+        file=os.path.join(
+            config.BASE_PATH,
+            feature_selector,
+            f"selected-features-{feature_selector}.json",
+        ),
+        mode="r",
+        encoding="utf-8",
     ) as fh:
         ft = json.load(fh)
     selection_step_features = ft[f"selected-features-{feature_selector}"]
 
-    print(f"Using automatic bins")
+    print("Using automatic bins")
     binning_fit_params = BINNING_FIT_PARAMS
-    # X = X_train[[col for col in X_train.columns if X_train[col].nunique()>1]]#.drop(columns=["SNAPSHOT_DT", "B1_BUS_PRTNR_NBR"])
+    # X = X_train[
+    # [col for col in X_train.columns if X_train[col].nunique()>1]
+    # ]#.drop(columns=["SNAPSHOT_DT", "B1_BUS_PRTNR_NBR"])
     # y = y_train.astype("int8").values.reshape(-1)
 
     scorecard_features = [
@@ -137,11 +152,10 @@ def main(
     ]
     # if include_financials:
     #     scorecard_features = scorecard_features + dlfeatures.financial_features
-    
+
     print("Features used to build the model are: \n", scorecard_features)
     # enable autologging
 
-    
     scorecard_model = scorecard_pipeline(
         data=train_data[scorecard_features + [TARGET]],
         selected_features=scorecard_features,
@@ -160,10 +174,12 @@ def main(
     table.to_csv(f"{config.BASE_PATH}/{feature_selector}/scorecard-table.csv")
 
     # do prediction
-    X = train_data[scorecard_features]
-    y = train_data[TARGET].astype("int8")
-    y_pred = scorecard_model.predict_proba(X)[:, 1]
-    save_metrics_to_output(y, y_pred, path=f"{config.BASE_PATH}/{feature_selector}")
+    y_pred = scorecard_model.predict_proba(train_data[scorecard_features])[:, 1]
+    save_metrics_to_output(
+        y=train_data[TARGET].astype("int8"),
+        y_pred=y_pred,
+        path=f"{config.BASE_PATH}/{feature_selector}",
+    )
 
     print(
         f"Time taken bin and get woe: {round(time.perf_counter() - start_time, 2)} seconds"

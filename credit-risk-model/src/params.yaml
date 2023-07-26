@@ -1,0 +1,31 @@
+
+# Test-train split of data
+datasplit: #Specifies params used to split data
+  dest_dir: 
+  source_data_path: 
+  source_type: dummy
+  segments:  [M, B]  # [""] # 
+  segmentation_feature: col_1 
+  stratify: col_30  # 
+ 
+  date_id: snapshot_dt
+  train_size: 0.7
+  train_name: df_train.parquet
+  test_name: df_test.parquet
+
+preprocessing:
+  stage: preprocessing
+  auto_bins: True 
+
+cluster: # Feature clustering
+  stage: clustering
+  max_eigen_split: 0.7
+  source_data_path: data/
+  dest_dir: data
+  drop_features: [col_30]
+  # iv_table_path comes from binning
+  iv_table_path: 
+
+
+iv_criteria:
+  min: 0.1

@@ -1,13 +1,13 @@
 import json
 import os
+import sys
 import warnings
 
+import config
 import pandas as pd
 from sklearn.feature_selection import RFECV, SequentialFeatureSelector
-from sklearn.linear_model import Lasso, LogisticRegression
+from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-
-import config
 from util import setup_binning
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -15,17 +15,16 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 TARGET: str = "RiskPerformance"
 TOP_FEATURE_NUM: int = 15
-MAX_ITERATIONS_FOR_LOGISTIC_REGRESSION: int = 1000
+MAX_ITER_LOGREG: int = 1000
 FEATURE_SELECTION_TYPE: str = "rfecv"
 
 
 def feature_selection_pipeline(X, y, *, feature_selector="", is_binned=True):
-
     if feature_selector in ["forward", "backward", "rfe", "rfecv"]:
         print(f"Feature selection process: {feature_selector}")
     else:
         print(f"NOT Implemented Feature selection process: {feature_selector}")
-        exit()
+        sys.exit()
 
     # if X.shape[1] > TOP_FEATURE_NUM:
     #     num_feat_to_select = TOP_FEATURE_NUM
@@ -37,7 +36,7 @@ def feature_selection_pipeline(X, y, *, feature_selector="", is_binned=True):
 
     if feature_selector in ["forward", "backward"]:
         feature_selection = SequentialFeatureSelector(
-            LogisticRegression(max_iter=MAX_ITERATIONS_FOR_LOGISTIC_REGRESSION),
+            LogisticRegression(max_iter=MAX_ITER_LOGREG),
             n_features_to_select=num_feat_to_select,
             direction=feature_selector,
             n_jobs=12,
@@ -46,11 +45,11 @@ def feature_selection_pipeline(X, y, *, feature_selector="", is_binned=True):
         )
     else:
         # feature_selection = RFE(
-        #             estimator=LogisticRegression(max_iter=MAX_ITERATIONS_FOR_LOGISTIC_REGRESSION),
+        #             estimator=LogisticRegression(max_iter=MAX_ITER_LOGREG),
         #             n_features_to_select=num_feat_to_select_rfe
         #         )
         feature_selection = RFECV(
-            LogisticRegression(max_iter=MAX_ITERATIONS_FOR_LOGISTIC_REGRESSION),
+            LogisticRegression(max_iter=MAX_ITER_LOGREG),
             # n_features_to_select=num_feat_to_select_rfe,
             # min_features_to_select=8,
             cv=2,
@@ -68,7 +67,7 @@ def feature_selection_pipeline(X, y, *, feature_selector="", is_binned=True):
                 (
                     "feature_selection",
                     feature_selection,
-                ),  # TODO: Check if generic logreg is ok!
+                ),
             ]
         )
         #  pipeline_.fit(X, y)
@@ -90,11 +89,7 @@ def filter_by_iv(df, *, iv_table, iv_cutoff=0.01):
     return df[columns_with_right_iv]
 
 
-def main(
-    feature_selector=FEATURE_SELECTION_TYPE,
-    use_manual_bins=True,
-    include_financials=False,
-):
+def main(feature_selector=FEATURE_SELECTION_TYPE):
     print("===========================================================")
     print("==================Feature Selection========================")
     print("===========================================================")
@@ -122,8 +117,12 @@ def main(
     #     feature_selector=feature_selector
     # )
 
-    print(f"Using automatic bins")
-    with open(f"{path}/selected-features-varclushi.json") as fh:
+    print("Using automatic bins")
+    with open(
+        file=f"{path}/selected-features-varclushi.json",
+        mode="r",
+        encoding="utf-8",
+    ) as fh:
         ft = json.load(fh)
     features_ = ft["selected-features-varclushi"]
 
@@ -146,7 +145,9 @@ def main(
     print(selected_features_pl)
 
     with open(
-        f"{path}/{feature_selector}/selected-features-{feature_selector}.json", "w"
+        file=f"{path}/{feature_selector}/selected-features-{feature_selector}.json",
+        mode="w",
+        encoding="utf-8",
     ) as f:
         json.dump(
             {f"selected-features-{feature_selector}": selected_features_pl}, f, indent=6
