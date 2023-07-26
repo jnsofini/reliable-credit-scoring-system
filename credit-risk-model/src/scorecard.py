@@ -1,28 +1,40 @@
 import json
 import os
 import time
+from pathlib import Path
 
 import config
+import mlflow
 import pandas as pd
 from optbinning.scorecard import plot_auc_roc, plot_cap, plot_ks
 from sklearn.linear_model import LogisticRegression  # , LogisticRegressionCV
-from util import scorecard, setup_binning #,load_data
-import mlflow
+from util import scorecard, setup_binning  # ,load_data
 
-# Set MLFLOW
-db = (
-    "/home/fini/github-projects/reliable-credit-scoring-system/"
-    "data/experiment-tracking/mlflow.db"
-)
+# # Set MLFLOW
+# db = (
+#     "/home/fini/github-projects/reliable-credit-scoring-system/"
+#     "data/experiment-tracking/mlflow.db"
+# )
 
 
-mlflow.set_tracking_uri(f"sqlite:///{db}")
-mlflow.set_experiment("scorecard-experiment")
-
+# mlflow.set_tracking_uri(f"sqlite:///{db}")
+# mlflow.set_experiment("scorecard-experiment")
 
 TARGET: str = "RiskPerformance"
+SPECIAL_CODES = [-9, -8, -7]
+MISSING = [-99_000_000]
+
+DATA_DIR = "data"
+STAGE = "train"
+test_dir = 'dev-test'
+root_dir = Path(DATA_DIR).joinpath(test_dir)
+predecessor_dir = root_dir.joinpath("featurization")
+dest_dir = root_dir.joinpath(STAGE)
+
+FILE_DIR = Path(__file__).parent
 
 MAX_ITER_LOGREG: int = 1000
+
 FEATURE_SELECTION_TYPE: str = "rfecv"
 
 BINNING_FIT_PARAMS = {
@@ -80,33 +92,6 @@ def scorecard_pipeline(data, selected_features, target=TARGET, binning_fit_param
     return scorecard_.fit(X, y)
 
 
-def scorecard_pl(X, y, binning_obj):
-    # binning_params_rfe = {
-    #     col: xtics
-    #     for col, xtics in params.binning_params.items()
-    #     if col in selected_features
-    # }
-    # binning_process = setup_binning(
-    #     data[selected_features],
-    #     target=target,
-    #     features=selected_features
-    # )
-
-    # method = LogisticRegressionCV(
-    #     Cs=3,
-    #     cv=5,
-    #     penalty="l1",
-    #     scoring="roc_auc",
-    #     solver="liblinear",
-    #     max_iter=MAX_ITER_LOGREG,
-    #     random_state=42,
-    # )
-    method = LogisticRegression(C=3, max_iter=MAX_ITER_LOGREG, random_state=42)
-    scorecard_ = scorecard(process=binning_obj, method=method)
-
-    return scorecard_.fit(X, y)
-
-
 def main(
     feature_selector=FEATURE_SELECTION_TYPE,
     # use_manual_bins=True,
@@ -115,13 +100,15 @@ def main(
     print("==================Scorecard-Generation=====================")
     print("===========================================================")
     # os.makedirs(os.path.join(".", "outputs"), exist_ok=True)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    print(f"Working dir is:  {dest_dir}")
     start_time = time.perf_counter()
     # segment = "ALNC"
     X_train = pd.read_parquet(
-        os.path.join(config.RAW_DATA_BASE_PATH, "X_train.parquet")
+        os.path.join(DATA_DIR, "X_train.parquet")
     )
     y_train = pd.read_parquet(
-        os.path.join(config.RAW_DATA_BASE_PATH, "y_train.parquet")
+        os.path.join(DATA_DIR, "y_train.parquet")
     )
 
     # Pull all data back together as the functions were written to take that
@@ -129,16 +116,12 @@ def main(
     train_data[TARGET] = y_train
 
     with open(
-        file=os.path.join(
-            config.BASE_PATH,
-            feature_selector,
-            f"selected-features-{feature_selector}.json",
-        ),
+        file=predecessor_dir.joinpath(f"selected-features-{feature_selector}.json"),
         mode="r",
         encoding="utf-8",
     ) as fh:
         ft = json.load(fh)
-    selection_step_features = ft[f"selected-features-{feature_selector}"]
+    scorecard_features = ft[f"selected-features-{feature_selector}"]
 
     print("Using automatic bins")
     binning_fit_params = BINNING_FIT_PARAMS
@@ -147,13 +130,13 @@ def main(
     # ]#.drop(columns=["SNAPSHOT_DT", "B1_BUS_PRTNR_NBR"])
     # y = y_train.astype("int8").values.reshape(-1)
 
-    scorecard_features = [
-        col for col in selection_step_features if X_train[col].nunique() > 1
-    ]
+    # scorecard_features = [
+    #     col for col in selection_step_features if X_train[col].nunique() > 1
+    # ]
     # if include_financials:
     #     scorecard_features = scorecard_features + dlfeatures.financial_features
 
-    print("Features used to build the model are: \n", scorecard_features)
+    # print("Features used to build the model are: \n", scorecard_features)
     # enable autologging
 
     scorecard_model = scorecard_pipeline(
@@ -162,23 +145,30 @@ def main(
         target=TARGET,
         binning_fit_params=binning_fit_params,
     )
-    # No way to save optbin model in mlflow
     # with mlflow.start_run(run_name="Optbinning Model"):
-    #     model_info = mlflow.pyfunc.log_model(artifact_path="model", python_model=scorecard_model)
-
+    #     # mlflow.sklearn.save_model(
+    #     #     path="model", 
+    #     #     sk_model=scorecard_model,
+    #     #     serialization_format="pickle",
+    #     #     )
+    #     mlflow.sklearn.log_model(
+    #         artifact_path="data/mlflow_artifacts_store", 
+    #         sk_model=scorecard_model,
+    #         serialization_format="pickle",
+    #         )
     # Save scorecard obj
-    scorecard_model.save(f"{config.BASE_PATH}/{feature_selector}/scorecard-model.pkl")
+    scorecard_model.save(str(dest_dir.joinpath(f"model-{feature_selector}.pkl")))
 
     table = scorecard_model.table(style="detailed").round(3)
     print(table.groupby("Variable")["IV"].sum().sort_values(ascending=True))
-    table.to_csv(f"{config.BASE_PATH}/{feature_selector}/scorecard-table.csv")
+    table.to_csv(dest_dir.joinpath(f"model-{feature_selector}.csv"))
 
     # do prediction
     y_pred = scorecard_model.predict_proba(train_data[scorecard_features])[:, 1]
     save_metrics_to_output(
         y=train_data[TARGET].astype("int8"),
         y_pred=y_pred,
-        path=f"{config.BASE_PATH}/{feature_selector}",
+        path=str(dest_dir),
     )
 
     print(
