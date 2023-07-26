@@ -26,7 +26,7 @@ TARGET: str = "RiskPerformance"
 SAVE_BINNING_OBJ = True
 QUARTER_TO_REMOVE: str = "2016-3-31"
 INCLUDE_FINANCIALS: bool = False
-SPECIAL_CODES = [-9]
+SPECIAL_CODES = [-9, -8, -7]
 MISSING = [-99_000_000]
 
 DATA_DIR = "data"
