@@ -180,7 +180,7 @@ def main(feature_selector=FEATURE_SELECTION_TYPE):
     
 
     # with open(
-    #     file=f"{dest_dir}/selected-features-{feature_selector}.json",
+    #     file=f"{destination_dir}/selected-features-{feature_selector}.json",
     #     mode="w",
     #     encoding="utf-8",
     # ) as f:
