@@ -92,9 +92,9 @@ def _get_binning_features(df, *, target=None, features=None):
     return binning_features, categorical_features
 
 
-def _stage_info(stage, symbol="=", length=100):
-    msg = f"\n{symbol*length}\n{stage.center(length, symbol)}\n{symbol*length}"
-    return msg
+# def _stage_info(stage, symbol="=", length=100):
+#     msg = f"\n{symbol*length}\n{stage.center(length, symbol)}\n{symbol*length}"
+#     return msg
 
 def set_destination_directory():
     root_dir = Path(DATA_DIR).joinpath(test_dir)
@@ -122,7 +122,7 @@ def save_artifacts(
 
 @timeit(logging.info)
 def main(use_manual_bins=False, binning_fit_params=None):
-    logging.info(_stage_info(STAGE))
+    logging.info(stage_info(STAGE))
     
     predecessor_dir, destination_dir, root_dir = set_destination_directory()
     # Get raw data and split into X and y
