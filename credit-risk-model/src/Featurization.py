@@ -1,12 +1,19 @@
+""" 
+python -m src.Featurization 
+"""
+
 import json
 import os
 import warnings
+import logging as log
 
 import pandas as pd
 from sklearn.feature_selection import RFECV, SequentialFeatureSelector
 from sklearn.linear_model import LogisticRegression
 from typing import Literal
 from pathlib import Path
+
+from src.tools import stage_info
 
 from dataclasses import dataclass
 
@@ -28,6 +35,7 @@ dest_dir = root_dir.joinpath(STAGE)
 
 FILE_DIR = Path(__file__).parent
 
+log.basicConfig(format='%(levelname)s:%(message)s', encoding='utf-8', level=log.DEBUG)
 
 @dataclass
 class FeatureSelectionParameters:
@@ -117,9 +125,8 @@ def load_transformed_data(path):
 
 
 def main(feature_selector=FEATURE_SELECTION_TYPE):
-    print("===========================================================")
-    print("==================Feature Selection========================")
-    print("===========================================================")
+
+    log.debug(stage_info(stage=STAGE))
 
     os.makedirs(path := dest_dir, exist_ok=True)
     print(f"Working dir is:  {path}")
@@ -158,14 +165,14 @@ def main(feature_selector=FEATURE_SELECTION_TYPE):
     print(f"The number of features selected is: {len(selected_features_pl)}")
     print(selected_features_pl)
 
-    with open(
-        file=f"{path}/selected-features-{feature_selector}.json",
-        mode="w",
-        encoding="utf-8",
-    ) as f:
-        json.dump(
-            {f"selected-features-{feature_selector}": selected_features_pl}, f, indent=6
-        )
+    # with open(
+    #     file=f"{path}/selected-features-{feature_selector}.json",
+    #     mode="w",
+    #     encoding="utf-8",
+    # ) as f:
+    #     json.dump(
+    #         {f"selected-features-{feature_selector}": selected_features_pl}, f, indent=6
+    #     )
 
 
 if __name__ == "__main__":
