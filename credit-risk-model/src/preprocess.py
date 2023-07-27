@@ -96,6 +96,7 @@ def _get_binning_features(df, *, target=None, features=None):
 #     msg = f"\n{symbol*length}\n{stage.center(length, symbol)}\n{symbol*length}"
 #     return msg
 
+
 def set_destination_directory():
     root_dir = Path(DATA_DIR).joinpath(test_dir)
     predecessor_dir = None
@@ -105,11 +106,12 @@ def set_destination_directory():
 
     return predecessor_dir, destination_dir, root_dir
 
+
 def save_artifacts(
     use_manual_bins: bool,
     binning_process: BinningProcess,
     preprocess_data: pd.DataFrame,
-    dest_dir: Path
+    dest_dir: Path,
 ):
     iv_table_name = "manual_iv_table" if use_manual_bins else "auto_iv_table"
     iv_table = binning_process.summary()
@@ -123,11 +125,11 @@ def save_artifacts(
 @timeit(logging.info)
 def main(use_manual_bins=False, binning_fit_params=None):
     logging.info(stage_info(STAGE))
-    
+
     predecessor_dir, destination_dir, root_dir = set_destination_directory()
     # Get raw data and split into X and y
     if binning_fit_params is None:
-        binning_fit_params = read_json(FILE_DIR/"configs/binning-params.json")
+        binning_fit_params = read_json(FILE_DIR / "configs/binning-params.json")
 
     x_train = pd.read_parquet(path=os.path.join(DATA_DIR, "X_train.parquet"))
     y_train = pd.read_parquet(path=os.path.join(DATA_DIR, "y_train.parquet"))
@@ -154,8 +156,12 @@ def main(use_manual_bins=False, binning_fit_params=None):
     preprocessed_data[TARGET] = y
 
     # save binning process and table
-    save_artifacts(use_manual_bins=use_manual_bins, binning_process=binning_process, preprocess_data=preprocessed_data, dest_dir=destination_dir)
-
+    save_artifacts(
+        use_manual_bins=use_manual_bins,
+        binning_process=binning_process,
+        preprocess_data=preprocessed_data,
+        dest_dir=destination_dir,
+    )
 
     # logging.info(f"Time taken : {round(time.perf_counter() - start_time, 2)} seconds")
 
