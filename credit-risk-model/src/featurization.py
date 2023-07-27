@@ -1,16 +1,22 @@
+""" 
+Run from the credit-risk-model directory, with pipenv from reliable-credit-scoring-system
+python -m src.Featurization 
+"""
+
 import json
 import os
-import sys
 import warnings
+import logging as log
 
-import config
 import pandas as pd
 from sklearn.feature_selection import RFECV, SequentialFeatureSelector
 from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
-from util import setup_binning
-
+from typing import Literal
 from pathlib import Path
+
+from src.tools import stage_info, read_json, save_dict_to_json
+
+from dataclasses import dataclass
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -24,142 +30,163 @@ DATA_DIR = "data"
 STAGE = "featurization"
 test_dir = 'dev-test'
 
-root_dir = Path(DATA_DIR).joinpath(test_dir)
-predecessor_dir = root_dir.joinpath("clustering")
-dest_dir = root_dir.joinpath(STAGE)
+# root_dir = Path(DATA_DIR).joinpath(test_dir)
+# predecessor_dir = root_dir.joinpath("clustering")
+# dest_dir = root_dir.joinpath(STAGE)
 
 FILE_DIR = Path(__file__).parent
 
+log.basicConfig(format='%(levelname)s:%(message)s', encoding='utf-8', level=log.DEBUG)
 
-def feature_selection_pipeline(X, y, *, feature_selector="", is_binned=True):
-    if feature_selector in ["forward", "backward", "rfe", "rfecv"]:
+@dataclass
+class FeatureSelectionParameters:
+    selector: Literal["forward", "backward", "rfecv"] = "rfecv"
+    num_feat_to_select: str | int = "auto"
+    n_jobs: int = -1
+    scoring: str ="roc_auc"
+
+    def __post_init__(self):
+        tol: float = 1e-3
+        if self.selector == "forward":
+            self.tol = tol
+        elif self.selector == "backward":
+            self.tol = -1*tol
+
+@dataclass
+class SequentialFeatureParameters:
+    direction: Literal["forward", "backward"] = "forward"
+    n_features_to_select: str | int = "auto"
+    n_jobs: int = -1
+    scoring: str ="roc_auc"
+    tol: float = 1e-3
+    cv: int | None  = None
+
+    def __post_init__(self):
+        if self.direction == "backward":
+            self.tol = -1*self.tol
+
+class RFECVParameters:
+    min_features_to_select: int = 5
+    n_jobs: int = -1
+    scoring: str = "roc_auc"
+    cv: int | None  = None
+
+def _check_feature_selector(feature_selector):
+    if feature_selector in ["forward", "backward", "rfecv"]:
         print(f"Feature selection process: {feature_selector}")
     else:
         NotImplemented(f"NOT Implemented Feature selection process: {feature_selector}")
-    # if X.shape[1] > TOP_FEATURE_NUM:
-    #     num_feat_to_select = TOP_FEATURE_NUM
-    #     num_feat_to_select_rfe = TOP_FEATURE_NUM
-    # else:
-    #     num_feat_to_select = "auto"
-    #     num_feat_to_select_rfe = None
-    num_feat_to_select = "auto"
 
-    if feature_selector in ["forward", "backward"]:
-        feature_selection = SequentialFeatureSelector(
-            LogisticRegression(max_iter=MAX_ITER_LOGREG),
-            n_features_to_select=num_feat_to_select,
-            direction=feature_selector,
-            n_jobs=12,
-            scoring="roc_auc",
-            tol=-0.001,
+def set_sequential_feature_selector(estimator, params: SequentialFeatureParameters) -> SequentialFeatureSelector:
+    return SequentialFeatureSelector(
+        estimator = estimator,
+        n_features_to_select = params.n_features_to_select,
+        direction = params.direction,
+        scoring = params.scoring,
+        tol = params.tol,
+        cv = params.cv,
+        n_jobs = params.n_jobs
+        )
+
+def set_rfecv_feature_selector(estimator, params: RFECVParameters) -> RFECV:
+    return RFECV(
+        estimator=estimator,
+        scoring = params.scoring,
+        cv = params.cv,
+        n_jobs = params.n_jobs
+        )
+
+
+def set_feature_selection(
+        estimator, 
+        params: SequentialFeatureParameters | RFECVParameters
+        ):
+
+    direction = getattr(params, "direction", "rfecv")
+    _check_feature_selector(direction)
+
+    if direction == "rfecv":
+        feature_selector = set_rfecv_feature_selector(
+            estimator=estimator,
+            params=params
         )
     else:
-        # feature_selection = RFE(
-        #             estimator=LogisticRegression(max_iter=MAX_ITER_LOGREG),
-        #             n_features_to_select=num_feat_to_select_rfe
-        #         )
-        feature_selection = RFECV(
-            LogisticRegression(max_iter=MAX_ITER_LOGREG),
-            # n_features_to_select=num_feat_to_select_rfe,
-            # min_features_to_select=8,
-            cv=2,
-            scoring="roc_auc",
-            n_jobs=-1,
+        feature_selector = set_sequential_feature_selector(
+            estimator=estimator,
+            params=params
         )
 
-    if is_binned:
-        pipeline_ = feature_selection
-        # return pipeline_.fit(X, y)
-    else:
-        pipeline_ = Pipeline(
-            steps=[
-                ("binning_process", setup_binning(X)),
-                (
-                    "feature_selection",
-                    feature_selection,
-                ),
-            ]
-        )
-        #  pipeline_.fit(X, y)
-        # returnpipeline_["feature_selection"]
+    return feature_selector
 
-    return pipeline_.fit(X, y)
+def set_destination_directory():
+    root_dir = Path(DATA_DIR).joinpath(test_dir)
+    predecessor_dir = root_dir.joinpath("clustering")
+    destination_dir = root_dir.joinpath(STAGE)
+    destination_dir.mkdir(parents=True, exist_ok=True)
+    log.debug(f"Working dir is:  {destination_dir}")
 
+    return predecessor_dir, destination_dir, root_dir
 
-def load_transformed_data(path):
-    # Load transformed data and return only cols with non singular value
-    transformed_data = pd.read_parquet(path)
-    # select_columns = transformed_data.columns[transformed_data.nunique() != 1]
-    return transformed_data
+def log_feature_summary(features_in: int | list, features_out: list[str]):
+    """Log summary of the features in and out of the stage.
 
+    Args:
+        features_in (int): number of features in
+        features_out (list[str]): number of features out of the stage
+    """
 
-def filter_by_iv(df, *, iv_table, iv_cutoff=0.01):
-    # iv_table = binning_obj.summary()
-    columns_with_right_iv = iv_table[iv_table["iv"] > iv_cutoff]["name"].values
-    return df[columns_with_right_iv]
+    log.info(f"The number of features to select from is: {features_in}")
+    log.info(f"The number of features selected is: {len(features_out)}")
+    log.info("The number of features selected: ")
+    log.info(features_out)
 
 
 def main(feature_selector=FEATURE_SELECTION_TYPE):
-    print("===========================================================")
-    print("==================Feature Selection========================")
-    print("===========================================================")
-    # Define base path
-    # segment = "segments/non-rsps-features"
-    # segment = "ALNC"
-    # Define storage for data
 
-    os.makedirs(path := dest_dir, exist_ok=True)
-    print(f"Working dir is:  {path}")
-    os.makedirs(os.path.join(path, feature_selector), exist_ok=True)
+    log.debug(stage_info(stage=STAGE))
+
+    # dest_dir.mkdir(parents=True, exist_ok=True)
+    # log.debug(f"Working dir is:  {dest_dir}")
+    predecessor_dir, destination_dir, root_dir = set_destination_directory()
     # breakpoint()
-    transformed_data = load_transformed_data(root_dir.joinpath("preprocessing", "transform-data.parquet"))
-    # print(transformed_data.head())
+    transformed_data = pd.read_parquet(root_dir.joinpath("preprocessing", "transform-data.parquet"))
 
-    # with open(f"{path}/selected-features-varclushi.json") as fh:
-    #     ft = json.load(fh)
-
-    # Feed the selected features to RFE
-    # feat_selection_pipeline = feature_selection_pipeline(
-    #     X=transformed_data[ft["selected-features-varclushi"]],
-    #     y=transformed_data[TARGET].astype("int8"),
-    #     feature_selector=feature_selector
-    # )
-
-    print("Using automatic bins")
-    with open(
-        file=f"{predecessor_dir}/selected-features-varclushi.json",
-        mode="r",
-        encoding="utf-8",
-    ) as fh:
-        ft = json.load(fh)
+    log.info("Using automatic bins")
+    ft = read_json(f"{predecessor_dir}/selected-features-varclushi.json")
     features_ = ft["selected-features-varclushi"]
 
-    feat_selection_pipeline = feature_selection_pipeline(
+    logreg = LogisticRegression(max_iter=MAX_ITER_LOGREG)
+    pipeline_params = RFECVParameters()
+    
+
+    feat_selection_pipeline = set_feature_selection(
+        estimator=logreg,
+        params=pipeline_params
+    )
+    feat_selection_pipeline.fit(
         X=transformed_data[features_],
-        y=transformed_data[TARGET].astype("int8"),
-        feature_selector=feature_selector,
+        y=transformed_data[TARGET].astype("int8")
     )
 
-    print(f"The number of features to select from is: {len(features_)}")
+    log_feature_summary(
+        features_in=len(features_),
+        features_out=list(feat_selection_pipeline.get_feature_names_out())
+    )
 
-    if isinstance(feat_selection_pipeline, Pipeline):
-        selected_features_pl = list(
-            feat_selection_pipeline["feature_selection"].get_feature_names_out()
+    save_dict_to_json(
+        data={f"selected-features-{feature_selector}": list(feat_selection_pipeline.get_feature_names_out())},
+        filename=f"{destination_dir}/selected-features-{feature_selector}.json"
         )
-    else:
-        selected_features_pl = list(feat_selection_pipeline.get_feature_names_out())
+    
 
-    print(f"The number of features selected is: {len(selected_features_pl)}")
-    print(selected_features_pl)
-
-    with open(
-        file=f"{path}/selected-features-{feature_selector}.json",
-        mode="w",
-        encoding="utf-8",
-    ) as f:
-        json.dump(
-            {f"selected-features-{feature_selector}": selected_features_pl}, f, indent=6
-        )
+    # with open(
+    #     file=f"{destination_dir}/selected-features-{feature_selector}.json",
+    #     mode="w",
+    #     encoding="utf-8",
+    # ) as f:
+    #     json.dump(
+    #         {f"selected-features-{feature_selector}": selected_features_pl}, f, indent=6
+    #     )
 
 
 if __name__ == "__main__":
