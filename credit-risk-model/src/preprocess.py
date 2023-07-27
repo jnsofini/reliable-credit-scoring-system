@@ -130,7 +130,22 @@ def set_destination_directory():
 
     return predecessor_dir, destination_dir, root_dir
 
-@timeit
+def save_artifacts(
+    use_manual_bins: bool,
+    binning_process: BinningProcess,
+    preprocess_data: pd.DataFrame,
+    dest_dir: Path
+):
+    iv_table_name = "manual_iv_table" if use_manual_bins else "auto_iv_table"
+    iv_table = binning_process.summary()
+    iv_table.to_csv(dest_dir.joinpath(f"{iv_table_name}.csv"))
+    preprocess_data.to_parquet(dest_dir.joinpath(TRANSFORM_DATA_PATH))
+
+    if SAVE_BINNING_OBJ:
+        binning_process.save(str(dest_dir.joinpath(BINNING_TRANSFORM_PATH)))
+
+
+@timeit(logging.info)
 def main(use_manual_bins=False, binning_fit_params=None):
     logging.info(_stage_info(STAGE))
     
@@ -160,29 +175,14 @@ def main(use_manual_bins=False, binning_fit_params=None):
     )
     binning_process.fit(X, y)
 
-    preprocess_data = binning_process.transform(X, metric="woe")
-    preprocess_data[TARGET] = y
+    preprocessed_data = binning_process.transform(X, metric="woe")
+    preprocessed_data[TARGET] = y
 
     # save binning process and table
-    save_artifacts(use_manual_bins=use_manual_bins, binning_process=binning_process, preprocess_data=preprocess_data, dest_dir=destination_dir)
+    save_artifacts(use_manual_bins=use_manual_bins, binning_process=binning_process, preprocess_data=preprocessed_data, dest_dir=destination_dir)
 
 
     # logging.info(f"Time taken : {round(time.perf_counter() - start_time, 2)} seconds")
-
-
-def save_artifacts(
-    use_manual_bins: bool,
-    binning_process: BinningProcess,
-    preprocess_data: pd.DataFrame,
-    dest_dir: Path
-):
-    iv_table_name = "manual_iv_table" if use_manual_bins else "auto_iv_table"
-    iv_table = binning_process.summary()
-    iv_table.to_csv(dest_dir.joinpath(f"{iv_table_name}.csv"))
-    preprocess_data.to_parquet(dest_dir.joinpath(TRANSFORM_DATA_PATH))
-
-    if SAVE_BINNING_OBJ:
-        binning_process.save(str(dest_dir.joinpath(BINNING_TRANSFORM_PATH)))
 
 
 if __name__ == "__main__":
