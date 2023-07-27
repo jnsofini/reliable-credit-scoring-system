@@ -10,6 +10,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from util import setup_binning
 
+from pathlib import Path
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
@@ -18,14 +20,22 @@ TOP_FEATURE_NUM: int = 15
 MAX_ITER_LOGREG: int = 1000
 FEATURE_SELECTION_TYPE: str = "rfecv"
 
+DATA_DIR = "data"
+STAGE = "featurization"
+test_dir = 'dev-test'
+
+root_dir = Path(DATA_DIR).joinpath(test_dir)
+predecessor_dir = root_dir.joinpath("clustering")
+dest_dir = root_dir.joinpath(STAGE)
+
+FILE_DIR = Path(__file__).parent
+
 
 def feature_selection_pipeline(X, y, *, feature_selector="", is_binned=True):
     if feature_selector in ["forward", "backward", "rfe", "rfecv"]:
         print(f"Feature selection process: {feature_selector}")
     else:
-        print(f"NOT Implemented Feature selection process: {feature_selector}")
-        sys.exit()
-
+        NotImplemented(f"NOT Implemented Feature selection process: {feature_selector}")
     # if X.shape[1] > TOP_FEATURE_NUM:
     #     num_feat_to_select = TOP_FEATURE_NUM
     #     num_feat_to_select_rfe = TOP_FEATURE_NUM
@@ -98,13 +108,11 @@ def main(feature_selector=FEATURE_SELECTION_TYPE):
     # segment = "ALNC"
     # Define storage for data
 
-    os.makedirs(path := config.BASE_PATH, exist_ok=True)
+    os.makedirs(path := dest_dir, exist_ok=True)
     print(f"Working dir is:  {path}")
     os.makedirs(os.path.join(path, feature_selector), exist_ok=True)
     # breakpoint()
-    transformed_data = load_transformed_data(
-        os.path.join(config.BASE_PATH, config.TRANSFORM_DATA_PATH)
-    )
+    transformed_data = load_transformed_data(root_dir.joinpath("preprocessing", "transform-data.parquet"))
     # print(transformed_data.head())
 
     # with open(f"{path}/selected-features-varclushi.json") as fh:
@@ -119,7 +127,7 @@ def main(feature_selector=FEATURE_SELECTION_TYPE):
 
     print("Using automatic bins")
     with open(
-        file=f"{path}/selected-features-varclushi.json",
+        file=f"{predecessor_dir}/selected-features-varclushi.json",
         mode="r",
         encoding="utf-8",
     ) as fh:
@@ -145,7 +153,7 @@ def main(feature_selector=FEATURE_SELECTION_TYPE):
     print(selected_features_pl)
 
     with open(
-        file=f"{path}/{feature_selector}/selected-features-{feature_selector}.json",
+        file=f"{path}/selected-features-{feature_selector}.json",
         mode="w",
         encoding="utf-8",
     ) as f:
