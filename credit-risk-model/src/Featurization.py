@@ -150,17 +150,9 @@ def main(feature_selector=FEATURE_SELECTION_TYPE):
     predecessor_dir, destination_dir, root_dir = set_destination_directory()
     # breakpoint()
     transformed_data = pd.read_parquet(root_dir.joinpath("preprocessing", "transform-data.parquet"))
-    # print(transformed_data.head())
-
 
     log.info("Using automatic bins")
     ft = read_json(f"{predecessor_dir}/selected-features-varclushi.json")
-    # with open(
-    #     file=f"{predecessor_dir}/selected-features-varclushi.json",
-    #     mode="r",
-    #     encoding="utf-8",
-    # ) as fh:
-    #     ft = json.load(fh)
     features_ = ft["selected-features-varclushi"]
 
     logreg = LogisticRegression(max_iter=MAX_ITER_LOGREG)
@@ -180,14 +172,6 @@ def main(feature_selector=FEATURE_SELECTION_TYPE):
         features_in=len(features_),
         features_out=list(feat_selection_pipeline.get_feature_names_out())
     )
-
-    # log.info(f"The number of features to select from is: {len(features_)}")
-
-    # selected_features_pl = list(feat_selection_pipeline.get_feature_names_out())
-
-    # log.info(f"The number of features selected is: {len(selected_features_pl)}")
-    # log.info("The number of features selected: ")
-    # log.info(selected_features_pl)
 
     # save_dict_to_json(
     #     data={f"selected-features-{feature_selector}": selected_features_pl},
