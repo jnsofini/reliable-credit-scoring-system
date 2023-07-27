@@ -40,31 +40,6 @@ test_dir = 'dev-test'
 
 FILE_DIR = Path(__file__).parent
 
-# BINNING_FIT_PARAMS = {
-#     "ExternalRiskEstimate": {"monotonic_trend": "descending"},
-#     "MSinceOldestTradeOpen": {"monotonic_trend": "descending"},
-#     "MSinceMostRecentTradeOpen": {"monotonic_trend": "descending"},
-#     "AverageMInFile": {"monotonic_trend": "descending"},
-#     "NumSatisfactoryTrades": {"monotonic_trend": "descending"},
-#     "NumTrades60Ever2DerogPubRec": {"monotonic_trend": "ascending"},
-#     "NumTrades90Ever2DerogPubRec": {"monotonic_trend": "ascending"},
-#     "PercentTradesNeverDelq": {"monotonic_trend": "descending"},
-#     "MSinceMostRecentDelq": {"monotonic_trend": "descending"},
-#     "NumTradesOpeninLast12M": {"monotonic_trend": "ascending"},
-#     "MSinceMostRecentInqexcl7days": {"monotonic_trend": "descending"},
-#     "NumInqLast6M": {"monotonic_trend": "ascending"},
-#     "NumInqLast6Mexcl7days": {"monotonic_trend": "ascending"},
-#     "NetFractionRevolvingBurden": {"monotonic_trend": "ascending"},
-#     "NetFractionInstallBurden": {"monotonic_trend": "ascending"},
-#     "NumBank2NatlTradesWHighUtilization": {"monotonic_trend": "ascending"},
-# }
-
-# def load_json(filename):
-#     with open(file=filename, mode="r", encoding="utf-8") as file_header:
-#         data = json.load(file_header)
-
-#     return data
-
 
 def _remove_feature(df: pd.DataFrame, columns_to_drop: str | list[str] | None = None):
     if columns_to_drop is None:
