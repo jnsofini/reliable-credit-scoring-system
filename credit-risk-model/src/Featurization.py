@@ -1,4 +1,5 @@
 """ 
+Run from the credit-risk-model directory, with pipenv from reliable-credit-scoring-system
 python -m src.Featurization 
 """
 
@@ -29,9 +30,9 @@ DATA_DIR = "data"
 STAGE = "featurization"
 test_dir = 'dev-test'
 
-root_dir = Path(DATA_DIR).joinpath(test_dir)
-predecessor_dir = root_dir.joinpath("clustering")
-dest_dir = root_dir.joinpath(STAGE)
+# root_dir = Path(DATA_DIR).joinpath(test_dir)
+# predecessor_dir = root_dir.joinpath("clustering")
+# dest_dir = root_dir.joinpath(STAGE)
 
 FILE_DIR = Path(__file__).parent
 
@@ -124,7 +125,7 @@ def set_destination_directory():
     destination_dir.mkdir(parents=True, exist_ok=True)
     log.debug(f"Working dir is:  {destination_dir}")
 
-    return predecessor_dir, destination_dir
+    return predecessor_dir, destination_dir, root_dir
 
 
 def main(feature_selector=FEATURE_SELECTION_TYPE):
@@ -133,7 +134,7 @@ def main(feature_selector=FEATURE_SELECTION_TYPE):
 
     # dest_dir.mkdir(parents=True, exist_ok=True)
     # log.debug(f"Working dir is:  {dest_dir}")
-    predecessor_dir, destination_dir = set_destination_directory()
+    predecessor_dir, destination_dir, root_dir = set_destination_directory()
     # breakpoint()
     transformed_data = pd.read_parquet(root_dir.joinpath("preprocessing", "transform-data.parquet"))
     # print(transformed_data.head())
