@@ -109,45 +109,6 @@ def set_feature_selection(
 
     return feature_selector
 
-# def feature_selection_pipeline(X, y, *, feature_selector=""):
-#     if feature_selector in ["forward", "backward", "rfe", "rfecv"]:
-#         print(f"Feature selection process: {feature_selector}")
-#     else:
-#         NotImplemented(f"NOT Implemented Feature selection process: {feature_selector}")
-#     # if X.shape[1] > TOP_FEATURE_NUM:
-#     #     num_feat_to_select = TOP_FEATURE_NUM
-#     #     num_feat_to_select_rfe = TOP_FEATURE_NUM
-#     # else:
-#     #     num_feat_to_select = "auto"
-#     #     num_feat_to_select_rfe = None
-#     num_feat_to_select = "auto"
-
-#     if feature_selector in ["forward", "backward"]:
-#         feature_selection = SequentialFeatureSelector(
-#             LogisticRegression(max_iter=MAX_ITER_LOGREG),
-#             n_features_to_select=num_feat_to_select,
-#             direction=feature_selector,
-#             n_jobs=12,
-#             scoring="roc_auc",
-#             tol=-0.001,
-#         )
-#     else:
-#         # feature_selection = RFE(
-#         #             estimator=LogisticRegression(max_iter=MAX_ITER_LOGREG),
-#         #             n_features_to_select=num_feat_to_select_rfe
-#         #         )
-#         feature_selection = RFECV(
-#             LogisticRegression(max_iter=MAX_ITER_LOGREG),
-#             # n_features_to_select=num_feat_to_select_rfe,
-#             # min_features_to_select=8,
-#             cv=2,
-#             scoring="roc_auc",
-#             n_jobs=-1,
-#         )
-
-#     return feature_selection.fit(X, y)
-
-
 def load_transformed_data(path):
     # Load transformed data and return only cols with non singular value
     transformed_data = pd.read_parquet(path)
