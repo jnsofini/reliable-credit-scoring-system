@@ -127,6 +127,19 @@ def set_destination_directory():
 
     return predecessor_dir, destination_dir, root_dir
 
+def log_feature_summary(features_in: int | list, features_out: list[str]):
+    """Log summary of the features in and out of the stage.
+
+    Args:
+        features_in (int): number of features in
+        features_out (list[str]): number of features out of the stage
+    """
+
+    log.info(f"The number of features to select from is: {features_in}")
+    log.info(f"The number of features selected is: {len(features_out)}")
+    log.info("The number of features selected: ")
+    log.info(features_out)
+
 
 def main(feature_selector=FEATURE_SELECTION_TYPE):
 
@@ -163,13 +176,18 @@ def main(feature_selector=FEATURE_SELECTION_TYPE):
         y=transformed_data[TARGET].astype("int8")
     )
 
-    log.info(f"The number of features to select from is: {len(features_)}")
+    log_feature_summary(
+        features_in=len(features_),
+        features_out=list(feat_selection_pipeline.get_feature_names_out())
+    )
 
-    selected_features_pl = list(feat_selection_pipeline.get_feature_names_out())
+    # log.info(f"The number of features to select from is: {len(features_)}")
 
-    log.info(f"The number of features selected is: {len(selected_features_pl)}")
-    log.info("The number of features selected: ")
-    log.info(selected_features_pl)
+    # selected_features_pl = list(feat_selection_pipeline.get_feature_names_out())
+
+    # log.info(f"The number of features selected is: {len(selected_features_pl)}")
+    # log.info("The number of features selected: ")
+    # log.info(selected_features_pl)
 
     # save_dict_to_json(
     #     data={f"selected-features-{feature_selector}": selected_features_pl},
