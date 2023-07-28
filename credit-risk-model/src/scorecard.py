@@ -1,14 +1,22 @@
+""" 
+Run from the credit-risk-model directory, with pipenv from reliable-credit-scoring-system
+python -m src.scorecard 
+"""
+
+
 import json
 import os
 import time
 from pathlib import Path
+from dataclasses import dataclass
+import logging as log
 
-import config
 import mlflow
 import pandas as pd
 from optbinning.scorecard import plot_auc_roc, plot_cap, plot_ks
 from sklearn.linear_model import LogisticRegression  # , LogisticRegressionCV
-from util import scorecard, setup_binning  # ,load_data
+from src.util import scorecard, setup_binning  # ,load_data
+from src.tools import stage_info, read_json, save_dict_to_json, timeit
 
 # # Set MLFLOW
 # db = (
@@ -27,9 +35,9 @@ MISSING = [-99_000_000]
 DATA_DIR = "data"
 STAGE = "train"
 test_dir = 'dev-test'
-root_dir = Path(DATA_DIR).joinpath(test_dir)
-predecessor_dir = root_dir.joinpath("featurization")
-dest_dir = root_dir.joinpath(STAGE)
+# root_dir = Path(DATA_DIR).joinpath(test_dir)
+# predecessor_dir = root_dir.joinpath("featurization")
+# dest_dir = root_dir.joinpath(STAGE)
 
 FILE_DIR = Path(__file__).parent
 
@@ -56,6 +64,17 @@ BINNING_FIT_PARAMS = {
     "NumBank2NatlTradesWHighUtilization": {"monotonic_trend": "ascending"},
 }
 
+# log = Logger(stream_level="DEBUG", file_level="DEBUG").getLogger()
+log.basicConfig(format='%(levelname)s:%(message)s', encoding='utf-8', level=log.DEBUG)
+
+def set_destination_directory():
+    root_dir = Path(DATA_DIR).joinpath(test_dir)
+    predecessor_dir = root_dir.joinpath("featurization")
+    destination_dir = root_dir.joinpath(STAGE)
+    destination_dir.mkdir(parents=True, exist_ok=True)
+    log.debug(f"Working dir is:  {destination_dir}")
+
+    return predecessor_dir, destination_dir, root_dir
 
 def save_metrics_to_output(y, y_pred, path):
     base_path = path
@@ -91,19 +110,16 @@ def scorecard_pipeline(data, selected_features, target=TARGET, binning_fit_param
 
     return scorecard_.fit(X, y)
 
-
+@timeit(log.info)
 def main(
     feature_selector=FEATURE_SELECTION_TYPE,
     # use_manual_bins=True,
 ):
-    print("===========================================================")
-    print("==================Scorecard-Generation=====================")
-    print("===========================================================")
-    # os.makedirs(os.path.join(".", "outputs"), exist_ok=True)
-    dest_dir.mkdir(parents=True, exist_ok=True)
-    print(f"Working dir is:  {dest_dir}")
-    start_time = time.perf_counter()
-    # segment = "ALNC"
+    log.debug(stage_info(stage=STAGE))
+
+    predecessor_dir, destination_dir, root_dir = set_destination_directory()
+    log.debug(f"Working dir is:  {destination_dir}")
+
     X_train = pd.read_parquet(
         os.path.join(DATA_DIR, "X_train.parquet")
     )
@@ -157,22 +173,18 @@ def main(
     #         serialization_format="pickle",
     #         )
     # Save scorecard obj
-    scorecard_model.save(str(dest_dir.joinpath(f"model-{feature_selector}.pkl")))
+    scorecard_model.save(str(destination_dir.joinpath(f"model-{feature_selector}.pkl")))
 
     table = scorecard_model.table(style="detailed").round(3)
     print(table.groupby("Variable")["IV"].sum().sort_values(ascending=True))
-    table.to_csv(dest_dir.joinpath(f"model-{feature_selector}.csv"))
+    table.to_csv(destination_dir.joinpath(f"model-{feature_selector}.csv"))
 
     # do prediction
     y_pred = scorecard_model.predict_proba(train_data[scorecard_features])[:, 1]
     save_metrics_to_output(
         y=train_data[TARGET].astype("int8"),
         y_pred=y_pred,
-        path=str(dest_dir),
-    )
-
-    print(
-        f"Time taken bin and get woe: {round(time.perf_counter() - start_time, 2)} seconds"
+        path=str(destination_dir),
     )
 
 
