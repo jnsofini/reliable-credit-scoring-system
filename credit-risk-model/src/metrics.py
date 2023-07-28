@@ -52,14 +52,13 @@ def formatted_metrics(y, y_pred):
     ks_ =  ks(y, y_pred)
 
     return {"auc": f"{auc_:.2%}", "gini": f"{gini_:.2%}", "KS": f"{ks_:.2%}"}
-
  
 def get_population_dist(y):
     pop_count = len(y)
     default_count = sum(y)
     return  {
-        "# of observations": pop_count, 
-        "# of non-events": pop_count - default_count, 
-        "# of events": default_count , 
-        "Default Rate": "{0:.2%}".format(default_count/pop_count)
+        "Num of observations": pop_count, 
+        "Num of non-events": pop_count - default_count, 
+        "Num of events": default_count , 
+        "Default Rate": f"{(default_count/pop_count):.2%}"
         }
