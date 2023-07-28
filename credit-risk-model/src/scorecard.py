@@ -13,6 +13,7 @@ import logging as log
 
 import mlflow
 import pandas as pd
+from optbinning import BinningProcess
 from optbinning.scorecard import plot_auc_roc, plot_cap, plot_ks
 from sklearn.linear_model import LogisticRegression  # , LogisticRegressionCV
 from src.util import scorecard, setup_binning, _get_binning_features, _get_categorical_features  # ,load_data
@@ -113,6 +114,7 @@ def scorecard_pipeline(data, selected_features, target=TARGET, binning_fit_param
 @timeit(log.info)
 def main(
     feature_selector=FEATURE_SELECTION_TYPE,
+    binning_fit_params=None
     # use_manual_bins=True,
 ):
     log.debug(stage_info(stage=STAGE))
@@ -144,7 +146,20 @@ def main(
     scorecard_features = ft[f"selected-features-{feature_selector}"]
 
     print("Using automatic bins")
-    binning_fit_params = BINNING_FIT_PARAMS
+    if binning_fit_params is None:
+        binning_fit_params = read_json(FILE_DIR / "configs/binning-params.json")
+
+    binning_process = BinningProcess(
+        categorical_variables=categorical_features,
+        variable_names=list(X_train.columns),
+        # Uncomment the below line and pass a binning fit parameter
+        # to stop doing automatic binning
+        binning_fit_params=binning_fit_params,
+        # This is the prebin size that should make the feature set usable
+        min_prebin_size=10e-5,
+        special_codes=SPECIAL_CODES,
+    )
+
     # X = X_train[
     # [col for col in X_train.columns if X_train[col].nunique()>1]
     # ]#.drop(columns=["SNAPSHOT_DT", "B1_BUS_PRTNR_NBR"])
