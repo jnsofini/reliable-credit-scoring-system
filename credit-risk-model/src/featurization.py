@@ -14,7 +14,7 @@ from sklearn.linear_model import LogisticRegression
 from typing import Literal
 from pathlib import Path
 
-from src.tools import stage_info, read_json, save_dict_to_json
+from src.tools import stage_info, read_json, save_dict_to_json, timeit
 
 from dataclasses import dataclass
 
@@ -143,7 +143,7 @@ def log_feature_summary(features_in: int | list, features_out: list[str]):
     log.info("The number of features selected: ")
     log.info(features_out)
 
-
+@timeit(log.info)
 def main(feature_selector=FEATURE_SELECTION_TYPE):
     log.debug(stage_info(stage=STAGE))
 
