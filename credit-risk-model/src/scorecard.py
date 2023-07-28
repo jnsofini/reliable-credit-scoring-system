@@ -18,7 +18,7 @@ from optbinning.scorecard import plot_auc_roc, plot_cap, plot_ks
 from sklearn.linear_model import LogisticRegression  # , LogisticRegressionCV
 from src.util import scorecard, setup_binning, _get_binning_features, _get_categorical_features  # ,load_data
 from src.tools import stage_info, read_json, save_dict_to_json, timeit
-
+from src.metrics import formatted_metrics
 # # Set MLFLOW
 # db = (
 #     "/home/fini/github-projects/reliable-credit-scoring-system/"
@@ -186,8 +186,11 @@ def main(
     print(table.groupby("Variable")["IV"].sum().sort_values(ascending=True))
     table.to_csv(destination_dir.joinpath(f"model-{feature_selector}.csv"))
 
+    
+
     # # do prediction
-    # y_pred = scorecard_model.predict_proba(X_train[scorecard_features])[:, 1]
+    y_pred = scorecard_model.predict_proba(X_train[scorecard_features])[:, 1]
+    print(formatted_metrics(y=y_train, y_pred=y_pred))
     # save_metrics_to_output(
     #     y=y_train,
     #     y_pred=y_pred,
