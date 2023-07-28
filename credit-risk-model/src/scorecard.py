@@ -156,20 +156,6 @@ def main(
     predecessor_dir, destination_dir, root_dir = set_destination_directory()
     log.debug(f"Working dir is:  {destination_dir}")
 
-    
-    
-
-    # Pull all data back together as the functions were written to take that
-    # train_data = X_train
-    # train_data[TARGET] = y_train
-
-    # # with open(
-    #     file=predecessor_dir.joinpath(f"selected-features-{feature_selector}.json"),
-    #     mode="r",
-    #     encoding="utf-8",
-    # ) as fh:
-    #     ft = json.load(fh)
-
     ft = read_json(path=predecessor_dir.joinpath(f"selected-features-{feature_selector}.json"))
     scorecard_features = ft[f"selected-features-{feature_selector}"]
     log.info("Using automatic bins")
@@ -189,10 +175,7 @@ def main(
     binning_process = BinningProcess(
         categorical_variables=categorical_features,
         variable_names=list(X_train.columns),
-        # Uncomment the below line and pass a binning fit parameter
-        # to stop doing automatic binning
         binning_fit_params={key: value for key, value in binning_fit_params.items() if key in scorecard_features},
-        # This is the prebin size that should make the feature set usable
         min_prebin_size=10e-5,
         special_codes=SPECIAL_CODES,
     )
