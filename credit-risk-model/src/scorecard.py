@@ -77,12 +77,11 @@ def set_destination_directory():
 
     return predecessor_dir, destination_dir, root_dir
 
-def save_metrics_to_output(y, y_pred, path):
-    base_path = path
+def save_metrics_to_output(y, y_pred, base_path):
     os.makedirs(os.path.join(base_path), exist_ok=True)
-    plot_auc_roc(y, y_pred, savefig=True, fname=f"{base_path}/auc.png")
-    plot_cap(y, y_pred, savefig=True, fname=f"{base_path}/cap.png")
-    plot_ks(y, y_pred, savefig=True, fname=f"{base_path}/ks.png")
+    plot_auc_roc(y, y_pred, savefig=False, fname=f"{base_path}/auc.png")
+    plot_cap(y, y_pred, savefig=False, fname=f"{base_path}/cap.png")
+    plot_ks(y, y_pred, savefig=False, fname=f"{base_path}/ks.png")
 
 def get_scorecard_obj(process, *, method=None):
     """
@@ -186,8 +185,6 @@ def main(
     )
     y_train = y_train.values.reshape(-1).astype("int8")
 
-    # print(scorecard_features)
-    # print({key: value for key, value in binning_fit_params.items() if key in scorecard_features}.keys())
     categorical_features = _get_categorical_features(X_train)
     binning_process = BinningProcess(
         categorical_variables=categorical_features,
@@ -200,31 +197,13 @@ def main(
         special_codes=SPECIAL_CODES,
     )
 
-    # X = X_train[
-    # [col for col in X_train.columns if X_train[col].nunique()>1]
-    # ]#.drop(columns=["SNAPSHOT_DT", "B1_BUS_PRTNR_NBR"])
-    # y = y_train.astype("int8").values.reshape(-1)
-
-    # scorecard_features = [
-    #     col for col in selection_step_features if X_train[col].nunique() > 1
-    # ]
-    # if include_financials:
-    #     scorecard_features = scorecard_features + dlfeatures.financial_features
-
-    # print("Features used to build the model are: \n", scorecard_features)
-    # enable autologging
     estimator = LogisticRegression(C=3, max_iter=MAX_ITER_LOGREG, random_state=42)
     scorecard_model = get_scorecard_obj(
         process=binning_process,
         method=estimator
     )
     scorecard_model.fit(X_train, y_train)
-    # scorecard_model = scorecard_pipeline(
-    #     data=train_data[scorecard_features + [TARGET]],
-    #     selected_features=scorecard_features,
-    #     target=TARGET,
-    #     binning_fit_params=binning_fit_params,
-    # )
+
     # with mlflow.start_run(run_name="Optbinning Model"):
     #     # mlflow.sklearn.save_model(
     #     #     path="model", 
@@ -241,14 +220,14 @@ def main(
 
     table = scorecard_model.table(style="detailed").round(3)
     print(table.groupby("Variable")["IV"].sum().sort_values(ascending=True))
-    # table.to_csv(destination_dir.joinpath(f"model-{feature_selector}.csv"))
+    table.to_csv(destination_dir.joinpath(f"model-{feature_selector}.csv"))
 
     # # do prediction
-    # y_pred = scorecard_model.predict_proba(train_data[scorecard_features])[:, 1]
+    # y_pred = scorecard_model.predict_proba(X_train[scorecard_features])[:, 1]
     # save_metrics_to_output(
-    #     y=train_data[TARGET].astype("int8"),
+    #     y=y_train,
     #     y_pred=y_pred,
-    #     path=str(destination_dir),
+    #     base_path=str(destination_dir)
     # )
 
 
