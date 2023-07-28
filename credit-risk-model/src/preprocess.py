@@ -5,19 +5,20 @@ This script performs the preprocessing of the data used to build the model.
 
 python -m src.preprocess
 """
+import json
 import logging
 import os
 import time
 import warnings
-import json
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 
-# from src import config
-from src.tools import timeit, stage_info, read_json, save_dict_to_json
 import pandas as pd
 from optbinning import BinningProcess
 from sklearn.feature_selection import VarianceThreshold
+
+# from src import config
+from src.tools import read_json, save_dict_to_json, stage_info, timeit
 
 # logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
 logging.basicConfig(

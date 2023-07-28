@@ -4,19 +4,17 @@ python -m src.Featurization
 """
 
 import json
+import logging as log
 import os
 import warnings
-import logging as log
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Literal
 
 import pandas as pd
 from sklearn.feature_selection import RFECV, SequentialFeatureSelector
 from sklearn.linear_model import LogisticRegression
-from typing import Literal
-from pathlib import Path
-
-from src.tools import stage_info, read_json, save_dict_to_json
-
-from dataclasses import dataclass
+from src.tools import read_json, save_dict_to_json, stage_info
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 

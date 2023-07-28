@@ -5,25 +5,25 @@ python -m src.scorecard
 
 
 import json
+import logging as log
 import os
 import time
-from pathlib import Path
 from dataclasses import dataclass
-import logging as log
+from pathlib import Path
 
 import mlflow
 import pandas as pd
 from optbinning import BinningProcess, Scorecard
 from optbinning.scorecard import plot_auc_roc, plot_cap, plot_ks
 from sklearn.linear_model import LogisticRegression  # , LogisticRegressionCV
-from src.util import (
-    scorecard,
-    setup_binning,
+from src.metrics import formatted_metrics, get_population_dist
+from src.tools import read_json, save_dict_to_json, stage_info, timeit
+from src.util import (  # ,load_data
     _get_binning_features,
     _get_categorical_features,
-)  # ,load_data
-from src.tools import stage_info, read_json, save_dict_to_json, timeit
-from src.metrics import formatted_metrics, get_population_dist
+    scorecard,
+    setup_binning,
+)
 
 # # Set MLFLOW
 # db = (

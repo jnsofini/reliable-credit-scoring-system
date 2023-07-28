@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.metrics import roc_curve, roc_auc_score
+from sklearn.metrics import roc_auc_score, roc_curve
 
 
 def kolmogorov_smirnov(y, y_pred):
