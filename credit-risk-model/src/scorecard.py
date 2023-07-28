@@ -15,7 +15,7 @@ import mlflow
 import pandas as pd
 from optbinning.scorecard import plot_auc_roc, plot_cap, plot_ks
 from sklearn.linear_model import LogisticRegression  # , LogisticRegressionCV
-from src.util import scorecard, setup_binning  # ,load_data
+from src.util import scorecard, setup_binning, _get_binning_features, _get_categorical_features  # ,load_data
 from src.tools import stage_info, read_json, save_dict_to_json, timeit
 
 # # Set MLFLOW
@@ -127,16 +127,20 @@ def main(
         os.path.join(DATA_DIR, "y_train.parquet")
     )
 
+    categorical_features = _get_categorical_features(X_train)
+
     # Pull all data back together as the functions were written to take that
     train_data = X_train
     train_data[TARGET] = y_train
 
-    with open(
-        file=predecessor_dir.joinpath(f"selected-features-{feature_selector}.json"),
-        mode="r",
-        encoding="utf-8",
-    ) as fh:
-        ft = json.load(fh)
+    # with open(
+    #     file=predecessor_dir.joinpath(f"selected-features-{feature_selector}.json"),
+    #     mode="r",
+    #     encoding="utf-8",
+    # ) as fh:
+    #     ft = json.load(fh)
+
+    ft = read_json(path=predecessor_dir.joinpath(f"selected-features-{feature_selector}.json"))
     scorecard_features = ft[f"selected-features-{feature_selector}"]
 
     print("Using automatic bins")
