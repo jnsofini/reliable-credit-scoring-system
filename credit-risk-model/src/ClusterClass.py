@@ -6,12 +6,13 @@ import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from varclushi import VarClusHi
 
+
 class Cluster(BaseEstimator, TransformerMixin):
     """
     Clustering Transformer for Feature Selection.
 
-    This transformer clusters features based on their similarity and selects one feature from each cluster 
-    based on the lowest RS Ratio. If available, the feature with the highest IV is also included. 
+    This transformer clusters features based on their similarity and selects one feature from each cluster
+    based on the lowest RS Ratio. If available, the feature with the highest IV is also included.
     It uses VarClusHi for clustering, a library that functions similarly to the SAS version.
     """
 

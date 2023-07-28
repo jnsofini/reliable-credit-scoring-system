@@ -143,6 +143,7 @@ def log_feature_summary(features_in: int | list, features_out: list[str]):
     log.info("The number of features selected: ")
     log.info(features_out)
 
+
 @timeit(log.info)
 def main(feature_selector=FEATURE_SELECTION_TYPE):
     log.debug(stage_info(stage=STAGE))
