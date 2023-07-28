@@ -75,6 +75,41 @@ def _get_categorical_features(df):
 
     return categorical_variables
 
+def _remove_feature(df: pd.DataFrame, columns_to_drop: str | list[str] | None = None):
+    if columns_to_drop is None:
+        return df
+    if isinstance(columns_to_drop, str):
+        columns_to_drop = [columns_to_drop]
+
+    columns_to_drop = list(set(columns_to_drop).intersection(set(df.columns.values)))
+    return df.drop(columns=columns_to_drop)
+
+def _get_binning_features(df, *, target=None, features=None):
+    """
+    Setup the binning process for optbinning.
+
+    Args:
+        binning_fit_params: fit parameters object, including splits
+        features: the list of features that we are interested in
+        target: the target variable
+        df (DataFrame): Dataframe containing features and a target column called 'target'
+
+    Returns: Optbinning functional to bin the data BinningProcess()
+
+    """
+    # Remove target if present in data
+    if target:
+        df = _remove_feature(df=df, columns_to_drop=target)
+
+    binning_features = features or df.columns.to_list()
+    categorical_features = (
+        df[binning_features]
+        .select_dtypes(include=["object", "category", "string"])
+        .columns.values
+    )
+
+    return binning_features, categorical_features
+
 
 def get_best_feature_from_each_cluster(clusters):
     """The best feature from each cluster is selected.
