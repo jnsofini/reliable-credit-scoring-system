@@ -18,7 +18,7 @@ from optbinning.scorecard import plot_auc_roc, plot_cap, plot_ks
 from sklearn.linear_model import LogisticRegression  # , LogisticRegressionCV
 from src.util import scorecard, setup_binning, _get_binning_features, _get_categorical_features  # ,load_data
 from src.tools import stage_info, read_json, save_dict_to_json, timeit
-from src.metrics import formatted_metrics
+from src.metrics import formatted_metrics, get_population_dist
 # # Set MLFLOW
 # db = (
 #     "/home/fini/github-projects/reliable-credit-scoring-system/"
@@ -126,6 +126,7 @@ def scorecard_pipeline(data, selected_features, target=TARGET, binning_fit_param
 
     return scorecard_.fit(X, y)
 
+
 @timeit(log.info)
 def main(
     feature_selector=FEATURE_SELECTION_TYPE,
@@ -190,7 +191,19 @@ def main(
 
     # # do prediction
     y_pred = scorecard_model.predict_proba(X_train[scorecard_features])[:, 1]
-    print(formatted_metrics(y=y_train, y_pred=y_pred))
+    auc_gini_ks = formatted_metrics(y=y_train, y_pred=y_pred)
+    dist_stats = get_population_dist(y=y_train)
+    print({
+            "metrics": auc_gini_ks,
+            "dist": dist_stats
+        })
+    save_dict_to_json(
+        filename=destination_dir.joinpath(f"summary-stats-{feature_selector}.json"), 
+        default=str,
+        data={
+            "metrics": auc_gini_ks,
+            "dist": dist_stats
+        })
     # save_metrics_to_output(
     #     y=y_train,
     #     y_pred=y_pred,
