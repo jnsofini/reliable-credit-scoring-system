@@ -45,7 +45,7 @@ def auc(y, y_pred):
     return roc_auc_score(y, y_pred)
     
  
-def fit_stats_formatted(y, y_pred):
+def formatted_metrics(y, y_pred):
     """Gets the fit stats used in out model building"""
     auc_ =  auc(y, y_pred)
     gini_ =  gini(y, y_pred)
