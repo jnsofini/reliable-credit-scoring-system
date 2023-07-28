@@ -150,6 +150,7 @@ def main(feature_selector=FEATURE_SELECTION_TYPE):
     # dest_dir.mkdir(parents=True, exist_ok=True)
     # log.debug(f"Working dir is:  {dest_dir}")
     predecessor_dir, destination_dir, root_dir = set_destination_directory()
+    log.debug(f"Working dir is:  {destination_dir}")
     # breakpoint()
     transformed_data = pd.read_parquet(
         root_dir.joinpath("preprocessing", "transform-data.parquet")
