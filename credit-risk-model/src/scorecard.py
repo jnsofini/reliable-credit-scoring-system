@@ -46,25 +46,6 @@ MAX_ITER_LOGREG: int = 1000
 
 FEATURE_SELECTION_TYPE: str = "rfecv"
 
-BINNING_FIT_PARAMS = {
-    "ExternalRiskEstimate": {"monotonic_trend": "descending"},
-    "MSinceOldestTradeOpen": {"monotonic_trend": "descending"},
-    "MSinceMostRecentTradeOpen": {"monotonic_trend": "descending"},
-    "AverageMInFile": {"monotonic_trend": "descending"},
-    "NumSatisfactoryTrades": {"monotonic_trend": "descending"},
-    "NumTrades60Ever2DerogPubRec": {"monotonic_trend": "ascending"},
-    "NumTrades90Ever2DerogPubRec": {"monotonic_trend": "ascending"},
-    "PercentTradesNeverDelq": {"monotonic_trend": "descending"},
-    "MSinceMostRecentDelq": {"monotonic_trend": "descending"},
-    "NumTradesOpeninLast12M": {"monotonic_trend": "ascending"},
-    "MSinceMostRecentInqexcl7days": {"monotonic_trend": "descending"},
-    "NumInqLast6M": {"monotonic_trend": "ascending"},
-    "NumInqLast6Mexcl7days": {"monotonic_trend": "ascending"},
-    "NetFractionRevolvingBurden": {"monotonic_trend": "ascending"},
-    "NetFractionInstallBurden": {"monotonic_trend": "ascending"},
-    "NumBank2NatlTradesWHighUtilization": {"monotonic_trend": "ascending"},
-}
-
 # log = Logger(stream_level="DEBUG", file_level="DEBUG").getLogger()
 log.basicConfig(format='%(levelname)s:%(message)s', encoding='utf-8', level=log.DEBUG)
 
