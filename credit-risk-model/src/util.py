@@ -75,6 +75,7 @@ def _get_categorical_features(df):
 
     return categorical_variables
 
+
 def _remove_feature(df: pd.DataFrame, columns_to_drop: str | list[str] | None = None):
     if columns_to_drop is None:
         return df
@@ -83,6 +84,7 @@ def _remove_feature(df: pd.DataFrame, columns_to_drop: str | list[str] | None = 
 
     columns_to_drop = list(set(columns_to_drop).intersection(set(df.columns.values)))
     return df.drop(columns=columns_to_drop)
+
 
 def _get_binning_features(df, *, target=None, features=None):
     """

@@ -1,5 +1,6 @@
 import numpy as np
-from sklearn.metrics import roc_curve, roc_auc_score
+from sklearn.metrics import roc_auc_score, roc_curve
+
 
 def kolmogorov_smirnov(y, y_pred):
     """Compute the Kolmogorov-Smirnov (KS).
@@ -31,34 +32,35 @@ def kolmogorov_smirnov(y, y_pred):
 
     return ks_score
 
- 
-def ks(y, y_pred):
-    return  kolmogorov_smirnov(y, y_pred)
 
- 
+def ks(y, y_pred):
+    return kolmogorov_smirnov(y, y_pred)
+
+
 def gini(y, y_pred):
     auroc = roc_auc_score(y, y_pred)
     return auroc * 2 - 1
 
- 
+
 def auc(y, y_pred):
     return roc_auc_score(y, y_pred)
-    
- 
+
+
 def formatted_metrics(y, y_pred):
     """Gets the fit stats used in out model building"""
-    auc_ =  auc(y, y_pred)
-    gini_ =  gini(y, y_pred)
-    ks_ =  ks(y, y_pred)
+    auc_ = auc(y, y_pred)
+    gini_ = gini(y, y_pred)
+    ks_ = ks(y, y_pred)
 
     return {"auc": f"{auc_:.2%}", "gini": f"{gini_:.2%}", "KS": f"{ks_:.2%}"}
- 
+
+
 def get_population_dist(y):
     pop_count = len(y)
     default_count = sum(y)
-    return  {
-        "Num of observations": pop_count, 
-        "Num of non-events": pop_count - default_count, 
-        "Num of events": default_count , 
-        "Default Rate": f"{(default_count/pop_count):.2%}"
-        }
+    return {
+        "Num of observations": pop_count,
+        "Num of non-events": pop_count - default_count,
+        "Num of events": default_count,
+        "Default Rate": f"{(default_count/pop_count):.2%}",
+    }

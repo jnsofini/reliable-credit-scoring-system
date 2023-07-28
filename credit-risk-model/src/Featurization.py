@@ -4,19 +4,17 @@ python -m src.Featurization
 """
 
 import json
+import logging as log
 import os
 import warnings
-import logging as log
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Literal
 
 import pandas as pd
 from sklearn.feature_selection import RFECV, SequentialFeatureSelector
 from sklearn.linear_model import LogisticRegression
-from typing import Literal
-from pathlib import Path
-
-from src.tools import stage_info, read_json, save_dict_to_json
-
-from dataclasses import dataclass
+from src.tools import read_json, save_dict_to_json, stage_info
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -38,38 +36,42 @@ FILE_DIR = Path(__file__).parent
 
 log.basicConfig(format='%(levelname)s:%(message)s', encoding='utf-8', level=log.DEBUG)
 
+
 @dataclass
 class FeatureSelectionParameters:
     selector: Literal["forward", "backward", "rfecv"] = "rfecv"
     num_feat_to_select: str | int = "auto"
     n_jobs: int = -1
-    scoring: str ="roc_auc"
+    scoring: str = "roc_auc"
 
     def __post_init__(self):
         tol: float = 1e-3
         if self.selector == "forward":
             self.tol = tol
         elif self.selector == "backward":
-            self.tol = -1*tol
+            self.tol = -1 * tol
+
 
 @dataclass
 class SequentialFeatureParameters:
     direction: Literal["forward", "backward"] = "forward"
     n_features_to_select: str | int = "auto"
     n_jobs: int = -1
-    scoring: str ="roc_auc"
+    scoring: str = "roc_auc"
     tol: float = 1e-3
-    cv: int | None  = None
+    cv: int | None = None
 
     def __post_init__(self):
         if self.direction == "backward":
-            self.tol = -1*self.tol
+            self.tol = -1 * self.tol
+
 
 class RFECVParameters:
     min_features_to_select: int = 5
     n_jobs: int = -1
     scoring: str = "roc_auc"
-    cv: int | None  = None
+    cv: int | None = None
+
 
 def _check_feature_selector(feature_selector):
     if feature_selector in ["forward", "backward", "rfecv"]:
@@ -77,46 +79,44 @@ def _check_feature_selector(feature_selector):
     else:
         NotImplemented(f"NOT Implemented Feature selection process: {feature_selector}")
 
-def set_sequential_feature_selector(estimator, params: SequentialFeatureParameters) -> SequentialFeatureSelector:
+
+def set_sequential_feature_selector(
+    estimator, params: SequentialFeatureParameters
+) -> SequentialFeatureSelector:
     return SequentialFeatureSelector(
-        estimator = estimator,
-        n_features_to_select = params.n_features_to_select,
-        direction = params.direction,
-        scoring = params.scoring,
-        tol = params.tol,
-        cv = params.cv,
-        n_jobs = params.n_jobs
-        )
+        estimator=estimator,
+        n_features_to_select=params.n_features_to_select,
+        direction=params.direction,
+        scoring=params.scoring,
+        tol=params.tol,
+        cv=params.cv,
+        n_jobs=params.n_jobs,
+    )
+
 
 def set_rfecv_feature_selector(estimator, params: RFECVParameters) -> RFECV:
     return RFECV(
-        estimator=estimator,
-        scoring = params.scoring,
-        cv = params.cv,
-        n_jobs = params.n_jobs
-        )
+        estimator=estimator, scoring=params.scoring, cv=params.cv, n_jobs=params.n_jobs
+    )
 
 
 def set_feature_selection(
-        estimator, 
-        params: SequentialFeatureParameters | RFECVParameters
-        ):
-
+    estimator, params: SequentialFeatureParameters | RFECVParameters
+):
     direction = getattr(params, "direction", "rfecv")
     _check_feature_selector(direction)
 
     if direction == "rfecv":
         feature_selector = set_rfecv_feature_selector(
-            estimator=estimator,
-            params=params
+            estimator=estimator, params=params
         )
     else:
         feature_selector = set_sequential_feature_selector(
-            estimator=estimator,
-            params=params
+            estimator=estimator, params=params
         )
 
     return feature_selector
+
 
 def set_destination_directory():
     root_dir = Path(DATA_DIR).joinpath(test_dir)
@@ -126,6 +126,7 @@ def set_destination_directory():
     log.debug(f"Working dir is:  {destination_dir}")
 
     return predecessor_dir, destination_dir, root_dir
+
 
 def log_feature_summary(features_in: int | list, features_out: list[str]):
     """Log summary of the features in and out of the stage.
@@ -142,14 +143,15 @@ def log_feature_summary(features_in: int | list, features_out: list[str]):
 
 
 def main(feature_selector=FEATURE_SELECTION_TYPE):
-
     log.debug(stage_info(stage=STAGE))
 
     # dest_dir.mkdir(parents=True, exist_ok=True)
     # log.debug(f"Working dir is:  {dest_dir}")
     predecessor_dir, destination_dir, root_dir = set_destination_directory()
     # breakpoint()
-    transformed_data = pd.read_parquet(root_dir.joinpath("preprocessing", "transform-data.parquet"))
+    transformed_data = pd.read_parquet(
+        root_dir.joinpath("preprocessing", "transform-data.parquet")
+    )
 
     log.info("Using automatic bins")
     ft = read_json(f"{predecessor_dir}/selected-features-varclushi.json")
@@ -157,27 +159,23 @@ def main(feature_selector=FEATURE_SELECTION_TYPE):
 
     logreg = LogisticRegression(max_iter=MAX_ITER_LOGREG)
     pipeline_params = RFECVParameters()
-    
 
     feat_selection_pipeline = set_feature_selection(
-        estimator=logreg,
-        params=pipeline_params
+        estimator=logreg, params=pipeline_params
     )
     feat_selection_pipeline.fit(
-        X=transformed_data[features_],
-        y=transformed_data[TARGET].astype("int8")
+        X=transformed_data[features_], y=transformed_data[TARGET].astype("int8")
     )
 
     log_feature_summary(
         features_in=len(features_),
-        features_out=list(feat_selection_pipeline.get_feature_names_out())
+        features_out=list(feat_selection_pipeline.get_feature_names_out()),
     )
 
     # save_dict_to_json(
     #     data={f"selected-features-{feature_selector}": selected_features_pl},
     #     filename=f"{dest_dir}/selected-features-{feature_selector}.json"
     #     )
-    
 
     # with open(
     #     file=f"{destination_dir}/selected-features-{feature_selector}.json",

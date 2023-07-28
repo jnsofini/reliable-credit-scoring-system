@@ -5,20 +5,26 @@ python -m src.scorecard
 
 
 import json
+import logging as log
 import os
 import time
-from pathlib import Path
 from dataclasses import dataclass
-import logging as log
+from pathlib import Path
 
 import mlflow
 import pandas as pd
 from optbinning import BinningProcess, Scorecard
 from optbinning.scorecard import plot_auc_roc, plot_cap, plot_ks
 from sklearn.linear_model import LogisticRegression  # , LogisticRegressionCV
-from src.util import scorecard, setup_binning, _get_binning_features, _get_categorical_features  # ,load_data
-from src.tools import stage_info, read_json, save_dict_to_json, timeit
 from src.metrics import formatted_metrics, get_population_dist
+from src.tools import read_json, save_dict_to_json, stage_info, timeit
+from src.util import (  # ,load_data
+    _get_binning_features,
+    _get_categorical_features,
+    scorecard,
+    setup_binning,
+)
+
 # # Set MLFLOW
 # db = (
 #     "/home/fini/github-projects/reliable-credit-scoring-system/"
@@ -49,6 +55,7 @@ FEATURE_SELECTION_TYPE: str = "rfecv"
 # log = Logger(stream_level="DEBUG", file_level="DEBUG").getLogger()
 log.basicConfig(format='%(levelname)s:%(message)s', encoding='utf-8', level=log.DEBUG)
 
+
 def set_destination_directory():
     root_dir = Path(DATA_DIR).joinpath(test_dir)
     predecessor_dir = root_dir.joinpath("featurization")
@@ -58,11 +65,13 @@ def set_destination_directory():
 
     return predecessor_dir, destination_dir, root_dir
 
+
 def save_metrics_to_output(y, y_pred, base_path):
     os.makedirs(os.path.join(base_path), exist_ok=True)
     plot_auc_roc(y, y_pred, savefig=False, fname=f"{base_path}/auc.png")
     plot_cap(y, y_pred, savefig=False, fname=f"{base_path}/cap.png")
     plot_ks(y, y_pred, savefig=False, fname=f"{base_path}/ks.png")
+
 
 def get_scorecard_obj(process, *, method=None):
     """
@@ -99,6 +108,7 @@ def get_scorecard_obj(process, *, method=None):
         #     # "scorecard_points": 30
         # }
     )
+
 
 def scorecard_pipeline(data, selected_features, target=TARGET, binning_fit_params=None):
     binning_process = setup_binning(
@@ -138,45 +148,44 @@ def main(
     predecessor_dir, destination_dir, root_dir = set_destination_directory()
     log.debug(f"Working dir is:  {destination_dir}")
 
-    ft = read_json(path=predecessor_dir.joinpath(f"selected-features-{feature_selector}.json"))
+    ft = read_json(
+        path=predecessor_dir.joinpath(f"selected-features-{feature_selector}.json")
+    )
     scorecard_features = ft[f"selected-features-{feature_selector}"]
     log.info("Using automatic bins")
     if binning_fit_params is None:
         binning_fit_params = read_json(FILE_DIR / "configs/binning-params.json")
 
-    X_train = pd.read_parquet(
-        os.path.join(DATA_DIR, "X_train.parquet")
-    )
+    X_train = pd.read_parquet(os.path.join(DATA_DIR, "X_train.parquet"))
     X_train = X_train[scorecard_features]
-    y_train = pd.read_parquet(
-        os.path.join(DATA_DIR, "y_train.parquet")
-    )
+    y_train = pd.read_parquet(os.path.join(DATA_DIR, "y_train.parquet"))
     y_train = y_train.values.reshape(-1).astype("int8")
 
     categorical_features = _get_categorical_features(X_train)
     binning_process = BinningProcess(
         categorical_variables=categorical_features,
         variable_names=list(X_train.columns),
-        binning_fit_params={key: value for key, value in binning_fit_params.items() if key in scorecard_features},
+        binning_fit_params={
+            key: value
+            for key, value in binning_fit_params.items()
+            if key in scorecard_features
+        },
         min_prebin_size=10e-5,
         special_codes=SPECIAL_CODES,
     )
 
     estimator = LogisticRegression(C=3, max_iter=MAX_ITER_LOGREG, random_state=42)
-    scorecard_model = get_scorecard_obj(
-        process=binning_process,
-        method=estimator
-    )
+    scorecard_model = get_scorecard_obj(process=binning_process, method=estimator)
     scorecard_model.fit(X_train, y_train)
 
     # with mlflow.start_run(run_name="Optbinning Model"):
     #     # mlflow.sklearn.save_model(
-    #     #     path="model", 
+    #     #     path="model",
     #     #     sk_model=scorecard_model,
     #     #     serialization_format="pickle",
     #     #     )
     #     mlflow.sklearn.log_model(
-    #         artifact_path="data/mlflow_artifacts_store", 
+    #         artifact_path="data/mlflow_artifacts_store",
     #         sk_model=scorecard_model,
     #         serialization_format="pickle",
     #         )
@@ -187,23 +196,16 @@ def main(
     print(table.groupby("Variable")["IV"].sum().sort_values(ascending=True))
     table.to_csv(destination_dir.joinpath(f"model-{feature_selector}.csv"))
 
-    
-
     # # do prediction
     y_pred = scorecard_model.predict_proba(X_train[scorecard_features])[:, 1]
     auc_gini_ks = formatted_metrics(y=y_train, y_pred=y_pred)
     dist_stats = get_population_dist(y=y_train)
-    print({
-            "metrics": auc_gini_ks,
-            "dist": dist_stats
-        })
+    print({"metrics": auc_gini_ks, "dist": dist_stats})
     save_dict_to_json(
-        filename=destination_dir.joinpath(f"summary-stats-{feature_selector}.json"), 
+        filename=destination_dir.joinpath(f"summary-stats-{feature_selector}.json"),
         default=str,
-        data={
-            "metrics": auc_gini_ks,
-            "dist": dist_stats
-        })
+        data={"metrics": auc_gini_ks, "dist": dist_stats},
+    )
     # save_metrics_to_output(
     #     y=y_train,
     #     y_pred=y_pred,
