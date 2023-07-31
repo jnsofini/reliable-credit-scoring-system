@@ -134,7 +134,7 @@ def main(cfg: DictConfig, use_manual_bins=False, binning_fit_params=None):
 
     predecessor_dir, destination_dir, root_dir = set_destination_directory(cfg)
     # Get raw data and split into X and y
-    if binning_fit_params is None:
+    if cfg.preprocessing.process == "manual":
         binning_fit_params = read_json(FILE_DIR / "configs/binning-params.json")
 
     x_train = pd.read_parquet(path=os.path.join(cfg.data.source, "X_train.parquet"))
@@ -149,12 +149,11 @@ def main(cfg: DictConfig, use_manual_bins=False, binning_fit_params=None):
     binning_process = BinningProcess(
         categorical_variables=categorical_features,
         variable_names=binning_features,
-        # Uncomment the below line and pass a binning fit parameter
-        # to stop doing automatic binning
+        # Below params are manual
         binning_fit_params=binning_fit_params,
-        # This is the prebin size that should make the feature set usable
-        min_prebin_size=10e-5,
+        min_prebin_size=cfg.preprocessing.min_prebin_size,
         special_codes=list(cfg.data.special_codes),
+        selection_criteria={"iv":{"min": cfg.preprocessing.selection_strategy.iv.min}}
     )
     binning_process.fit(X, y)
 
