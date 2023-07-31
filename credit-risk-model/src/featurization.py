@@ -11,7 +11,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+import hydra
 import pandas as pd
+from omegaconf import DictConfig, OmegaConf
 from sklearn.feature_selection import RFECV, SequentialFeatureSelector
 from sklearn.linear_model import LogisticRegression
 from src.tools import read_json, save_dict_to_json, stage_info, timeit
@@ -19,14 +21,14 @@ from src.tools import read_json, save_dict_to_json, stage_info, timeit
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
-TARGET: str = "RiskPerformance"
-TOP_FEATURE_NUM: int = 15
-MAX_ITER_LOGREG: int = 1000
-FEATURE_SELECTION_TYPE: str = "rfecv"
+# TARGET: str = "RiskPerformance"
+# TOP_FEATURE_NUM: int = 15
+# MAX_ITER_LOGREG: int = 1000
+# FEATURE_SELECTION_TYPE: str = "rfecv"
 
-DATA_DIR = "data"
+# DATA_DIR = "data"
 STAGE = "featurization"
-test_dir = 'dev-test'
+# test_dir = 'dev-test'
 
 # root_dir = Path(DATA_DIR).joinpath(test_dir)
 # predecessor_dir = root_dir.joinpath("clustering")
@@ -118,8 +120,8 @@ def set_feature_selection(
     return feature_selector
 
 
-def set_destination_directory():
-    root_dir = Path(DATA_DIR).joinpath(test_dir)
+def set_destination_directory(cfg:DictConfig):
+    root_dir = Path(cfg.data.source).joinpath(cfg.data.test_dir)
     predecessor_dir = root_dir.joinpath("clustering")
     destination_dir = root_dir.joinpath(STAGE)
     destination_dir.mkdir(parents=True, exist_ok=True)
@@ -143,13 +145,12 @@ def log_feature_summary(features_in: int | list, features_out: list[str]):
 
 
 @timeit(log.info)
-def main(feature_selector=FEATURE_SELECTION_TYPE):
+@hydra.main(version_base=None, config_path="..", config_name="params")
+def main(cfg: DictConfig, feature_selector="rfecv"):
     log.debug(stage_info(stage=STAGE))
 
-    # dest_dir.mkdir(parents=True, exist_ok=True)
-    # log.debug(f"Working dir is:  {dest_dir}")
-    predecessor_dir, destination_dir, root_dir = set_destination_directory()
-    log.debug(f"Working dir is:  {destination_dir}")
+    predecessor_dir, destination_dir, root_dir = set_destination_directory(cfg=cfg)
+    # log.debug(f"Working dir is:  {destination_dir}")
     # breakpoint()
     transformed_data = pd.read_parquet(
         root_dir.joinpath("preprocessing", "transform-data.parquet")
@@ -159,14 +160,14 @@ def main(feature_selector=FEATURE_SELECTION_TYPE):
     ft = read_json(f"{predecessor_dir}/selected-features-varclushi.json")
     features_ = ft["selected-features-varclushi"]
 
-    logreg = LogisticRegression(max_iter=MAX_ITER_LOGREG)
+    logreg = LogisticRegression(max_iter=cfg.featurization.max_iter)
     pipeline_params = RFECVParameters()
 
     feat_selection_pipeline = set_feature_selection(
         estimator=logreg, params=pipeline_params
     )
     feat_selection_pipeline.fit(
-        X=transformed_data[features_], y=transformed_data[TARGET].astype("int8")
+        X=transformed_data[features_], y=transformed_data[cfg.data.target].astype("int8")
     )
 
     log_feature_summary(
