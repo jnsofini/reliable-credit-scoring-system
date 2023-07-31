@@ -8,10 +8,10 @@ I this part of the project we demonstrate the process of pulling data from vario
 
 Our choice of feature store is Hopswork feature store. It provide a freemium plan with a generous  enough space for us to experiment with our project at no cost. The first step is to set a [Hopswork account](https://www.hopsworks.ai/) and get an feature store api key. The account information are then added in the `.env` file.
 
-To run the code we need to set the python environment as [explained below](#Install-for-Development).
+To run the code we need to set the python environment as [explained below](#Development-environment-setup).
 
 
-## Install for Development
+## Development environment setup
 
 The files to set this environment are `pyproject.toml` and `poetry.lock`. Navigate to the `feature-pipeline` directory and then setup the virtual environment via:
 
