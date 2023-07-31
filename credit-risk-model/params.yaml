@@ -15,9 +15,14 @@ datasplit: #Specifies params used to split data
 
 preprocessing:
   stage: preprocessing
+  process: automatic
   auto_bins: True 
   binning_transformer: binning-transformer.pkl
   transformed_data: transform-data.parquet
+  min_prebin_size: 10e-5
+  selection_strategy: 
+    iv: 
+      min: 0.1
 
 cluster: # Feature clustering
   stage: clustering
@@ -31,6 +36,8 @@ cluster: # Feature clustering
 
 iv_criteria:
   min: 0.1
+  t: {"iv":{"min": 0.1}}
+
 
 data:
   target: RiskPerformance
