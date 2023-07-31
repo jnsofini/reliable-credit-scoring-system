@@ -20,15 +20,15 @@ from varclushi import VarClusHi
 
 TARGET: str = "RiskPerformance"
 
-DATA_DIR = "data"
+# DATA_DIR = "data"
 STAGE = "clustering"
-test_dir = 'dev-test'
+# test_dir = 'dev-test'
 
 FILE_DIR = Path(__file__).parent
 
 
-def set_destination_directory():
-    root_dir = Path(DATA_DIR).joinpath(test_dir)
+def set_destination_directory(cfg:DictConfig):
+    root_dir = Path(cfg.data.source).joinpath(cfg.data.test_dir)
     predecessor_dir = root_dir.joinpath("preprocessing")
     destination_dir = root_dir.joinpath(STAGE)
     destination_dir.mkdir(parents=True, exist_ok=True)
@@ -86,7 +86,7 @@ def main(cfg: DictConfig):
     log.info(stage_info(stage=STAGE))
     # start_time = time.perf_counter()
     # Define storage for data
-    predecessor_dir, destination_dir, root_dir = set_destination_directory()
+    predecessor_dir, destination_dir, root_dir = set_destination_directory(cfg)
 
     log.info(f"Working dir is:  {destination_dir}")
 
@@ -98,7 +98,7 @@ def main(cfg: DictConfig):
     transformed_data = pd.read_parquet(
         path=predecessor_dir.joinpath("transform-data.parquet")
     )
-    transformed_data.drop(columns=TARGET, inplace=True)
+    transformed_data.drop(columns=cfg.data.target, inplace=True)
 
     # Clustering
     clusters = Cluster(max_eigen=cfg.cluster.max_eigen_split)
