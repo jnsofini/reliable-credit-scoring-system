@@ -33,6 +33,9 @@ cluster: # Feature clustering
   # iv_table_path comes from binning
   iv_table_path: 
 
+featurization:
+  algorithm: rfecv
+  max_iter: 1000
 
 iv_criteria:
   min: 0.1
