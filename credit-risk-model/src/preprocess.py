@@ -15,7 +15,7 @@ from pathlib import Path
 
 import hydra
 import pandas as pd
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 from optbinning import BinningProcess
 from sklearn.feature_selection import VarianceThreshold
 
@@ -130,6 +130,7 @@ def save_artifacts(
 @hydra.main(version_base=None, config_path="..", config_name="params")
 def main(cfg: DictConfig, use_manual_bins=False, binning_fit_params=None):
     logging.info(stage_info(STAGE))
+    OmegaConf.resolve(cfg)
 
     predecessor_dir, destination_dir, root_dir = set_destination_directory(cfg)
     # Get raw data and split into X and y
@@ -153,7 +154,7 @@ def main(cfg: DictConfig, use_manual_bins=False, binning_fit_params=None):
         binning_fit_params=binning_fit_params,
         # This is the prebin size that should make the feature set usable
         min_prebin_size=10e-5,
-        special_codes=[-9, -8, -7]#cfg.data.special_codes,
+        special_codes=list(cfg.data.special_codes),
     )
     binning_process.fit(X, y)
 
