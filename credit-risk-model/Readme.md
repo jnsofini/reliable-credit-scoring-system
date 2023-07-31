@@ -1,23 +1,61 @@
-# Description
+# Model Traininig Pipeline
 
-This folder contains code that is working and was used as a final pipeline to build a risk scoring model. There are various steps followed in the pipeline which includes
+In the model training pipeline, we carry out two main task; feature reduction and model development. The model we are developing is a scoring model which scores customers with a risk rating. It also demands a lot of explainablity so this inspires the choice models used.
 
-- [Data ingestion](src/ingest.py): In this stage,  the data is gathered from sources.
-- [Separation](src/test_train_split.py): In this step, we randomly partitions the data to ensure that the model's performance can be evaluated on unseen data. The function used **train_test_split** takes a dataset and divides it into two distinct sets - a training set and a testing set. The training set is used to train the machine learning model. It contains input features and their corresponding target labels, allowing the model to learn patterns and relationships in the data. The testing set is used to evaluate the model's performance. It contains input features but not their corresponding target labels. Instead, the model makes predictions on this set, and the predictions are compared with the actual target labels to assess the model's accuracy and generalization ability.
 
-    By using separate training and testing sets, train_test_split helps to avoid overfitting. Overfitting occurs when a model performs well on the training data but poorly on unseen data, indicating that it has memorized the training set rather than learning the underlying patterns.
+## Development environment setup
 
-    The testing set allows us to estimate how well the model will perform on new, unseen data. This evaluation helps in selecting the best model, tuning hyperparameters, and making informed decisions about its deployment and usage in real-world scenarios.
+The files to set this environment are `Pipfile` and `Pipfile.lock`. Navigate to the project root directory and then setup the virtual environment via `pipenv`:
 
-- [Preprocessing](src/preprocess.py): This steps involves a few processes. It holds data transformation as well as dimensionality reduction to improve the efficiency of the learning process. In the feature reduction part we aim to remove the feature with negligeable variation using **VarianceThreshold**. `VarianceThreshold` is a feature selection method in machine learning that removes features (columns) with low variance. It is commonly used to eliminate features that have little or no variation across the dataset, as these features may not contribute much to the learning process or may even add noise to the model. The basic idea behind `VarianceThreshold` is that if a feature has very low variance, it means that the majority of its values are the same or very close, which makes it less informative and less useful for distinguishing between different instances in the dataset. On the other hand, features with higher variance tend to exhibit more diverse patterns and carry more relevant information for the learning algorithm.
-
-    In the second part of the step, we preprocess the data including transforming every feature to ordinal data using WOE. The package of choice is OptBinning. OptBinning is a powerful Python library that provides advanced binning techniques for data preprocessing and feature engineering. One of its key components is the **BinningProcess** module, which offers a wide range of binning algorithms, including optimal binning methods such as Recursive Partitioning and Dynamic Programming. With OptBinning's BinningProcess, you can efficiently transform continuous variables into categorical bins, improving the interpretability and predictive power of your models. You can handle data preprocessing challenges, such as reducing noise, handling outliers, and capturing non-linear relationships, ultimately enhancing the accuracy and interpretability of your models.
-- [Clustering](src/clustering.py): This is a feature reduction stage. The features are clustered together based on their correlation. The output is a list of automatically selected features. The feature with the highes informational value and the one at the center of the cluster are selected. The package of choice is **Varclushi**. Varclushi is a Python package designed for feature selection and dimensionality reduction. It implements a variant of the clustering-based feature selection method called "variance component analysis." With Varclushi, you can identify and eliminate redundant or irrelevant features from your dataset, leading to more efficient and interpretable models. By leveraging clustering and statistical techniques, Varclushi helps uncover the most informative features and improve overall model performance.
-- [Feature selection](src/featurization.py): In the feature selection stage, a further smaller number of feature are further selected to provide a parsimonous model. The module of choice is Scikit-learn **RFECV (Recursive Feature Elimination with Cross-Validation)**. RFECV is a feature selection technique in sklearn that recursively eliminates less important features by repeatedly training models and selecting the optimal subset of features based on cross-validation performance. RFECV helps improve model interpretability, reduce overfitting, and enhance prediction accuracy by automatically selecting the most relevant features for the task at hand.
-- [Model](src/scorecard.py): The model stage involves building a scorecard with the final features. The scorecard is a classification model that is converted into a score so that it outputs a range of scores. The algorithms and packages will be scikit-learn **LogisticRegression** in combination with OptBinning Scorecard. LogisticRegression is a classification algorithm in sklearn that is widely used for binary and multiclass classification problems. It fits a logistic regression model to the training data and predicts the probability of class membership for new observations. LogisticRegression is known for its simplicity, interpretability, and effectiveness in various domains. It is particularly useful when dealing with binary classification tasks, where the goal is to predict the probability of an instance belonging to a particular class. The **Scorecard** module in OptBinning allows you to develop scorecards by combining binning and logistic regression, facilitating credit risk modeling and scoring applications.
-
-To run each of the stage, activate the environment in Chapter 5, and run
-
-```py
-python src/stage-code.py
+```shell
+pipenv install --dev
+pipenv shell (to activate the enviroment)
 ```
+
+The `--dev` flag is for development purpise. The packages needed to run in production are a small subset of the files needed in development.
+
+## Data reduction
+
+The data reduction steps includes the follwing
+
+- [Separation](src/test_train_split.py): In this step, we strategically partitions the data to ensure that the model's performance can be evaluated on unseen data. By using separate training and testing sets, train_test_split helps to avoid overfitting.  The testing set allows us to estimate how well the model will perform on new, unseen data. This evaluation helps in selecting the best model, tuning hyperparameters, and making informed decisions about its deployment and usage in real-world scenarios.
+
+- [Preprocessing](src/preprocess.py): This steps involves a few processes. It holds data transformation as well as dimensionality reduction to improve the efficiency of the learning process. In the feature reduction part we aim to remove the feature with negligeable variation using **VarianceThreshold**.
+
+    In the second part of the step, we preprocess the data including transforming every feature to ordinal data using WOE. With `OptBinning's` `BinningProcess`, we efficiently transform continuous variables into categorical bins, improving the interpretability and predictive power of your models. Run this stage with the following command
+
+    ```python
+    python -m src.preprocess
+    ```
+
+- [Clustering](src/clustering.py): In this feature reduction stage, the features are clustered together based on their correlation using 'varclushi' library. The feature with the highest informational value and the one at the center of the cluster are selected. With Varclushi, you can identify and eliminate redundant or irrelevant features from your dataset, leading to more efficient and interpretable models. Run this stage with the following command
+
+    ```python
+    python -m src.clustering
+    ```
+
+- [Feature selection](src/featurization.py): In the feature selection stage, a further smaller number of feature are further selected (using `RFECV`, Recursive Feature Elimination with Cross-Validation) to provide a parsimonous model. There are other techniques which we tried but didn't use in the final pipeline, including sequetial feature selection. Run this stage with the following command
+
+    ```python
+    python -m src.featurization
+    ```
+
+Alternatively, all these sections can be ran via a make file via
+
+```shell
+make datareduction
+```
+
+## [Model](src/scorecard.py)
+
+The model part involves three states. These stages are 
+
+- Binnin stage to transform the data to WOE
+- A estimatore stage where an algorithm is picked and optimized. The algorithms and packages will be scikit-learn `LogisticRegression` that is widely used for binary and multiclass classification problems.
+- The scorecarding stage where the probabilities from the model prediction are used to create a range of scores which rank order risk. The `Scorecard` module in OptBinning allows you to develop scorecards by combining binning, logistic regression and scoring, facilitating credit risk modeling and scoring applications.
+
+    Run this stage with the following command
+
+    ```python
+    python -m src.scorecard
+    ```
