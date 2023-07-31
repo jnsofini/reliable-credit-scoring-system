@@ -1,4 +1,4 @@
-
+# File used for the project
 # Test-train split of data
 datasplit: #Specifies params used to split data
   dest_dir: 
@@ -16,6 +16,8 @@ datasplit: #Specifies params used to split data
 preprocessing:
   stage: preprocessing
   auto_bins: True 
+  binning_transformer: binning-transformer.pkl
+  transformed_data: transform-data.parquet
 
 cluster: # Feature clustering
   stage: clustering
@@ -29,3 +31,14 @@ cluster: # Feature clustering
 
 iv_criteria:
   min: 0.1
+
+data:
+  target: RiskPerformance
+  source: data
+  test_dir: uat
+  missing: [-99_000_000]
+  special_codes: [-9, -8, -7]
+  x_train: X_train.parquet
+  x_test: X_val.parquet
+  y_train: y_train.parquet
+  y_test: y_val.parquet

@@ -13,7 +13,9 @@ import warnings
 from dataclasses import dataclass
 from pathlib import Path
 
+import hydra
 import pandas as pd
+from omegaconf import DictConfig, OmegaConf
 from optbinning import BinningProcess
 from sklearn.feature_selection import VarianceThreshold
 
@@ -27,16 +29,16 @@ logging.basicConfig(
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-TARGET: str = "RiskPerformance"
+# TARGET: str = "RiskPerformance"
 SAVE_BINNING_OBJ = True
-BINNING_TRANSFORM_PATH = "binning-transformer.pkl"
-TRANSFORM_DATA_PATH = "transform-data.parquet"
-SPECIAL_CODES = [-9, -8, -7]
-MISSING = [-99_000_000]
+# BINNING_TRANSFORM_PATH = "binning-transformer.pkl"
+# TRANSFORM_DATA_PATH = "transform-data.parquet"
+# SPECIAL_CODES = [-9, -8, -7]
+# MISSING = [-99_000_000]
 
-DATA_DIR = "data"
+# DATA_DIR = "data"
 STAGE = "preprocessing"
-test_dir = 'dev-test'
+# test_dir = 'dev-test'
 # dest_dir = Path(DATA_DIR).joinpath(test_dir, STAGE)
 
 FILE_DIR = Path(__file__).parent
@@ -98,8 +100,8 @@ def _get_binning_features(df, *, target=None, features=None):
 #     return msg
 
 
-def set_destination_directory():
-    root_dir = Path(DATA_DIR).joinpath(test_dir)
+def set_destination_directory(cfg:DictConfig):
+    root_dir = Path(cfg.data.source).joinpath(cfg.data.test_dir)
     predecessor_dir = None
     destination_dir = root_dir.joinpath(STAGE)
     destination_dir.mkdir(parents=True, exist_ok=True)
@@ -113,27 +115,30 @@ def save_artifacts(
     binning_process: BinningProcess,
     preprocess_data: pd.DataFrame,
     dest_dir: Path,
+    cfg:DictConfig
 ):
     iv_table_name = "manual_iv_table" if use_manual_bins else "auto_iv_table"
     iv_table = binning_process.summary()
     iv_table.to_csv(dest_dir.joinpath(f"{iv_table_name}.csv"))
-    preprocess_data.to_parquet(dest_dir.joinpath(TRANSFORM_DATA_PATH))
+    preprocess_data.to_parquet(dest_dir.joinpath(cfg.preprocessing.transformed_data))
 
     if SAVE_BINNING_OBJ:
-        binning_process.save(str(dest_dir.joinpath(BINNING_TRANSFORM_PATH)))
+        binning_process.save(str(dest_dir.joinpath(cfg.preprocessing.binning_transformer)))
 
 
 @timeit(logging.info)
-def main(use_manual_bins=False, binning_fit_params=None):
+@hydra.main(version_base=None, config_path="..", config_name="params")
+def main(cfg: DictConfig, use_manual_bins=False, binning_fit_params=None):
     logging.info(stage_info(STAGE))
+    OmegaConf.resolve(cfg)
 
-    predecessor_dir, destination_dir, root_dir = set_destination_directory()
+    predecessor_dir, destination_dir, root_dir = set_destination_directory(cfg)
     # Get raw data and split into X and y
-    if binning_fit_params is None:
+    if cfg.preprocessing.process == "manual":
         binning_fit_params = read_json(FILE_DIR / "configs/binning-params.json")
 
-    x_train = pd.read_parquet(path=os.path.join(DATA_DIR, "X_train.parquet"))
-    y_train = pd.read_parquet(path=os.path.join(DATA_DIR, "y_train.parquet"))
+    x_train = pd.read_parquet(path=os.path.join(cfg.data.source, "X_train.parquet"))
+    y_train = pd.read_parquet(path=os.path.join(cfg.data.source, "y_train.parquet"))
 
     logging.debug("Using automatic bins")
     X = remove_feature_with_low_variance(x_train)
@@ -144,20 +149,20 @@ def main(use_manual_bins=False, binning_fit_params=None):
     binning_process = BinningProcess(
         categorical_variables=categorical_features,
         variable_names=binning_features,
-        # Uncomment the below line and pass a binning fit parameter
-        # to stop doing automatic binning
+        # Below params are manual
         binning_fit_params=binning_fit_params,
-        # This is the prebin size that should make the feature set usable
-        min_prebin_size=10e-5,
-        special_codes=SPECIAL_CODES,
+        min_prebin_size=cfg.preprocessing.min_prebin_size,
+        special_codes=list(cfg.data.special_codes),
+        selection_criteria={"iv":{"min": cfg.preprocessing.selection_strategy.iv.min}}
     )
     binning_process.fit(X, y)
 
     preprocessed_data = binning_process.transform(X, metric="woe")
-    preprocessed_data[TARGET] = y
+    preprocessed_data[cfg.data.target] = y
 
     # save binning process and table
     save_artifacts(
+        cfg=cfg,
         use_manual_bins=use_manual_bins,
         binning_process=binning_process,
         preprocess_data=preprocessed_data,

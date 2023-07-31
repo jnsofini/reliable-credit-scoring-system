@@ -1,6 +1,6 @@
 """ 
 Run from the credit-risk-model directory, with pipenv from reliable-credit-scoring-system
-python -m src.Featurization 
+python -m src.featurization 
 """
 
 import json
