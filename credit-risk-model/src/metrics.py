@@ -52,15 +52,15 @@ def formatted_metrics(y, y_pred):
     gini_ = gini(y, y_pred)
     ks_ = ks(y, y_pred)
 
-    return {"auc": f"{auc_:.2%}", "gini": f"{gini_:.2%}", "KS": f"{ks_:.2%}"}
+    return {"auc": f"{float(auc_):.2%}", "gini": f"{float(gini_):.2%}", "KS": f"{float(ks_):.2%}"}
 
 
 def get_population_dist(y):
     pop_count = len(y)
     default_count = sum(y)
     return {
-        "Num of observations": pop_count,
-        "Num of non-events": pop_count - default_count,
-        "Num of events": default_count,
-        "Default Rate": f"{(default_count/pop_count):.2%}",
+        "Num of observations": int(pop_count),
+        "Num of non-events": int(pop_count - default_count),
+        "Num of events": int(default_count),
+        "Default Rate": f"{float(default_count/pop_count):.2%}",
     }
