@@ -1,1 +1,1 @@
-from .ClusterClass import Cluster
+from .cluster import Cluster
