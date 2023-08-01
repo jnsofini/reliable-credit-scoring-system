@@ -111,37 +111,10 @@ def get_scorecard_obj(process, *, method=None):
         # }
     )
 
-
-def scorecard_pipeline(data, selected_features, target=TARGET, binning_fit_params=None):
-    binning_process = setup_binning(
-        data[selected_features],
-        target=target,
-        features=selected_features,
-        binning_fit_params=binning_fit_params,
-    )
-
-    # method = LogisticRegressionCV(
-    #     Cs=3,
-    #     cv=5,
-    #     penalty="l1",
-    #     scoring="roc_auc",
-    #     solver="liblinear",
-    #     max_iter=MAX_ITER_LOGREG,
-    #     random_state=42,
-    # )
-    method = LogisticRegression(C=3, max_iter=MAX_ITER_LOGREG, random_state=42)
-
-    scorecard_ = scorecard(binning_process, method=method)
-
-    X = data[selected_features]
-    y = data[target].astype("int8")
-
-    return scorecard_.fit(X, y)
-
 def get_binning_params(binning_type, selected_features):
     if binning_type == "manual":
         binning_fit_params = read_json(FILE_DIR / "configs/binning-params.json")
-        log.info("Using manua bins")
+        log.info("Using manual bins")
     else:
         binning_fit_params = {}
         log.info("Using automatic bins")
@@ -203,14 +176,14 @@ def main(
     scorecard_model.save(str(destination_dir.joinpath(f"model-{feature_selector}.pkl")))
 
     table = scorecard_model.table(style="detailed").round(3)
-    print(table.groupby("Variable")["IV"].sum().sort_values(ascending=True))
+    log.debug(table.groupby("Variable")["IV"].sum().sort_values(ascending=True))
     table.to_csv(destination_dir.joinpath(f"model-{feature_selector}.csv"))
 
     # # do prediction
     y_pred = scorecard_model.predict_proba(X_train[scorecard_features])[:, 1]
     auc_gini_ks = formatted_metrics(y=y_train, y_pred=y_pred)
     dist_stats = get_population_dist(y=y_train)
-    print({"metrics": auc_gini_ks, "dist": dist_stats})
+    log.info(json.dumps({"metrics": auc_gini_ks, "dist": dist_stats}, indent=6))
     save_dict_to_json(
         filename=destination_dir.joinpath(f"summary-stats-{feature_selector}.json"),
         default=str,
