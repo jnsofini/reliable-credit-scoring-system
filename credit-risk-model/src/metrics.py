@@ -10,6 +10,8 @@ def kolmogorov_smirnov(y, y_pred):
         Array with the target labels.
     y_pred : array-like, shape = (n_samples,)
         Array with predicted probabilities.
+    Returns:
+        float: Summy count stats
     """
 
     n_samples = y.shape[0]
@@ -34,20 +36,65 @@ def kolmogorov_smirnov(y, y_pred):
 
 
 def ks(y, y_pred):
+    """Compute the Kolmogorov-Smirnov (KS).
+    Parameters
+    ----------
+    y : array-like, shape = (n_samples,)
+        Array with the target labels.
+    y_pred : array-like, shape = (n_samples,)
+        Array with predicted probabilities.
+    Returns:
+        float: Summy count stats
+    """
     return kolmogorov_smirnov(y, y_pred)
 
 
 def gini(y, y_pred):
+    """Compute the Gini using the roc_auc_score
+    Parameters
+    ----------
+    y : array-like, shape = (n_samples,)
+        Array with the target labels.
+    y_pred : array-like, shape = (n_samples,)
+        Array with predicted probabilities.
+    
+    Returns:
+        float: Summy count stats
+    """
     auroc = roc_auc_score(y, y_pred)
     return auroc * 2 - 1
 
 
 def auc(y, y_pred):
+    """Compute the AUC.
+    Parameters
+    ----------
+    y : array-like, shape = (n_samples,)
+        Array with the target labels.
+    y_pred : array-like, shape = (n_samples,)
+        Array with predicted probabilities.
+    """
     return roc_auc_score(y, y_pred)
 
 
 def formatted_metrics(y, y_pred):
-    """Gets the fit stats used in out model building"""
+    """Gets the fit stats used in the model building.
+
+    These statistics includes:
+        - auc
+        - gini
+        - ks
+
+    Parameters
+    ----------
+    y : array-like, shape = (n_samples,)
+        Array with the target labels.
+    y_pred : array-like, shape = (n_samples,)
+        Array with predicted probabilities.
+
+    Returns:
+        dict: Summy count stats
+    """
     auc_ = auc(y, y_pred)
     gini_ = gini(y, y_pred)
     ks_ = ks(y, y_pred)
@@ -60,6 +107,20 @@ def formatted_metrics(y, y_pred):
 
 
 def get_population_dist(y):
+    """Takes an array and return stats.
+
+    The stats include
+     - number of observations
+     - number of events
+     - number of non events
+     - ratio of events to non-events
+
+    Args:
+        y (array | list): Events and non events
+
+    Returns:
+        dict: Summy count stats
+    """
     pop_count = len(y)
     default_count = sum(y)
     return {
