@@ -22,10 +22,10 @@ from optbinning.scorecard import plot_auc_roc, plot_cap, plot_ks
 from sklearn.linear_model import LogisticRegression  # , LogisticRegressionCV
 from src.metrics import formatted_metrics, get_population_dist
 from src.tools import read_json, save_dict_to_json, stage_info, timeit
-from src.util import (  # ,load_data
-    # _get_binning_features,
-    _get_categorical_features,
-)
+# from src.util import (  # ,load_data
+#     # _get_binning_features,
+#     _get_categorical_features,
+# )
 
 # # Set MLFLOW
 # db = (
@@ -142,6 +142,12 @@ def get_binning_params(binning_type: str, selected_features: list):
         if key in selected_features
     }
 
+def _get_categorical_features(df):
+    categorical_variables = df.select_dtypes(
+        include=["object", "category", "string"]
+    ).columns.values
+
+    return categorical_variables
 
 @timeit(log.info)
 @hydra.main(version_base=None, config_path="..", config_name="params")
