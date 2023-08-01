@@ -1,3 +1,7 @@
+""" 
+Module to handle clustering.
+"""
+# pylint: disable=attribute-defined-outside-init
 import json
 import logging as log
 from pathlib import Path
@@ -11,9 +15,11 @@ class Cluster(BaseEstimator, TransformerMixin):
     """
     Clustering Transformer for Feature Selection.
 
-    This transformer clusters features based on their similarity and selects one feature from each cluster
-    based on the lowest RS Ratio. If available, the feature with the highest IV is also included.
-    It uses VarClusHi for clustering, a library that functions similarly to the SAS version.
+    This transformer clusters features based on their similarity 
+    and selects one feature from each cluster based on the lowest 
+    RS Ratio. If available, the feature with the highest IV is 
+    also included. It uses VarClusHi for clustering, a library 
+    that functions similarly to the SAS version.
     """
 
     def __init__(self, max_eigen=1, maxclus=None) -> None:
@@ -27,21 +33,21 @@ class Cluster(BaseEstimator, TransformerMixin):
         self.max_eigen = max_eigen
         self.maxclus = maxclus
 
-    def fit(self, x, y=None):
+    def fit(self, x_data, y_data=None): # pylint: disable=unused-argument
         """
         Fit the Cluster transformer to the data.
 
         Parameters:
-            x (pd.DataFrame): Input data.
-            y: Ignored.
+            x_data (pd.DataFrame): Input data.
+            y_data: Ignored.
 
         Returns:
             self: Fitted Cluster transformer object.
         """
-        self.clusters = VarClusHi(df=x, maxeigval2=self.max_eigen, maxclus=self.maxclus)
+        self.clusters = VarClusHi(df=x_data, maxeigval2=self.max_eigen, maxclus=self.maxclus)
         return self
 
-    def transform(self, x):
+    def transform(self, x_data):
         """
         Transform the input data based on feature selection.
 
@@ -65,7 +71,7 @@ class Cluster(BaseEstimator, TransformerMixin):
         )
         Path("data/pipeline").mkdir(parents=True, exist_ok=True)
         cluster_table.to_csv("data/pipeline/cluster-iv-table.csv")
-        return x[self.selected_features]
+        return x_data[self.selected_features]
 
     @staticmethod
     def _indicated_selected(table, selected, features="Variable"):
@@ -157,5 +163,5 @@ class Cluster(BaseEstimator, TransformerMixin):
             data (dict): Data to be saved.
             path (str): File path for saving the data.
         """
-        with open(path, mode="w", encoding="utf-8") as f:
-            json.dump(data, f, indent=6)
+        with open(path, mode="w", encoding="utf-8") as fhandle:
+            json.dump(data, fhandle, indent=6)
