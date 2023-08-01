@@ -18,3 +18,7 @@ clusters:
 
 scorecard:
 	python -m src.scorecard 
+
+data-reduction: preprocess featurization clusters
+
+model-pipeline: data-reduction scorecard
