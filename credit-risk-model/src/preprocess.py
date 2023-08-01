@@ -100,7 +100,7 @@ def _get_binning_features(df, *, target=None, features=None):
 #     return msg
 
 
-def set_destination_directory(cfg:DictConfig):
+def set_destination_directory(cfg: DictConfig):
     root_dir = Path(cfg.data.source).joinpath(cfg.data.test_dir)
     predecessor_dir = None
     destination_dir = root_dir.joinpath(STAGE)
@@ -115,7 +115,7 @@ def save_artifacts(
     binning_process: BinningProcess,
     preprocess_data: pd.DataFrame,
     dest_dir: Path,
-    cfg:DictConfig
+    cfg: DictConfig,
 ):
     iv_table_name = "manual_iv_table" if use_manual_bins else "auto_iv_table"
     iv_table = binning_process.summary()
@@ -123,7 +123,9 @@ def save_artifacts(
     preprocess_data.to_parquet(dest_dir.joinpath(cfg.preprocessing.transformed_data))
 
     if SAVE_BINNING_OBJ:
-        binning_process.save(str(dest_dir.joinpath(cfg.preprocessing.binning_transformer)))
+        binning_process.save(
+            str(dest_dir.joinpath(cfg.preprocessing.binning_transformer))
+        )
 
 
 @timeit(logging.info)
@@ -153,7 +155,7 @@ def main(cfg: DictConfig, use_manual_bins=False, binning_fit_params=None):
         binning_fit_params=binning_fit_params,
         min_prebin_size=cfg.preprocessing.min_prebin_size,
         special_codes=list(cfg.data.special_codes),
-        selection_criteria={"iv":{"min": cfg.preprocessing.selection_strategy.iv.min}}
+        selection_criteria={"iv": {"min": cfg.preprocessing.selection_strategy.iv.min}},
     )
     binning_process.fit(X, y)
 

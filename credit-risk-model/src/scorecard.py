@@ -12,9 +12,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import hydra
+import mlflow
 import pandas as pd
 from omegaconf import DictConfig
-import mlflow
 from optbinning import BinningProcess, Scorecard
 from optbinning.scorecard import plot_auc_roc, plot_cap, plot_ks
 from sklearn.linear_model import LogisticRegression  # , LogisticRegressionCV
@@ -58,7 +58,7 @@ FILE_DIR = Path(__file__).parent
 log.basicConfig(format='%(levelname)s:%(message)s', encoding='utf-8', level=log.DEBUG)
 
 
-def set_destination_directory(cfg:DictConfig):
+def set_destination_directory(cfg: DictConfig):
     root_dir = Path(cfg.data.source).joinpath(cfg.data.test_dir)
     predecessor_dir = root_dir.joinpath("featurization")
     destination_dir = root_dir.joinpath(STAGE)
@@ -111,6 +111,7 @@ def get_scorecard_obj(process, *, method=None):
         # }
     )
 
+
 def get_binning_params(binning_type, selected_features):
     if binning_type == "manual":
         binning_fit_params = read_json(FILE_DIR / "configs/binning-params.json")
@@ -123,7 +124,8 @@ def get_binning_params(binning_type, selected_features):
         key: value
         for key, value in binning_fit_params.items()
         if key in selected_features
-        }
+    }
+
 
 @timeit(log.info)
 @hydra.main(version_base=None, config_path="..", config_name="params")
@@ -141,7 +143,10 @@ def main(
         path=predecessor_dir.joinpath(f"selected-features-{feature_selector}.json")
     )
     scorecard_features = feature_selection_file[f"selected-features-{feature_selector}"]
-    binning_fit_params = get_binning_params(binning_type=cfg.scorecard.estimator.process, selected_features=scorecard_features)
+    binning_fit_params = get_binning_params(
+        binning_type=cfg.scorecard.estimator.process,
+        selected_features=scorecard_features,
+    )
 
     X_train = pd.read_parquet(os.path.join(cfg.data.source, "X_train.parquet"))
     X_train = X_train[scorecard_features]
@@ -157,7 +162,9 @@ def main(
         special_codes=list(cfg.data.special_codes),
     )
 
-    estimator = LogisticRegression(C=3, max_iter=cfg.scorecard.estimator.max_iter, random_state=cfg.pipeline.seed)
+    estimator = LogisticRegression(
+        C=3, max_iter=cfg.scorecard.estimator.max_iter, random_state=cfg.pipeline.seed
+    )
     scorecard_model = get_scorecard_obj(process=binning_process, method=estimator)
     scorecard_model.fit(X_train, y_train)
 
