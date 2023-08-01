@@ -37,6 +37,12 @@ featurization:
   algorithm: rfecv
   max_iter: 1000
 
+scorecard:
+  estimator: 
+    alorithm: LogisticRegression
+    max_iter: 1000
+    process: manual
+
 iv_criteria:
   min: 0.1
   t: {"iv":{"min": 0.1}}
@@ -52,3 +58,6 @@ data:
   x_test: X_val.parquet
   y_train: y_train.parquet
   y_test: y_val.parquet
+
+pipeline:
+  seed: 42
