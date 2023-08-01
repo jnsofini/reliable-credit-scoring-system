@@ -120,7 +120,7 @@ def set_feature_selection(
     return feature_selector
 
 
-def set_destination_directory(cfg:DictConfig):
+def set_destination_directory(cfg: DictConfig):
     root_dir = Path(cfg.data.source).joinpath(cfg.data.test_dir)
     predecessor_dir = root_dir.joinpath("clustering")
     destination_dir = root_dir.joinpath(STAGE)
@@ -167,7 +167,8 @@ def main(cfg: DictConfig, feature_selector="rfecv"):
         estimator=logreg, params=pipeline_params
     )
     feat_selection_pipeline.fit(
-        X=transformed_data[features_], y=transformed_data[cfg.data.target].astype("int8")
+        X=transformed_data[features_],
+        y=transformed_data[cfg.data.target].astype("int8"),
     )
 
     log_feature_summary(

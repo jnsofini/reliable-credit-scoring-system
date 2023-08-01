@@ -5,12 +5,12 @@ This script performs the preprocessing of the data used to build the model.
 
 python -m src.preprocess
 """
-import json
+# import json
 import logging
 import os
-import time
+# import time
 import warnings
-from dataclasses import dataclass
+# from dataclasses import dataclass
 from pathlib import Path
 
 import hydra
@@ -20,7 +20,12 @@ from optbinning import BinningProcess
 from sklearn.feature_selection import VarianceThreshold
 
 # from src import config
-from src.tools import read_json, save_dict_to_json, stage_info, timeit
+from src.tools import (
+    read_json,
+    # save_dict_to_json,
+    stage_info,
+    timeit,
+    )
 
 # logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
 logging.basicConfig(
@@ -44,31 +49,50 @@ STAGE = "preprocessing"
 FILE_DIR = Path(__file__).parent
 
 
-def _remove_feature(df: pd.DataFrame, columns_to_drop: str | list[str] | None = None):
+def _remove_feature(frame: pd.DataFrame, columns_to_drop: str | list[str] | None = None):
     if columns_to_drop is None:
-        return df
+        return frame
     if isinstance(columns_to_drop, str):
         columns_to_drop = [columns_to_drop]
 
-    columns_to_drop = list(set(columns_to_drop).intersection(set(df.columns.values)))
-    return df.drop(columns=columns_to_drop)
+    columns_to_drop = list(set(columns_to_drop).intersection(set(frame.columns.values)))
+    return frame.drop(columns=columns_to_drop)
 
 
-def remove_feature_with_low_variance(df):
+def remove_feature_with_low_variance(frame: pd.DataFrame) -> pd.DataFrame:
+    """Removes features with no variance.
+
+    Use Variance to remove unused features.
+
+    Args:
+        frame (pd.DataFrame): Data to removed features with low variance.
+
+    Returns:
+        pd.DataFrame: Reduced data.
+    """
     var_reductor = VarianceThreshold().set_output(transform="pandas")
-    data_ = var_reductor.fit_transform(df)
+    data_ = var_reductor.fit_transform(frame)
     return data_
 
 
-def load_data(path, drop_cols=None):
-    df = pd.read_parquet(path)
+def load_data(path: str | Path, drop_cols: list[str] | None = None) -> pd.DataFrame:
+    """Loads data and return specific columns.
+
+    Args:
+        path (str): Path to data
+        drop_cols (List, optional): List of columns. Defaults to None.
+
+    Returns:
+        pd.DataFrame: Read data as a Dataframe
+    """
+    frame = pd.read_parquet(path)
     if drop_cols:
-        columns_to_drop = list(set(drop_cols).intersection(set(df.columns.values)))
-        return df.drop(columns=columns_to_drop)
-    return df
+        columns_to_drop = list(set(drop_cols).intersection(set(frame.columns.values)))
+        return frame.drop(columns=columns_to_drop)
+    return frame
 
 
-def _get_binning_features(df, *, target=None, features=None):
+def _get_binning_features(frame, *, target=None, features=None):
     """
     Setup the binning process for optbinning.
 
@@ -76,18 +100,18 @@ def _get_binning_features(df, *, target=None, features=None):
         binning_fit_params: fit parameters object, including splits
         features: the list of features that we are interested in
         target: the target variable
-        df (DataFrame): Dataframe containing features and a target column called 'target'
+        frame (DataFrame): Dataframe containing features and a target column called 'target'
 
     Returns: Optbinning functional to bin the data BinningProcess()
 
     """
     # Remove target if present in data
     if target:
-        df = _remove_feature(df=df, columns_to_drop=target)
+        frame = _remove_feature(frame=frame, columns_to_drop=target)
 
-    binning_features = features or df.columns.to_list()
+    binning_features = features or frame.columns.to_list()
     categorical_features = (
-        df[binning_features]
+        frame[binning_features]
         .select_dtypes(include=["object", "category", "string"])
         .columns.values
     )
@@ -100,12 +124,20 @@ def _get_binning_features(df, *, target=None, features=None):
 #     return msg
 
 
-def set_destination_directory(cfg:DictConfig):
+def set_destination_directory(cfg: DictConfig):
+    """Prepares the directories.
+
+    Args:
+        cfg (DictConfig): Configuration data
+
+    Returns:
+        list[Path]: List of directories
+    """
     root_dir = Path(cfg.data.source).joinpath(cfg.data.test_dir)
     predecessor_dir = None
     destination_dir = root_dir.joinpath(STAGE)
     destination_dir.mkdir(parents=True, exist_ok=True)
-    logging.debug(f"Working dir is:  {destination_dir}")
+    logging.debug(f"Working dir is:  {destination_dir}") # pylint: disable=logging-fstring-interpolation
 
     return predecessor_dir, destination_dir, root_dir
 
@@ -115,24 +147,36 @@ def save_artifacts(
     binning_process: BinningProcess,
     preprocess_data: pd.DataFrame,
     dest_dir: Path,
-    cfg:DictConfig
+    cfg: DictConfig,
 ):
+    """Save artifacts to specified directories.
+
+    Args:
+        use_manual_bins (bool): Type of bins to use
+        binning_process (BinningProcess): Optbinning binning object
+        preprocess_data (pd.DataFrame): Dataframe of transformed data
+        dest_dir (Path): Directory to save data
+        cfg (DictConfig): Configuration files
+    """
     iv_table_name = "manual_iv_table" if use_manual_bins else "auto_iv_table"
     iv_table = binning_process.summary()
     iv_table.to_csv(dest_dir.joinpath(f"{iv_table_name}.csv"))
     preprocess_data.to_parquet(dest_dir.joinpath(cfg.preprocessing.transformed_data))
 
     if SAVE_BINNING_OBJ:
-        binning_process.save(str(dest_dir.joinpath(cfg.preprocessing.binning_transformer)))
+        binning_process.save(
+            str(dest_dir.joinpath(cfg.preprocessing.binning_transformer))
+        )
 
 
 @timeit(logging.info)
 @hydra.main(version_base=None, config_path="..", config_name="params")
 def main(cfg: DictConfig, use_manual_bins=False, binning_fit_params=None):
+    """Main function that runs all processes."""
     logging.info(stage_info(STAGE))
     OmegaConf.resolve(cfg)
 
-    predecessor_dir, destination_dir, root_dir = set_destination_directory(cfg)
+    _, destination_dir, _ = set_destination_directory(cfg)
     # Get raw data and split into X and y
     if cfg.preprocessing.process == "manual":
         binning_fit_params = read_json(FILE_DIR / "configs/binning-params.json")
@@ -141,10 +185,10 @@ def main(cfg: DictConfig, use_manual_bins=False, binning_fit_params=None):
     y_train = pd.read_parquet(path=os.path.join(cfg.data.source, "y_train.parquet"))
 
     logging.debug("Using automatic bins")
-    X = remove_feature_with_low_variance(x_train)
-    y = y_train.astype("int8").values.reshape(-1)
+    x_reduced = remove_feature_with_low_variance(x_train)
+    y_train = y_train.astype("int8").values.reshape(-1)
 
-    binning_features, categorical_features = _get_binning_features(df=X)
+    binning_features, categorical_features = _get_binning_features(frame=x_reduced)
 
     binning_process = BinningProcess(
         categorical_variables=categorical_features,
@@ -153,12 +197,12 @@ def main(cfg: DictConfig, use_manual_bins=False, binning_fit_params=None):
         binning_fit_params=binning_fit_params,
         min_prebin_size=cfg.preprocessing.min_prebin_size,
         special_codes=list(cfg.data.special_codes),
-        selection_criteria={"iv":{"min": cfg.preprocessing.selection_strategy.iv.min}}
+        selection_criteria={"iv": {"min": cfg.preprocessing.selection_strategy.iv.min}},
     )
-    binning_process.fit(X, y)
+    binning_process.fit(x_reduced, y_train)
 
-    preprocessed_data = binning_process.transform(X, metric="woe")
-    preprocessed_data[cfg.data.target] = y
+    preprocessed_data = binning_process.transform(x_reduced, metric="woe")
+    preprocessed_data[cfg.data.target] = y_train
 
     # save binning process and table
     save_artifacts(
@@ -173,4 +217,4 @@ def main(cfg: DictConfig, use_manual_bins=False, binning_fit_params=None):
 
 
 if __name__ == "__main__":
-    main()
+    main() # pylint: disable=no-value-for-parameter

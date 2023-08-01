@@ -27,7 +27,7 @@ STAGE = "clustering"
 FILE_DIR = Path(__file__).parent
 
 
-def set_destination_directory(cfg:DictConfig):
+def set_destination_directory(cfg: DictConfig):
     root_dir = Path(cfg.data.source).joinpath(cfg.data.test_dir)
     predecessor_dir = root_dir.joinpath("preprocessing")
     destination_dir = root_dir.joinpath(STAGE)
