@@ -52,7 +52,11 @@ def formatted_metrics(y, y_pred):
     gini_ = gini(y, y_pred)
     ks_ = ks(y, y_pred)
 
-    return {"auc": f"{float(auc_):.2%}", "gini": f"{float(gini_):.2%}", "KS": f"{float(ks_):.2%}"}
+    return {
+        "auc": f"{float(auc_):.2%}",
+        "gini": f"{float(gini_):.2%}",
+        "KS": f"{float(ks_):.2%}",
+    }
 
 
 def get_population_dist(y):
