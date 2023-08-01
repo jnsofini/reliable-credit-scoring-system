@@ -2,10 +2,12 @@
 Run from the credit-risk-model directory, with pipenv from reliable-credit-scoring-system
 python -m src.featurization 
 """
+# pylint: disable=logging-fstring-interpolation
+# pylint: disable=too-few-public-methods
 
-import json
+# import json
 import logging as log
-import os
+# import os
 import warnings
 from dataclasses import dataclass
 from pathlib import Path
@@ -13,7 +15,7 @@ from typing import Literal
 
 import hydra
 import pandas as pd
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig#, OmegaConf
 from sklearn.feature_selection import RFECV, SequentialFeatureSelector
 from sklearn.linear_model import LogisticRegression
 from src.tools import read_json, save_dict_to_json, stage_info, timeit
@@ -40,7 +42,7 @@ log.basicConfig(format='%(levelname)s:%(message)s', encoding='utf-8', level=log.
 
 
 @dataclass
-class FeatureSelectionParameters:
+class FeatureSelectionParameters: # pylint: disable=missing-class-docstring
     selector: Literal["forward", "backward", "rfecv"] = "rfecv"
     num_feat_to_select: str | int = "auto"
     n_jobs: int = -1
@@ -55,20 +57,20 @@ class FeatureSelectionParameters:
 
 
 @dataclass
-class SequentialFeatureParameters:
+class SequentialFeatureParameters: # pylint: disable=missing-class-docstring
     direction: Literal["forward", "backward"] = "forward"
     n_features_to_select: str | int = "auto"
     n_jobs: int = -1
     scoring: str = "roc_auc"
     tol: float = 1e-3
-    cv: int | None = None
+    cv: int | None = None #pylint: disable=invalid-name
 
     def __post_init__(self):
         if self.direction == "backward":
             self.tol = -1 * self.tol
 
 
-class RFECVParameters:
+class RFECVParameters: # pylint: disable=missing-class-docstring
     min_features_to_select: int = 5
     n_jobs: int = -1
     scoring: str = "roc_auc"
@@ -76,15 +78,18 @@ class RFECVParameters:
 
 
 def _check_feature_selector(feature_selector):
+    """Validate the feature selection process."""
     if feature_selector in ["forward", "backward", "rfecv"]:
         print(f"Feature selection process: {feature_selector}")
     else:
-        NotImplemented(f"NOT Implemented Feature selection process: {feature_selector}")
+        raise NotImplementedError(f"NOT Implemented Feature selection process: {feature_selector}")
 
 
 def set_sequential_feature_selector(
-    estimator, params: SequentialFeatureParameters
-) -> SequentialFeatureSelector:
+    estimator,
+    params: SequentialFeatureParameters
+    ) -> SequentialFeatureSelector:
+    """Setup feature selection process."""
     return SequentialFeatureSelector(
         estimator=estimator,
         n_features_to_select=params.n_features_to_select,
@@ -97,6 +102,7 @@ def set_sequential_feature_selector(
 
 
 def set_rfecv_feature_selector(estimator, params: RFECVParameters) -> RFECV:
+    """Setup recursive feature selection process."""
     return RFECV(
         estimator=estimator, scoring=params.scoring, cv=params.cv, n_jobs=params.n_jobs
     )
@@ -105,6 +111,7 @@ def set_rfecv_feature_selector(estimator, params: RFECVParameters) -> RFECV:
 def set_feature_selection(
     estimator, params: SequentialFeatureParameters | RFECVParameters
 ):
+    """Decide which direction feature selection process should follow."""
     direction = getattr(params, "direction", "rfecv")
     _check_feature_selector(direction)
 
@@ -121,6 +128,14 @@ def set_feature_selection(
 
 
 def set_destination_directory(cfg: DictConfig):
+    """Prepares the directories.
+
+    Args:
+        cfg (DictConfig): Configuration data
+
+    Returns:
+        list[Path]: List of directories
+    """
     root_dir = Path(cfg.data.source).joinpath(cfg.data.test_dir)
     predecessor_dir = root_dir.joinpath("clustering")
     destination_dir = root_dir.joinpath(STAGE)
@@ -147,6 +162,7 @@ def log_feature_summary(features_in: int | list, features_out: list[str]):
 @timeit(log.info)
 @hydra.main(version_base=None, config_path="..", config_name="params")
 def main(cfg: DictConfig, feature_selector="rfecv"):
+    """Main function that runs all processes."""
     log.debug(stage_info(stage=STAGE))
 
     predecessor_dir, destination_dir, root_dir = set_destination_directory(cfg=cfg)
@@ -157,8 +173,8 @@ def main(cfg: DictConfig, feature_selector="rfecv"):
     )
 
     log.info("Using automatic bins")
-    ft = read_json(f"{predecessor_dir}/selected-features-varclushi.json")
-    features_ = ft["selected-features-varclushi"]
+    feature_selection_file = read_json(f"{predecessor_dir}/selected-features-varclushi.json")
+    features_ = feature_selection_file["selected-features-varclushi"]
 
     logreg = LogisticRegression(max_iter=cfg.featurization.max_iter)
     pipeline_params = RFECVParameters()
@@ -187,4 +203,4 @@ def main(cfg: DictConfig, feature_selector="rfecv"):
 
 
 if __name__ == "__main__":
-    main()
+    main() # pylint: disable=no-value-for-parameter
