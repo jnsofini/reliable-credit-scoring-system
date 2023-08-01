@@ -17,7 +17,7 @@ import hydra
 import pandas as pd
 from omegaconf import DictConfig
 from sklearn.feature_selection import VarianceThreshold
-from src.ClusterClass import Cluster
+from src.cluster import Cluster
 from src.tools import (
     # read_json,
     # save_dict_to_json,
