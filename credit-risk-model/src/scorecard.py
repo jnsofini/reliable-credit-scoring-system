@@ -7,11 +7,13 @@ python -m src.scorecard
 import json
 import logging as log
 import os
+
 # import time
 # from dataclasses import dataclass
 from pathlib import Path
 
 import hydra
+
 # import mlflow
 import pandas as pd
 from omegaconf import DictConfig
@@ -168,19 +170,23 @@ def main(
     y_train = pd.read_parquet(os.path.join(cfg.data.source, "y_train.parquet"))
     y_train = y_train.values.reshape(-1).astype("int8")
 
-    categorical_features = _get_categorical_features(x_train)
+    # categorical_features = _get_categorical_features(x_train)
     binning_process = BinningProcess(
-        categorical_variables=categorical_features,
+        categorical_variables=_get_categorical_features(x_train),
         variable_names=list(x_train.columns),
         binning_fit_params=binning_fit_params,
         min_prebin_size=cfg.preprocessing.min_prebin_size,
         special_codes=list(cfg.data.special_codes),
     )
 
-    estimator = LogisticRegression(
-        C=3, max_iter=cfg.scorecard.estimator.max_iter, random_state=cfg.pipeline.seed
+    scorecard_model = get_scorecard_obj(
+        process=binning_process,
+        method=LogisticRegression(
+            C=3,
+            max_iter=cfg.scorecard.estimator.max_iter,
+            random_state=cfg.pipeline.seed,
+        ),
     )
-    scorecard_model = get_scorecard_obj(process=binning_process, method=estimator)
     scorecard_model.fit(x_train, y_train)
 
     # with mlflow.start_run(run_name="Optbinning Model"):
@@ -219,4 +225,4 @@ def main(
 
 
 if __name__ == "__main__":
-    main() # pylint: disable=no-value-for-parameter
+    main()  # pylint: disable=no-value-for-parameter
