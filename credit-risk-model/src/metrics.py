@@ -133,3 +133,36 @@ def get_population_dist(y_true):
         "Num of events": int(default_count),
         "Default Rate": f"{float(default_count/pop_count):.2%}",
     }
+
+def sensivity_specifity_cutoff(y_true, y_score):
+    '''Find data-driven cut-off for classification
+
+    Cut-off is determied using Youden's index defined as sensitivity + specificity - 1.
+
+    Parameters
+    ----------
+
+    y_true : array, shape = [n_samples]
+        True binary labels.
+
+    y_score : array, shape = [n_samples]
+        Target scores, can either be probability estimates of the positive class,
+        confidence values, or non-thresholded measure of decisions (as returned by
+        “decision_function” on some classifiers).
+
+    References
+    ----------
+
+    Ewald, B. (2006). Post hoc choice of cut points introduced bias to diagnostic research.
+    Journal of clinical epidemiology, 59(8), 798-801.
+
+    Steyerberg, E.W., Van Calster, B., & Pencina, M.J. (2011). Performance measures for
+    prediction models and markers: evaluation of predictions and classifications.
+    Revista Espanola de Cardiologia (English Edition), 64(9), 788-794.
+
+    Jiménez-Valverde, A., & Lobo, J.M. (2007). Threshold criteria for conversion of probability
+    of species presence to either–or presence–absence. Acta oecologica, 31(3), 361-369.
+    '''
+    fpr, tpr, thresholds = roc_curve(y_true, y_score)
+    idx = np.argmax(tpr - fpr)
+    return thresholds[idx]
