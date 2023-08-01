@@ -2,17 +2,17 @@
 Run from the credit-risk-model directory, with pipenv from reliable-credit-scoring-system
 python -m src.scorecard 
 """
-
+# pylint: disable=logging-fstring-interpolation
 
 import json
 import logging as log
 import os
-import time
-from dataclasses import dataclass
+# import time
+# from dataclasses import dataclass
 from pathlib import Path
 
 import hydra
-import mlflow
+# import mlflow
 import pandas as pd
 from omegaconf import DictConfig
 from optbinning import BinningProcess, Scorecard
@@ -21,10 +21,8 @@ from sklearn.linear_model import LogisticRegression  # , LogisticRegressionCV
 from src.metrics import formatted_metrics, get_population_dist
 from src.tools import read_json, save_dict_to_json, stage_info, timeit
 from src.util import (  # ,load_data
-    _get_binning_features,
+    # _get_binning_features,
     _get_categorical_features,
-    scorecard,
-    setup_binning,
 )
 
 # # Set MLFLOW
@@ -59,6 +57,14 @@ log.basicConfig(format='%(levelname)s:%(message)s', encoding='utf-8', level=log.
 
 
 def set_destination_directory(cfg: DictConfig):
+    """Prepares the directories.
+
+    Args:
+        cfg (DictConfig): Configuration data
+
+    Returns:
+        list[Path]: List of directories
+    """
     root_dir = Path(cfg.data.source).joinpath(cfg.data.test_dir)
     predecessor_dir = root_dir.joinpath("featurization")
     destination_dir = root_dir.joinpath(STAGE)
@@ -68,11 +74,12 @@ def set_destination_directory(cfg: DictConfig):
     return predecessor_dir, destination_dir, root_dir
 
 
-def save_metrics_to_output(y, y_pred, base_path):
-    os.makedirs(os.path.join(base_path), exist_ok=True)
-    plot_auc_roc(y, y_pred, savefig=False, fname=f"{base_path}/auc.png")
-    plot_cap(y, y_pred, savefig=False, fname=f"{base_path}/cap.png")
-    plot_ks(y, y_pred, savefig=False, fname=f"{base_path}/ks.png")
+def save_metrics_to_output(y_true, y_pred, base_path):
+    """Calculate artifacts from predict and save them."""
+    Path(base_path).mkdir(parents=True, exist_ok=True)
+    plot_auc_roc(y_true, y_pred, savefig=False, fname=f"{base_path}/auc.png")
+    plot_cap(y_true, y_pred, savefig=False, fname=f"{base_path}/cap.png")
+    plot_ks(y_true, y_pred, savefig=False, fname=f"{base_path}/ks.png")
 
 
 def get_scorecard_obj(process, *, method=None):
@@ -112,7 +119,14 @@ def get_scorecard_obj(process, *, method=None):
     )
 
 
-def get_binning_params(binning_type, selected_features):
+def get_binning_params(binning_type: str, selected_features: list):
+    """Loads binning features are filter only those selected by feature selection.
+
+    Args:
+        binning_type (str): Type of binning.
+        selected_features (list[str]): List of features from previous process stage
+    """
+
     if binning_type == "manual":
         binning_fit_params = read_json(FILE_DIR / "configs/binning-params.json")
         log.info("Using manual bins")
@@ -134,9 +148,10 @@ def main(
     feature_selector="rfecv"
     # use_manual_bins=True,
 ):
+    """Main function that runs all processes."""
     log.debug(stage_info(stage=STAGE))
 
-    predecessor_dir, destination_dir, root_dir = set_destination_directory(cfg=cfg)
+    predecessor_dir, destination_dir, _ = set_destination_directory(cfg=cfg)
     # log.debug(f"Working dir is:  {destination_dir}")
 
     feature_selection_file = read_json(
@@ -148,15 +163,15 @@ def main(
         selected_features=scorecard_features,
     )
 
-    X_train = pd.read_parquet(os.path.join(cfg.data.source, "X_train.parquet"))
-    X_train = X_train[scorecard_features]
+    x_train = pd.read_parquet(os.path.join(cfg.data.source, "X_train.parquet"))
+    x_train = x_train[scorecard_features]
     y_train = pd.read_parquet(os.path.join(cfg.data.source, "y_train.parquet"))
     y_train = y_train.values.reshape(-1).astype("int8")
 
-    categorical_features = _get_categorical_features(X_train)
+    categorical_features = _get_categorical_features(x_train)
     binning_process = BinningProcess(
         categorical_variables=categorical_features,
-        variable_names=list(X_train.columns),
+        variable_names=list(x_train.columns),
         binning_fit_params=binning_fit_params,
         min_prebin_size=cfg.preprocessing.min_prebin_size,
         special_codes=list(cfg.data.special_codes),
@@ -166,7 +181,7 @@ def main(
         C=3, max_iter=cfg.scorecard.estimator.max_iter, random_state=cfg.pipeline.seed
     )
     scorecard_model = get_scorecard_obj(process=binning_process, method=estimator)
-    scorecard_model.fit(X_train, y_train)
+    scorecard_model.fit(x_train, y_train)
 
     # with mlflow.start_run(run_name="Optbinning Model"):
     #     # mlflow.sklearn.save_model(
@@ -187,7 +202,7 @@ def main(
     table.to_csv(destination_dir.joinpath(f"model-{feature_selector}.csv"))
 
     # # do prediction
-    y_pred = scorecard_model.predict_proba(X_train[scorecard_features])[:, 1]
+    y_pred = scorecard_model.predict_proba(x_train[scorecard_features])[:, 1]
     auc_gini_ks = formatted_metrics(y_true=y_train, y_pred=y_pred)
     dist_stats = get_population_dist(y_true=y_train)
     log.info(json.dumps({"metrics": auc_gini_ks, "dist": dist_stats}, indent=6))
@@ -204,4 +219,4 @@ def main(
 
 
 if __name__ == "__main__":
-    main()
+    main() # pylint: disable=no-value-for-parameter
