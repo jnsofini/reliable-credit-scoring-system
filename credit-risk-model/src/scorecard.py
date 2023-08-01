@@ -188,8 +188,8 @@ def main(
 
     # # do prediction
     y_pred = scorecard_model.predict_proba(X_train[scorecard_features])[:, 1]
-    auc_gini_ks = formatted_metrics(y=y_train, y_pred=y_pred)
-    dist_stats = get_population_dist(y=y_train)
+    auc_gini_ks = formatted_metrics(y_true=y_train, y_pred=y_pred)
+    dist_stats = get_population_dist(y_true=y_train)
     log.info(json.dumps({"metrics": auc_gini_ks, "dist": dist_stats}, indent=6))
     save_dict_to_json(
         filename=destination_dir.joinpath(f"summary-stats-{feature_selector}.json"),
