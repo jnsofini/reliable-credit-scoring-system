@@ -4,11 +4,10 @@ datasplit: #Specifies params used to split data
   dest_dir: 
   source_data_path: 
   source_type: dummy
-  segments:  [M, B]  # [""] # 
-  segmentation_feature: col_1 
-  stratify: col_30  # 
- 
-  date_id: snapshot_dt
+  segments:  None
+  segmentation_feature: None 
+  stratify_on: RiskPerformance  # 
+  date_id: None
   train_size: 0.7
   train_name: df_train.parquet
   test_name: df_test.parquet
