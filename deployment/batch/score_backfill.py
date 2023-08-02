@@ -14,8 +14,8 @@ import score
 @flow
 def credit_score_prediction_backfill():
     """Runs the scoring script to back fill."""
-    start_date = datetime(year=2021, month=3, day=1)
-    end_date = datetime(year=2022, month=4, day=1)
+    start_date = datetime(year=2023, month=1, day=1)
+    end_date = datetime(year=2023, month=12, day=1)
 
     _date = start_date
 
