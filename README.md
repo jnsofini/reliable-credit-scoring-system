@@ -1,11 +1,20 @@
-# reliable-credit-scoring-system
+# Credit Scoring System
+
 Implementation of and end to end credit system scoring system. This starts from data ingestion to a deployment and monitoring with a full CICD with best practices of MLOPS.
 
-## Model Development
+## [Model Development](credit-risk-model)
 
 This is a stage in which the model is developed. The project here is building a risk scoring system where every customer is assigned a score that will range from 350 to 950. Details of the model are found in the [credit risk model directory](credit-risk-model).
 
-## Monitoring
+## [Deployment](deployment)
+
+This is a stage in which the model is deployed in the following deployment
+
+- batch
+- webservice
+- streaming
+
+## [Monitoring](monitoring)
 
 Models depreciate, data changes, many things can go wrong! Monitoring provide us the ability to understand the behaviour of our system as changes occur. It provide us the ability to possibily metigate down town before they occur. Our system uses [Evidently to monitor](monitoring) the services and display metrics via Gafana.
 
