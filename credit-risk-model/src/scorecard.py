@@ -144,8 +144,8 @@ def get_binning_params(binning_type: str, selected_features: list):
     }
 
 
-def _get_categorical_features(df):
-    categorical_variables = df.select_dtypes(
+def _get_categorical_features(frame):
+    categorical_variables = frame.select_dtypes(
         include=["object", "category", "string"]
     ).columns.values
 

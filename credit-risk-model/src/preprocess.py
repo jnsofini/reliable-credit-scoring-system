@@ -5,6 +5,7 @@ This script performs the preprocessing of the data used to build the model.
 
 python -m src.preprocess
 """
+# pylint: disable=logging-fstring-interpolation
 # import json
 import logging
 import os

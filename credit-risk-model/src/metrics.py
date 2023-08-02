@@ -2,7 +2,7 @@
 Metrics to measure performance of model.
 """
 import numpy as np
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, roc_curve
 
 
 def kolmogorov_smirnov(y_true, y_pred):
