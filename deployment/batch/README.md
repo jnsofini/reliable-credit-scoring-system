@@ -25,7 +25,7 @@ Code quality is ensured via `black, isort & pylint`. These are bundled into the 
 
 ```shell
 make quality_checks  # quality checks
-make batch-deploy
+make batch-deploy    # quality checks
 ```
 
 There are other commands bundled in the make file, summerized as follows
