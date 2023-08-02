@@ -115,7 +115,7 @@ def save_results(
 
     if RUN_TYPE.lower() != "test":
         df_result.to_parquet(output_file, index=False)
-    print(df_result.head())
+    # print(df_result.head())
 
 
 @task
