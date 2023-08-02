@@ -15,10 +15,10 @@ class Cluster(BaseEstimator, TransformerMixin):
     """
     Clustering Transformer for Feature Selection.
 
-    This transformer clusters features based on their similarity 
-    and selects one feature from each cluster based on the lowest 
-    RS Ratio. If available, the feature with the highest IV is 
-    also included. It uses VarClusHi for clustering, a library 
+    This transformer clusters features based on their similarity
+    and selects one feature from each cluster based on the lowest
+    RS Ratio. If available, the feature with the highest IV is
+    also included. It uses VarClusHi for clustering, a library
     that functions similarly to the SAS version.
     """
 
@@ -33,7 +33,7 @@ class Cluster(BaseEstimator, TransformerMixin):
         self.max_eigen = max_eigen
         self.maxclus = maxclus
 
-    def fit(self, x_data, y_data=None): # pylint: disable=unused-argument
+    def fit(self, x_data, y_data=None):  # pylint: disable=unused-argument
         """
         Fit the Cluster transformer to the data.
 
@@ -44,7 +44,9 @@ class Cluster(BaseEstimator, TransformerMixin):
         Returns:
             self: Fitted Cluster transformer object.
         """
-        self.clusters = VarClusHi(df=x_data, maxeigval2=self.max_eigen, maxclus=self.maxclus)
+        self.clusters = VarClusHi(
+            df=x_data, maxeigval2=self.max_eigen, maxclus=self.maxclus
+        )
         return self
 
     def transform(self, x_data):
