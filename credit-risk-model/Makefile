@@ -22,3 +22,6 @@ scorecard:
 data-reduction: preprocess featurization clusters
 
 model-pipeline: data-reduction scorecard
+
+tests: quality_checks
+	pytest
