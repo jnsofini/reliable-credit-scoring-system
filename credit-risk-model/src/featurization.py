@@ -7,6 +7,7 @@ python -m src.featurization
 
 # import json
 import logging as log
+
 # import os
 import warnings
 from dataclasses import dataclass
@@ -15,7 +16,7 @@ from typing import Literal
 
 import hydra
 import pandas as pd
-from omegaconf import DictConfig#, OmegaConf
+from omegaconf import DictConfig  # , OmegaConf
 from sklearn.feature_selection import RFECV, SequentialFeatureSelector
 from sklearn.linear_model import LogisticRegression
 from src.tools import read_json, save_dict_to_json, stage_info, timeit
@@ -42,7 +43,7 @@ log.basicConfig(format='%(levelname)s:%(message)s', encoding='utf-8', level=log.
 
 
 @dataclass
-class FeatureSelectionParameters: # pylint: disable=missing-class-docstring
+class FeatureSelectionParameters:  # pylint: disable=missing-class-docstring
     selector: Literal["forward", "backward", "rfecv"] = "rfecv"
     num_feat_to_select: str | int = "auto"
     n_jobs: int = -1
@@ -57,20 +58,20 @@ class FeatureSelectionParameters: # pylint: disable=missing-class-docstring
 
 
 @dataclass
-class SequentialFeatureParameters: # pylint: disable=missing-class-docstring
+class SequentialFeatureParameters:  # pylint: disable=missing-class-docstring
     direction: Literal["forward", "backward"] = "forward"
     n_features_to_select: str | int = "auto"
     n_jobs: int = -1
     scoring: str = "roc_auc"
     tol: float = 1e-3
-    cv: int | None = None #pylint: disable=invalid-name
+    cv: int | None = None  # pylint: disable=invalid-name
 
     def __post_init__(self):
         if self.direction == "backward":
             self.tol = -1 * self.tol
 
 
-class RFECVParameters: # pylint: disable=missing-class-docstring
+class RFECVParameters:  # pylint: disable=missing-class-docstring
     min_features_to_select: int = 5
     n_jobs: int = -1
     scoring: str = "roc_auc"
@@ -82,13 +83,14 @@ def _check_feature_selector(feature_selector):
     if feature_selector in ["forward", "backward", "rfecv"]:
         print(f"Feature selection process: {feature_selector}")
     else:
-        raise NotImplementedError(f"NOT Implemented Feature selection process: {feature_selector}")
+        raise NotImplementedError(
+            f"NOT Implemented Feature selection process: {feature_selector}"
+        )
 
 
 def set_sequential_feature_selector(
-    estimator,
-    params: SequentialFeatureParameters
-    ) -> SequentialFeatureSelector:
+    estimator, params: SequentialFeatureParameters
+) -> SequentialFeatureSelector:
     """Setup feature selection process."""
     return SequentialFeatureSelector(
         estimator=estimator,
@@ -173,7 +175,9 @@ def main(cfg: DictConfig, feature_selector="rfecv"):
     )
 
     log.info("Using automatic bins")
-    feature_selection_file = read_json(f"{predecessor_dir}/selected-features-varclushi.json")
+    feature_selection_file = read_json(
+        f"{predecessor_dir}/selected-features-varclushi.json"
+    )
     features_ = feature_selection_file["selected-features-varclushi"]
 
     logreg = LogisticRegression(max_iter=cfg.featurization.max_iter)
@@ -203,4 +207,4 @@ def main(cfg: DictConfig, feature_selector="rfecv"):
 
 
 if __name__ == "__main__":
-    main() # pylint: disable=no-value-for-parameter
+    main()  # pylint: disable=no-value-for-parameter

@@ -1,3 +1,9 @@
+"""
+Module to split data into test and train
+"""
+# pylint: disable=invalid-name
+# pylint: disable=unused-variable
+# pylint: disable=fixme
 import os
 
 import pandas as pd

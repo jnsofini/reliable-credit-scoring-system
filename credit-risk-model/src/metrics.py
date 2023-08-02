@@ -23,7 +23,7 @@ def kolmogorov_smirnov(y_true, y_pred):
     n_nonevent = n_samples - n_event
 
     idx = y_pred.argsort()
-    yy = y_true[idx] # pylint: disable=invalid-name
+    yy = y_true[idx]  # pylint: disable=invalid-name
     # pp = y_pred[idx]
 
     cum_event = np.cumsum(yy)
@@ -39,7 +39,7 @@ def kolmogorov_smirnov(y_true, y_pred):
     return ks_score
 
 
-def ks(y_true, y_pred):# pylint: disable=invalid-name
+def ks(y_true, y_pred):  # pylint: disable=invalid-name
     """Compute the Kolmogorov-Smirnov (KS).
     Parameters
     ----------
@@ -61,7 +61,7 @@ def gini(y_true, y_pred):
         Array with the target labels.
     y_pred : array-like, shape = (n_samples,)
         Array with predicted probabilities.
-    
+
     Returns:
         float: Summy count stats
     """
@@ -133,6 +133,7 @@ def get_population_dist(y_true):
         "Num of events": int(default_count),
         "Default Rate": f"{float(default_count/pop_count):.2%}",
     }
+
 
 def sensivity_specifity_cutoff(y_true, y_score):
     '''Find data-driven cut-off for classification

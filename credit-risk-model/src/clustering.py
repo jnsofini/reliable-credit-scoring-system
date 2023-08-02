@@ -11,19 +11,15 @@ import os
 # from dataclasses import dataclass
 from pathlib import Path
 
-# from typing import Dict, Union
-
 import hydra
 import pandas as pd
 from omegaconf import DictConfig
 from sklearn.feature_selection import VarianceThreshold
 from src.cluster import Cluster
-from src.tools import (
-    # read_json,
-    # save_dict_to_json,
-    stage_info,
-    timeit,
-)
+from src.tools import stage_info, timeit  # read_json,; save_dict_to_json,
+
+# from typing import Dict, Union
+
 
 # from varclushi import VarClusHi
 
