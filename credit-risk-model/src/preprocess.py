@@ -1,88 +1,222 @@
+"""
+Preprocessing of data.
+
+This script performs the preprocessing of the data used to build the model.
+
+python -m src.preprocess
+"""
+# pylint: disable=logging-fstring-interpolation
+# import json
+import logging
 import os
-import time
+
+# import time
 import warnings
 
-import pandas as pd
+# from dataclasses import dataclass
+from pathlib import Path
 
-import config
-from util import setup_binning
+import hydra
+import pandas as pd
+from omegaconf import DictConfig, OmegaConf
+from optbinning import BinningProcess
+from sklearn.feature_selection import VarianceThreshold
+
+# from src import config
+from src.tools import read_json, stage_info, timeit  # save_dict_to_json,
+
+# logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(
+    format='%(levelname)s:%(message)s', encoding='utf-8', level=logging.DEBUG
+)
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-TARGET: str = "RiskPerformance"
+# TARGET: str = "RiskPerformance"
 SAVE_BINNING_OBJ = True
-QUARTER_TO_REMOVE: str = "2016-3-31"
-INCLUDE_FINANCIALS: bool = False
+# BINNING_TRANSFORM_PATH = "binning-transformer.pkl"
+# TRANSFORM_DATA_PATH = "transform-data.parquet"
+# SPECIAL_CODES = [-9, -8, -7]
+# MISSING = [-99_000_000]
 
-DATA_DIR = "data"
+# DATA_DIR = "data"
+STAGE = "preprocessing"
+# test_dir = 'dev-test'
+# dest_dir = Path(DATA_DIR).joinpath(test_dir, STAGE)
 
-
-BINNING_FIT_PARAMS = {
-    "ExternalRiskEstimate": {"monotonic_trend": "descending"},
-    "MSinceOldestTradeOpen": {"monotonic_trend": "descending"},
-    "MSinceMostRecentTradeOpen": {"monotonic_trend": "descending"},
-    "AverageMInFile": {"monotonic_trend": "descending"},
-    "NumSatisfactoryTrades": {"monotonic_trend": "descending"},
-    "NumTrades60Ever2DerogPubRec": {"monotonic_trend": "ascending"},
-    "NumTrades90Ever2DerogPubRec": {"monotonic_trend": "ascending"},
-    "PercentTradesNeverDelq": {"monotonic_trend": "descending"},
-    "MSinceMostRecentDelq": {"monotonic_trend": "descending"},
-    "NumTradesOpeninLast12M": {"monotonic_trend": "ascending"},
-    "MSinceMostRecentInqexcl7days": {"monotonic_trend": "descending"},
-    "NumInqLast6M": {"monotonic_trend": "ascending"},
-    "NumInqLast6Mexcl7days": {"monotonic_trend": "ascending"},
-    "NetFractionRevolvingBurden": {"monotonic_trend": "ascending"},
-    "NetFractionInstallBurden": {"monotonic_trend": "ascending"},
-    "NumBank2NatlTradesWHighUtilization": {"monotonic_trend": "ascending"},
-}
+FILE_DIR = Path(__file__).parent
 
 
-def load_data(path, drop_cols=None):
-    df = pd.read_parquet(path)
+def _remove_feature(
+    frame: pd.DataFrame, columns_to_drop: str | list[str] | None = None
+):
+    if columns_to_drop is None:
+        return frame
+    if isinstance(columns_to_drop, str):
+        columns_to_drop = [columns_to_drop]
+
+    columns_to_drop = list(set(columns_to_drop).intersection(set(frame.columns.values)))
+    return frame.drop(columns=columns_to_drop)
+
+
+def remove_feature_with_low_variance(frame: pd.DataFrame) -> pd.DataFrame:
+    """Removes features with no variance.
+
+    Use Variance to remove unused features.
+
+    Args:
+        frame (pd.DataFrame): Data to removed features with low variance.
+
+    Returns:
+        pd.DataFrame: Reduced data.
+    """
+    var_reductor = VarianceThreshold().set_output(transform="pandas")
+    data_ = var_reductor.fit_transform(frame)
+    return data_
+
+
+def load_data(path: str | Path, drop_cols: list[str] | None = None) -> pd.DataFrame:
+    """Loads data and return specific columns.
+
+    Args:
+        path (str): Path to data
+        drop_cols (List, optional): List of columns. Defaults to None.
+
+    Returns:
+        pd.DataFrame: Read data as a Dataframe
+    """
+    frame = pd.read_parquet(path)
     if drop_cols:
-        columns_to_drop = list(set(drop_cols).intersection(set(df.columns.values)))
-        return df.drop(columns=columns_to_drop)
-    return df
+        columns_to_drop = list(set(drop_cols).intersection(set(frame.columns.values)))
+        return frame.drop(columns=columns_to_drop)
+    return frame
 
 
-def main(use_manual_bins=True):
-    print("===========================================================")
-    print("==================Preprocessing============================")
-    print("===========================================================")
-    start_time = time.perf_counter()
+def _get_binning_features(frame, *, target=None, features=None):
+    """
+    Setup the binning process for optbinning.
 
-    # Get raw data and split into X and y
+    Args:
+        binning_fit_params: fit parameters object, including splits
+        features: the list of features that we are interested in
+        target: the target variable
+        frame (DataFrame): Dataframe containing features and a target column called 'target'
 
-    X_train = load_data(path=os.path.join(DATA_DIR, "X_train.parquet"))
-    y_train = pd.read_parquet(path=os.path.join(DATA_DIR, "y_train.parquet"))
+    Returns: Optbinning functional to bin the data BinningProcess()
 
-    print(f"Using automatic bins")
-    features_ = [col for col in X_train.columns if X_train[col].nunique() > 1]
-    # Log removed columns
+    """
+    # Remove target if present in data
+    if target:
+        frame = _remove_feature(frame=frame, columns_to_drop=target)
 
-    X = X_train[features_]
-    y = y_train.astype("int8").values.reshape(-1)
+    binning_features = features or frame.columns.to_list()
+    categorical_features = (
+        frame[binning_features]
+        .select_dtypes(include=["object", "category", "string"])
+        .columns.values
+    )
 
-    binning_process = setup_binning(X, binning_fit_params=BINNING_FIT_PARAMS)
-    binning_process.fit(X, y)
+    return binning_features, categorical_features
 
-    # save binning table
+
+# def _stage_info(stage, symbol="=", length=100):
+#     msg = f"\n{symbol*length}\n{stage.center(length, symbol)}\n{symbol*length}"
+#     return msg
+
+
+def set_destination_directory(cfg: DictConfig):
+    """Prepares the directories.
+
+    Args:
+        cfg (DictConfig): Configuration data
+
+    Returns:
+        list[Path]: List of directories
+    """
+    root_dir = Path(cfg.data.source).joinpath(cfg.data.test_dir)
+    predecessor_dir = None
+    destination_dir = root_dir.joinpath(STAGE)
+    destination_dir.mkdir(parents=True, exist_ok=True)
+    logging.debug(
+        f"Working dir is:  {destination_dir}"
+    )  # pylint: disable=logging-fstring-interpolation
+
+    return predecessor_dir, destination_dir, root_dir
+
+
+def save_artifacts(
+    use_manual_bins: bool,
+    binning_process: BinningProcess,
+    preprocess_data: pd.DataFrame,
+    dest_dir: Path,
+    cfg: DictConfig,
+):
+    """Save artifacts to specified directories.
+
+    Args:
+        use_manual_bins (bool): Type of bins to use
+        binning_process (BinningProcess): Optbinning binning object
+        preprocess_data (pd.DataFrame): Dataframe of transformed data
+        dest_dir (Path): Directory to save data
+        cfg (DictConfig): Configuration files
+    """
     iv_table_name = "manual_iv_table" if use_manual_bins else "auto_iv_table"
-    auto_iv_table = binning_process.summary()
-    os.makedirs(path := os.path.join(DATA_DIR, "artifacts"), exist_ok=True)
-    auto_iv_table.to_csv(os.path.join(path, f"{iv_table_name}.csv"))
-
-    # Save Tranform data and binning_process
-    X_transformed = binning_process.transform(X)
-    X_transformed[TARGET] = y
-    # print(X_transformed.head())
-    X_transformed.to_parquet(os.path.join(path, config.TRANSFORM_DATA_PATH))
+    iv_table = binning_process.summary()
+    iv_table.to_csv(dest_dir.joinpath(f"{iv_table_name}.csv"))
+    preprocess_data.to_parquet(dest_dir.joinpath(cfg.preprocessing.transformed_data))
 
     if SAVE_BINNING_OBJ:
-        binning_process.save(os.path.join(path, config.BINNING_TRANSFORM_PATH))
+        binning_process.save(
+            str(dest_dir.joinpath(cfg.preprocessing.binning_transformer))
+        )
 
-    print(f"Time taken : {round(time.perf_counter() - start_time, 2)} seconds")
+
+@timeit(logging.info)
+@hydra.main(version_base=None, config_path="..", config_name="params")
+def main(cfg: DictConfig, use_manual_bins=False, binning_fit_params=None):
+    """Main function that runs all processes."""
+    logging.info(stage_info(STAGE))
+    OmegaConf.resolve(cfg)
+
+    _, destination_dir, _ = set_destination_directory(cfg)
+    # Get raw data and split into X and y
+    if cfg.preprocessing.process == "manual":
+        binning_fit_params = read_json(FILE_DIR / "configs/binning-params.json")
+
+    x_train = pd.read_parquet(path=os.path.join(cfg.data.source, "X_train.parquet"))
+    y_train = pd.read_parquet(path=os.path.join(cfg.data.source, "y_train.parquet"))
+
+    logging.debug("Using automatic bins")
+    x_reduced = remove_feature_with_low_variance(x_train)
+    y_train = y_train.astype("int8").values.reshape(-1)
+
+    binning_features, categorical_features = _get_binning_features(frame=x_reduced)
+
+    binning_process = BinningProcess(
+        categorical_variables=categorical_features,
+        variable_names=binning_features,
+        # Below params are manual
+        binning_fit_params=binning_fit_params,
+        min_prebin_size=cfg.preprocessing.min_prebin_size,
+        special_codes=list(cfg.data.special_codes),
+        selection_criteria={"iv": {"min": cfg.preprocessing.selection_strategy.iv.min}},
+    )
+    binning_process.fit(x_reduced, y_train)
+
+    preprocessed_data = binning_process.transform(x_reduced, metric="woe")
+    preprocessed_data[cfg.data.target] = y_train
+
+    # save binning process and table
+    save_artifacts(
+        cfg=cfg,
+        use_manual_bins=use_manual_bins,
+        binning_process=binning_process,
+        preprocess_data=preprocessed_data,
+        dest_dir=destination_dir,
+    )
+
+    # logging.info(f"Time taken : {round(time.perf_counter() - start_time, 2)} seconds")
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pylint: disable=no-value-for-parameter

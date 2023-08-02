@@ -1,0 +1,62 @@
+# File used for the project
+# Test-train split of data
+datasplit: #Specifies params used to split data
+  dest_dir: 
+  source_data_path: 
+  source_type: dummy
+  segments:  None
+  segmentation_feature: None 
+  stratify_on: RiskPerformance  # 
+  date_id: None
+  train_size: 0.7
+  train_name: df_train.parquet
+  test_name: df_test.parquet
+
+preprocessing:
+  stage: preprocessing
+  process: automatic
+  auto_bins: True 
+  binning_transformer: binning-transformer.pkl
+  transformed_data: transform-data.parquet
+  min_prebin_size: 10e-5
+  selection_strategy: 
+    iv: 
+      min: 0.1
+
+cluster: # Feature clustering
+  stage: clustering
+  max_eigen_split: 0.7
+  source_data_path: data/
+  dest_dir: data
+  drop_features: [col_30]
+  # iv_table_path comes from binning
+  iv_table_path: 
+
+featurization:
+  algorithm: rfecv
+  max_iter: 1000
+
+scorecard:
+  estimator: 
+    alorithm: LogisticRegression
+    max_iter: 1000
+    process: manual
+
+iv_criteria:
+  min: 0.1
+  t: {"iv":{"min": 0.1}}
+
+
+data:
+  target: RiskPerformance
+  source: data
+  test_dir: uat
+  missing: [-99_000_000]
+  special_codes: [-9, -8, -7]
+  x_train: X_train.parquet
+  x_test: X_val.parquet
+  y_train: y_train.parquet
+  y_test: y_val.parquet
+
+pipeline:
+  seed: 42
