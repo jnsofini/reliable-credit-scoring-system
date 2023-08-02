@@ -19,8 +19,18 @@ TARGET = "RiskPerformance"
 # TODO: Add comments and logging to this code
 
 
-def get_data_splits(X, y, train_size=0.7, val_split=False):
-    """Generate balanced data splits."""
+def get_data_splits(X:pd.DataFrame, y: pd.DataFrame, train_size: float=0.7, val_split: bool=False):
+    """Generate data splits for train and test.
+
+    Args:
+        X (pd.DataFrame): X train data
+        y (pd.DataFrame): y data
+        train_size (float, optional): Split size. Defaults to 0.7.
+        val_split (bool, optional): Further split test to get val. Defaults to False.
+
+    Returns:
+        dict[pd.DataFrame]: Training and test in DataFrame
+    """
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, train_size=train_size, stratify=y
     )
