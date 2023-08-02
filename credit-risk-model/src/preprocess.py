@@ -5,11 +5,14 @@ This script performs the preprocessing of the data used to build the model.
 
 python -m src.preprocess
 """
+# pylint: disable=logging-fstring-interpolation
 # import json
 import logging
 import os
+
 # import time
 import warnings
+
 # from dataclasses import dataclass
 from pathlib import Path
 
@@ -20,12 +23,7 @@ from optbinning import BinningProcess
 from sklearn.feature_selection import VarianceThreshold
 
 # from src import config
-from src.tools import (
-    read_json,
-    # save_dict_to_json,
-    stage_info,
-    timeit,
-    )
+from src.tools import read_json, stage_info, timeit  # save_dict_to_json,
 
 # logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
 logging.basicConfig(
@@ -49,7 +47,9 @@ STAGE = "preprocessing"
 FILE_DIR = Path(__file__).parent
 
 
-def _remove_feature(frame: pd.DataFrame, columns_to_drop: str | list[str] | None = None):
+def _remove_feature(
+    frame: pd.DataFrame, columns_to_drop: str | list[str] | None = None
+):
     if columns_to_drop is None:
         return frame
     if isinstance(columns_to_drop, str):
@@ -137,7 +137,9 @@ def set_destination_directory(cfg: DictConfig):
     predecessor_dir = None
     destination_dir = root_dir.joinpath(STAGE)
     destination_dir.mkdir(parents=True, exist_ok=True)
-    logging.debug(f"Working dir is:  {destination_dir}") # pylint: disable=logging-fstring-interpolation
+    logging.debug(
+        f"Working dir is:  {destination_dir}"
+    )  # pylint: disable=logging-fstring-interpolation
 
     return predecessor_dir, destination_dir, root_dir
 
@@ -217,4 +219,4 @@ def main(cfg: DictConfig, use_manual_bins=False, binning_fit_params=None):
 
 
 if __name__ == "__main__":
-    main() # pylint: disable=no-value-for-parameter
+    main()  # pylint: disable=no-value-for-parameter

@@ -1,3 +1,9 @@
+"""
+Module to split data into test and train
+"""
+# pylint: disable=invalid-name
+# pylint: disable=unused-variable
+# pylint: disable=fixme
 import os
 
 import pandas as pd
@@ -28,6 +34,7 @@ def get_data_splits(X, y, train_size=0.7, val_split=False):
 
 
 def load_data(path, drop_cols=None):
+    "Loads data and return dataframe without some columns."
     df = pd.read_parquet(path)
     if drop_cols:
         columns_to_drop = list(set(drop_cols).intersection(set(df.columns.values)))
@@ -36,11 +43,13 @@ def load_data(path, drop_cols=None):
 
 
 def save_parquet(path, frames: dict):
+    """Saves dict of dataframes to files with name by key."""
     for name, frame in frames.items():
         frame.to_parquet(os.path.join(path, f"{name}.parquet"))
 
 
 def main():
+    """Main file to run the process."""
     raw_data = load_data(path=RAW_DATA_PATH)
 
     X_train, X_test, y_train, y_test = get_data_splits(
