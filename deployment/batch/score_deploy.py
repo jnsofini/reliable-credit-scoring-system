@@ -12,7 +12,7 @@ deployment = Deployment.build_from_flow(
     name="credit-score-prediction",
     version=1,
     parameters={"model_id": "dev"},
-    schedule=(CronSchedule(cron="0 3 2 * *", timezone="America/Chicago")),
+    schedule=(CronSchedule(cron="0 3 1 * *", timezone="America/Chicago")),
     work_queue_name="ml",
 )
 
