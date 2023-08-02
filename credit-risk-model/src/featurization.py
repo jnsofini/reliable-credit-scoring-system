@@ -19,7 +19,13 @@ import pandas as pd
 from omegaconf import DictConfig  # , OmegaConf
 from sklearn.feature_selection import RFECV, SequentialFeatureSelector
 from sklearn.linear_model import LogisticRegression
-from src.tools import read_json, save_dict_to_json, stage_info, timeit
+from src.tools import (
+    timeit,
+    read_json,
+    stage_info,
+    save_dict_to_json,
+    set_destination_directory,
+)
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -31,6 +37,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # DATA_DIR = "data"
 STAGE = "featurization"
+PRED_STAGE = "clustering"
 # test_dir = 'dev-test'
 
 # root_dir = Path(DATA_DIR).joinpath(test_dir)
@@ -129,22 +136,22 @@ def set_feature_selection(
     return feature_selector
 
 
-def set_destination_directory(cfg: DictConfig):
-    """Prepares the directories.
+# def set_destination_directory(cfg: DictConfig):
+#     """Prepares the directories.
 
-    Args:
-        cfg (DictConfig): Configuration data
+#     Args:
+#         cfg (DictConfig): Configuration data
 
-    Returns:
-        list[Path]: List of directories
-    """
-    root_dir = Path(cfg.data.source).joinpath(cfg.data.test_dir)
-    predecessor_dir = root_dir.joinpath("clustering")
-    destination_dir = root_dir.joinpath(STAGE)
-    destination_dir.mkdir(parents=True, exist_ok=True)
-    log.debug(f"Working dir is:  {destination_dir}")
+#     Returns:
+#         list[Path]: List of directories
+#     """
+#     root_dir = Path(cfg.data.source).joinpath(cfg.data.test_dir)
+#     predecessor_dir = root_dir.joinpath(PRED_STAGE)
+#     destination_dir = root_dir.joinpath(STAGE)
+#     destination_dir.mkdir(parents=True, exist_ok=True)
+#     log.debug(f"Working dir is:  {destination_dir}")
 
-    return predecessor_dir, destination_dir, root_dir
+#     return predecessor_dir, destination_dir, root_dir
 
 
 def log_feature_summary(features_in: int | list, features_out: list[str]):
@@ -167,7 +174,9 @@ def main(cfg: DictConfig, feature_selector="rfecv"):
     """Main function that runs all processes."""
     log.debug(stage_info(stage=STAGE))
 
-    predecessor_dir, destination_dir, root_dir = set_destination_directory(cfg=cfg)
+    predecessor_dir, destination_dir, root_dir = set_destination_directory(
+        cfg=cfg, pred_stage=PRED_STAGE, stage=STAGE, logger=log.debug
+    )
     # log.debug(f"Working dir is:  {destination_dir}")
     # breakpoint()
     transformed_data = pd.read_parquet(

@@ -16,7 +16,12 @@ import pandas as pd
 from omegaconf import DictConfig
 from sklearn.feature_selection import VarianceThreshold
 from src.cluster import Cluster
-from src.tools import stage_info, timeit  # read_json,; save_dict_to_json,
+from src.tools import (
+    timeit,
+    stage_info,
+    set_destination_directory,
+    # read_json,; save_dict_to_json,
+)
 
 # from typing import Dict, Union
 
@@ -27,27 +32,29 @@ TARGET: str = "RiskPerformance"
 
 # DATA_DIR = "data"
 STAGE = "clustering"
+PRED_STAGE = "preprocessing"
+
 # test_dir = 'dev-test'
 
 FILE_DIR = Path(__file__).parent
 
 
-def set_destination_directory(cfg: DictConfig):
-    """Prepares the directories.
+# def set_destination_directory(cfg: DictConfig):
+#     """Prepares the directories.
 
-    Args:
-        cfg (DictConfig): Configuration data
+#     Args:
+#         cfg (DictConfig): Configuration data
 
-    Returns:
-        list[Path]: List of directories
-    """
-    root_dir = Path(cfg.data.source).joinpath(cfg.data.test_dir)
-    predecessor_dir = root_dir.joinpath("preprocessing")
-    destination_dir = root_dir.joinpath(STAGE)
-    destination_dir.mkdir(parents=True, exist_ok=True)
-    log.debug(f"Working dir is:  {destination_dir}")
+#     Returns:
+#         list[Path]: List of directories
+#     """
+#     root_dir = Path(cfg.data.source).joinpath(cfg.data.test_dir)
+#     predecessor_dir = root_dir.joinpath(PRED_STAGE)
+#     destination_dir = root_dir.joinpath(STAGE)
+#     destination_dir.mkdir(parents=True, exist_ok=True)
+#     log.debug(f"Working dir is:  {destination_dir}")
 
-    return predecessor_dir, destination_dir, root_dir
+#     return predecessor_dir, destination_dir, root_dir
 
 
 def log_feature_summary(features_in: int | list, features_out: list[str]):
@@ -133,9 +140,9 @@ def main(cfg: DictConfig):
     log.info(stage_info(stage=STAGE))
     # start_time = time.perf_counter()
     # Define storage for data
-    predecessor_dir, destination_dir, _ = set_destination_directory(cfg)
-
-    log.info(f"Working dir is:  {destination_dir}")
+    predecessor_dir, destination_dir, _ = set_destination_directory(
+        cfg, pred_stage=PRED_STAGE, stage=STAGE, logger=log.debug
+    )
 
     # iv_table_name = _compose_iv_table_name(cfg.preprocessing.auto_bins)
     # iv_table = Cluster.read_iv_table(
