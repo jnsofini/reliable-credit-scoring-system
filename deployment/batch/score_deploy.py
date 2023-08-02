@@ -11,7 +11,7 @@ deployment = Deployment.build_from_flow(
     flow=credit_score_prediction,
     name="credit-score-prediction",
     version=1,
-    parameters={"model_id": "dev"},
+    parameters={"run_id": "dev"},
     schedule=(CronSchedule(cron="0 3 1 * *", timezone="America/Chicago")),
     work_queue_name="ml",
 )
