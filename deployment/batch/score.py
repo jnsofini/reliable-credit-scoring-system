@@ -30,7 +30,7 @@ from prefect.context import get_run_context
 BUCKET = "moose-solutions-mlops-registry"
 SCORE_BUCKET = os.getenv("SCORE_BUCKET", "moose-solutions")  # -mlops-learning")
 SUB_DIR = "mlops-zoomcamp"
-RUN_TYPE = "Test"
+RUN_TYPE = "Not-Test"
 
 
 # New code using boto3
