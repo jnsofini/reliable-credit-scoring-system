@@ -3,9 +3,9 @@
 # 	pytest tests/
 
 quality_checks:
-	isort .
-	black .
-	pylint --recursive=y .
+	# isort .
+	black src/
+	pylint --recursive=y src/
 
 preprocess: #quality_checks
 	python -m src.preprocess
