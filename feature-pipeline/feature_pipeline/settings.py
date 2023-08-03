@@ -1,3 +1,5 @@
+# pylint: disable=[missing-module-docstring,invalid-name]
+
 import os
 from pathlib import Path
 from typing import Union
@@ -38,7 +40,8 @@ def get_root_dir(default_value: str = ".") -> Path:
 
     return Path(os.getenv("ML_PIPELINE_ROOT_DIR", default_value))
 
-# Add the feature-pipeline to bypass limitation set by the installation. See readme and 
+
+# Add the feature-pipeline to bypass limitation set by the installation. See readme and
 #  section `packages` in the pyproject.toml
 # ML_PIPELINE_ROOT_DIR = get_root_dir()
 ML_PIPELINE_ROOT_DIR = get_root_dir()
