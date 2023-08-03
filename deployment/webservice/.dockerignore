@@ -1,0 +1,6 @@
+# flyctl launch added from .ruff_cache/.gitignore
+.ruff_cache/**/*
+fly.toml
+README.md
+run.sh
+test.py
