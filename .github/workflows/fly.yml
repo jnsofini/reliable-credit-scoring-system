@@ -3,8 +3,8 @@ on:
   push:
     branches:
       - 'deploy/fly'
-    paths:
-        - 'reliable-credit-scoring-system/deployment/webservice/**'
+    # paths:
+    #     - 'reliable-credit-scoring-system/deployment/webservice/**'
 jobs:
   deploy:
     name: Deploy app
