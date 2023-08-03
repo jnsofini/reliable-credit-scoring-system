@@ -54,3 +54,7 @@ with open("mlruns/1/eadf66f1dc894e4dad2f0d74835056bd/artifacts/model/model.pkl",
 
 model.score(val_data)
 ```
+
+## Tests
+
+Test provided. You need to open the project such that the test is in the root dir and then click on the pytest icon to set test. Run with `pytest` or `pytest --durations=5` to see the top five slowest tests completed.
