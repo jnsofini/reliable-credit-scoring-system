@@ -1,18 +1,24 @@
+"""Script to cleanup the feature store."""
+
+# pylint: disable=broad-exception-caught
+# pylint: disable=invalid-name
 import fire
 import hopsworks
-
 from feature_pipeline import settings
 
 groups_to_delete = "deveopment-data"
 views_to_delete = "credit_score_view"
 
+
 def clean():
     """
-    Utiliy function used during development to clean all the data from the feature store.
+    Utiliy function used during development to clean
+    all the data from the feature store.
     """
 
     project = hopsworks.login(
-        api_key_value=settings.SETTINGS["FS_API_KEY"], project=settings.SETTINGS["FS_PROJECT_NAME"]
+        api_key_value=settings.SETTINGS["FS_API_KEY"],
+        project=settings.SETTINGS["FS_PROJECT_NAME"],
     )
     fs = project.get_feature_store()
 

@@ -1,3 +1,4 @@
+# pylint: disable=[missing-module-docstring,invalid-name]
 import json
 import logging
 from pathlib import Path
@@ -22,7 +23,9 @@ def get_logger(name: str) -> logging.Logger:
     return logger
 
 
-def save_json(data: dict, file_name: str, save_dir: Union[str, Path] = settings.OUTPUT_DIR):
+def save_json(
+    data: dict, file_name: str, save_dir: Union[str, Path] = settings.OUTPUT_DIR
+):
     """
     Save a dictionary as a JSON file.
 
@@ -35,7 +38,7 @@ def save_json(data: dict, file_name: str, save_dir: Union[str, Path] = settings.
     """
 
     data_path = Path(save_dir) / file_name
-    with open(data_path, "w") as f:
+    with open(data_path, "w", encoding="utf-8") as f:
         json.dump(data, f)
 
 
@@ -54,5 +57,5 @@ def load_json(file_name: str, save_dir: Union[str, Path] = settings.OUTPUT_DIR) 
     if not data_path.exists():
         raise FileNotFoundError(f"Cached JSON from {data_path} does not exist.")
 
-    with open(data_path, "r") as f:
+    with open(data_path, "r", encoding="utf-8") as f:
         return json.load(f)

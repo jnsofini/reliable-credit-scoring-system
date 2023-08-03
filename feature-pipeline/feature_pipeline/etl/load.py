@@ -1,11 +1,15 @@
+# pylint: disable=[missing-module-docstring,invalid-name,
+# broad-exception-caught,logging-fstring-interpolation]
+
 import json
 
 import hopsworks
 import pandas as pd
-from great_expectations.core import ExpectationSuite
-from hsfs.feature_group import FeatureGroup
-
 from feature_pipeline.settings import SETTINGS
+from great_expectations.core import ( # pylint: disable=[wrong-import-order
+    ExpectationSuite,
+)  # pylint: disable=[wrong-import-order
+from hsfs.feature_group import FeatureGroup  # pylint: disable=[wrong-import-order
 
 
 def to_feature_store(
@@ -21,8 +25,7 @@ def to_feature_store(
 
     # Connect to feature store.
     project = hopsworks.login(
-        api_key_value=SETTINGS["FS_API_KEY"], 
-        project=SETTINGS["FS_PROJECT_NAME"]
+        api_key_value=SETTINGS["FS_API_KEY"], project=SETTINGS["FS_PROJECT_NAME"]
     )
     feature_store = project.get_feature_store()
 
@@ -46,14 +49,14 @@ def to_feature_store(
     )
 
     # Add feature descriptions.
-    with open("metadata.json", "r") as f:
+    with open("metadata.json", "r", encoding="uft-8") as f:
         meta_data = json.load(f)
         feature_descriptions = meta_data["feature_descriptions"]
     # feature_descriptions = [
     #     {
     #         "name": "riskperformance",
     #         "description": """
-    #                         Describe the risk indicator of the customer. 
+    #                         Describe the risk indicator of the customer.
     #                         1 if they ran into financial difficulty and 0 otherwise.
     #                         """,
     #         "validation_rules": "Always have a code",
@@ -73,7 +76,7 @@ def to_feature_store(
     #         "validation_rules": ">0 (int)",
     #     },
     # ]
-    
+
     for description in feature_descriptions:
         store_feature_group.update_feature_description(
             description["name"].lower(), description["description"]

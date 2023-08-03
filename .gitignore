@@ -1,5 +1,8 @@
 
 # Hydra
+*.ignore.*
+*_ignore.*
+*_ignore_*
 outputs
 # --------------
 # Uncomment after chapter 5

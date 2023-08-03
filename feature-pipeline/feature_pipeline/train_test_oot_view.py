@@ -1,18 +1,18 @@
+# pylint: disable=[missing-module-docstring,invalid-name,logging-fstring-interpolation]
+
 from datetime import datetime
 from typing import Optional
 
 import fire
 import hopsworks
-
-from feature_pipeline import utils
-from feature_pipeline import settings
 import hsfs
-
+from feature_pipeline import settings, utils
 
 logger = utils.get_logger(__name__)
 
 FEATURE_GROUP = "credit_score"
 data_views = "credit_score_view"
+
 
 def create(
     feature_group_version: Optional[int] = None,
@@ -40,20 +40,19 @@ def create(
 
     """
 
-    
     project = hopsworks.login(
-        api_key_value=settings.SETTINGS["FS_API_KEY"], project=settings.SETTINGS["FS_PROJECT_NAME"]
+        api_key_value=settings.SETTINGS["FS_API_KEY"],
+        project=settings.SETTINGS["FS_PROJECT_NAME"],
     )
     fs = project.get_feature_store()
 
     # Delete old feature views as the free tier only allows 100 feature views.
-    # NOTE: Normally you would not want to delete feature views. We do it here just to stay in the free tier.
+    # NOTE: Normally you would not want to delete feature views.
+    # We do it here just to stay in the free tier.
     _remove_unused_views(fs)
 
     # Create feature view in the given feature group version.
-    store_fg = fs.get_feature_group(
-        FEATURE_GROUP, version=feature_group_version
-    )
+    store_fg = fs.get_feature_group(FEATURE_GROUP, version=feature_group_version)
     ds_query = store_fg.select_all()
 
     # ## Added this but not tested
@@ -74,8 +73,10 @@ def create(
     #     query=train_test_period,
     #     labels=[],
     # )
-    #     # create a training dataset 
-    # X_train, y_train, X_test, y_test = train_test_feature_view.train_test_split(test_size=0.2, strategy=)
+    #     # create a training dataset
+    # X_train, y_train, X_test, y_test = (
+    # train_test_feature_view.train_test_split(test_size=0.2, strategy=)
+    # )
 
     # # materialise a training dataset
     # version, job = feature_view.create_train_test_split(
@@ -83,7 +84,6 @@ def create(
     #     description = 'transactions_dataset_jan_feb',
     #     data_format = 'csv'
     # )
-
 
     feature_view = fs.create_feature_view(
         name=f"{FEATURE_GROUP}_view",
@@ -117,6 +117,7 @@ def create(
 
     return metadata
 
+
 def _remove_unused_views(fs):
     try:
         feature_views = fs.get_feature_views(name=data_views)
@@ -130,16 +131,17 @@ def _remove_unused_views(fs):
             feature_view.delete_all_training_datasets()
         except hsfs.client.exceptions.RestAPIError:
             logger.error(
-                f"Failed to delete training datasets for feature view {feature_view.name} with version {feature_view.version}."
+                f"""Failed to delete training datasets for feature view 
+                {feature_view.name} with version {feature_view.version}."""
             )
 
         try:
             feature_view.delete()
         except hsfs.client.exceptions.RestAPIError:
             logger.error(
-                f"Failed to delete feature view {feature_view.name} with version {feature_view.version}."
+                f"""Failed to delete feature view {feature_view.name} 
+                with version {feature_view.version}."""
             )
-
 
 
 if __name__ == "__main__":

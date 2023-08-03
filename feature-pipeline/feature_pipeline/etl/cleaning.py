@@ -1,32 +1,41 @@
-from typing import Dict, List
-import pandas as pd
-import numpy as np
+# pylint: disable=[missing-module-docstring,invalid-name,
+# broad-exception-caught, logging-fstring-interpolation,fixme]
 import datetime
 import uuid
+from typing import Dict, List
 
-def get_columns_types(df: pd.DataFrame, exemption=None)-> Dict[str, str]:
+import numpy as np
+import pandas as pd
+
+
+def get_columns_types(df: pd.DataFrame, exemption=None) -> Dict[str, str]:
+    """Gets the columns types."""
     if exemption is None:
         exemption = ["operation_date", "id", "RiskPerformance"]
-    columns_types = {column: "int32" for column in df.columns if column not in exemption}
+    columns_types = {
+        column: "int32" for column in df.columns if column not in exemption
+    }
     columns_types["id"] = "str"
 
     return columns_types
 
-def rename_columns(df: pd.DataFrame, columns: Dict[str, str] | None = None) -> pd.DataFrame:
+
+def rename_columns(
+    df: pd.DataFrame, columns: Dict[str, str] | None = None
+) -> pd.DataFrame:
     """
     Rename columns to match our schema.
     """
 
     if columns is not None:
-        df = df.rename(                           # Rename columns
-            columns=columns
-        ) # Return a copy
+        df = df.rename(columns=columns)  # Rename columns  # Return a copy
 
     df.columns = df.columns.str.lower()
 
     return df
 
-def add_date(data: pd.DataFrame)-> None:
+
+def add_date(data: pd.DataFrame) -> None:
     """Adds a date column called 'operation_date' to the dataframe.
 
     Our original data didn't have a date. We added this date to make the data
@@ -35,12 +44,17 @@ def add_date(data: pd.DataFrame)-> None:
     Args:
         data (pd.DataFrame): The data without date column
     """
-    data["operation_date"] = [datetime.date(2023, month, 1) for month in np.random.randint(1, 9, size=data.shape[0])]
+    data["operation_date"] = [
+        datetime.date(2023, month, 1)
+        for month in np.random.randint(1, 9, size=data.shape[0])
+    ]
 
-def add_ids(data: pd.DataFrame)-> None:
+
+def add_ids(data: pd.DataFrame) -> None:
     """Adds a date column called 'is' to the dataframe
 
-    Our original data didn't have a primary key. We added the 'id' ciolumn to make the data
+    Our original data didn't have a primary key.
+    We added the 'id' ciolumn to make the data
     richer and suitable for the project.
 
     Args:
@@ -48,12 +62,14 @@ def add_ids(data: pd.DataFrame)-> None:
     """
     data["id"] = [uuid.uuid4() for _ in range(data.shape[0])]
 
-def replace(df: pd.DataFrame, replacement: Dict[str, dict])-> pd.DataFrame:
+
+def replace(df: pd.DataFrame, replacement: Dict[str, dict]) -> pd.DataFrame:
     """Takes a dataframe and replace values in columns with values provided.
 
     Args:
         df (pd.DataFrame): Dataframe which carries multiple columns
-        replacement (dict): Dict with keys the string name and values dict of values to replace as keys and replament as values.
+        replacement (dict): Dict with keys the string name and values
+        dict of values to replace as keys and replament as values.
 
     Returns:
         pd.DataFrame: Dataframe with updated values
@@ -66,7 +82,8 @@ def cast_columns(df: pd.DataFrame, columns_type: Dict[str, str]) -> pd.DataFrame
 
     Args:
         df (pd.DataFrame): Dataframe which carries multiple columns
-        columns_type (dict): Dict with keys the column name and values a string representation of the type.
+        columns_type (dict): Dict with keys the column name and values
+        a string representation of the type.
 
     Returns:
         pd.DataFrame: Dataframe with updated values
@@ -76,13 +93,15 @@ def cast_columns(df: pd.DataFrame, columns_type: Dict[str, str]) -> pd.DataFrame
 
     return data
 
+
 def remove_outliers(
     df: pd.DataFrame, strategy: Dict[str, Dict[str, float]]
 ) -> pd.DataFrame:
     """Removes outliers defined as a strategy.
 
-    The strategy is defined as the a dict with columns as keys and the key is another dict
-    with keys min and max whose values depict the cutoff of the outliers
+    The strategy is defined as the a dict with columns as
+    keys and the key is another dict with keys min and max
+    whose values depict the cutoff of the outliers
 
     Args:
         df (pd.DataFrame): DataFrame with outliers present.
@@ -94,7 +113,8 @@ def remove_outliers(
     # mask = pd.Series(df.shape[0]*[True])
 
     for column, outlier in strategy.items():
-        # TODO: Make the following mask to only run on series and filter outside the loop
+        # Improve: Make the following mask to only run on series and
+        # filter outside the loop
         # print(column, outlier)
         mask = (df[column] >= outlier.get("min", df[column].min())) & (
             df[column] <= outlier.get("max", df[column].max())
