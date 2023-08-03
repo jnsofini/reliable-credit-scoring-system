@@ -1,0 +1,20 @@
+name: Fly Deploy
+on:
+  push:
+    branches:
+      - deploy/fly
+    paths:
+        - 'reliable-credit-scoring-system/deployment/webservice/**'
+jobs:
+  deploy:
+    name: Deploy app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: >
+            flyctl deploy
+            --build-only
+            --dockerfile deployment/webservice/Dockerfile
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
