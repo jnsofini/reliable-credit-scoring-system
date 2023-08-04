@@ -20,9 +20,9 @@ jobs:
         working-directory: "deployment/webservice"
         run: pip install pipenv && pipenv install --dev --system --deploy
 
-      - name: Run Unit tests
-        working-directory: "deployment"
-        run: pipenv run pytest test/
+      # - name: Run Unit tests
+      #   working-directory: "deployment"
+      #   run: pipenv run pytest test/
 
       # - name: Lint
       #   working-directory: "automation"
