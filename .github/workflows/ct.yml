@@ -3,8 +3,8 @@ on:
   push:
     branches:
       - 'deployment/testing'
-    paths:
-      - 'deployment/**'
+    # paths:
+    #   - 'deployment/**'
 
 jobs:
   test:
