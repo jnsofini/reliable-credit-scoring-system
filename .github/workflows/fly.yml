@@ -25,7 +25,7 @@ jobs:
 
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy devwoobanten/deploy:webservice
+      - run: flyctl deploy --image devwoobanten/deploy:webservice --now
     #   - run: >
     #         flyctl deploy  deployment/webservice/
     #         --build-only
