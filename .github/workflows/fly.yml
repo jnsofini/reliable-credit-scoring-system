@@ -1,0 +1,34 @@
+name: Fly Deploy
+on:
+  push:
+    branches:
+      - 'deploy/fly'
+    # paths:
+    #     - 'deployment/webservice/**'
+jobs:
+  deploy:
+    name: Deploy app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: mr-smithers-excellent/docker-build-push@v6
+        name: Build & push Docker image
+        with:
+            image: devwoobanten/deploy
+            tags: webservice, latest
+            registry: docker.io
+            directory: ./deployment/webservice
+            dockerfile: ./deployment/webservice/Dockerfile
+            username: ${{ secrets.DOCKER_USERNAME }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
+
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy deployment/webservice/ --image devwoobanten/deploy:webservice --now
+    #   - run: >
+    #         flyctl deploy  deployment/webservice/
+    #         --build-only
+#            # --dockerfile deployment/webservice/Dockerfile # Works after it's removed.
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

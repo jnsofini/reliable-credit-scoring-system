@@ -6,7 +6,9 @@ COPY [ "Pipfile", "Pipfile.lock", "./" ]
 RUN pipenv install --system --deploy
 
 WORKDIR /app
-COPY fastapi-app/ /app/
+COPY app/ /app/
+# COPY fly.toml /root/
+# COPY [ "fly.toml", "./" ]
 
 
 
