@@ -1,0 +1,29 @@
+{
+    "records":[
+       {
+          "cust":{
+             "ExternalRiskEstimate":79,
+             "AverageMInFile":68,
+             "NumSatisfactoryTrades":27,
+             "PercentTradesNeverDelq":100,
+             "PercentInstallTrades":36,
+             "MSinceMostRecentInqexcl7days":0,
+             "NetFractionRevolvingBurden":1
+          },
+          "cust_id":10105
+       },
+       {
+          "cust":{
+             "ExternalRiskEstimate":80,
+             "AverageMInFile":66,
+             "NumSatisfactoryTrades":5,
+             "PercentTradesNeverDelq":90,
+             "PercentInstallTrades":46,
+             "MSinceMostRecentInqexcl7days":0,
+             "NetFractionRevolvingBurden":1
+          },
+          "cust_id":30301
+       }
+    ]
+ }
+ 

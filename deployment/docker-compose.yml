@@ -1,0 +1,7 @@
+services:
+  web:
+    build:
+      context: ./webservice
+      dockerfile: ./fly.dockerfile
+    ports:
+      - "8002:8002"

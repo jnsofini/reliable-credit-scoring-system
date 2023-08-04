@@ -10,6 +10,16 @@ Here we deloy the model in batch form. This will run periodically, say every mon
 
 Here we deloy the model as a webservice running a `fastapi` backend packaged into a docker container and deployed in the cloud. in batch form. This model can be executed on demand as it an API however, it should have rate limitation. A batch of data in a json format can be pushed to it and the customer credit scores gotten.  The deployment here is orchestrated with GitHub Actions in a CICD pipeline. Go to the webservice [deployment readme](webservice/README.md) to get more details on how this was done.
 
+## Test
+
+The components and the whole is testes for both deployment.
+
+### Batch deploy tests
+
+### Webservices deployment tests
+
+A _docker-compose.yml_ file was build to deploy the app. The docker deployment is tested with [unit test](test/test_docker.py). To deploy from a docker compose simply use `docker compose u -d` and `docker compose down` for deployment and tearing down of the app. To add CI we created a `run.sh`. To run from the directory, run `./test.sh` on the terminal. The test inside build a docker service, deploy it and runs test.
+
 ## Docker build locally
  
 Some of the common commands we ran when building are
@@ -19,5 +29,7 @@ docker build -t test-credit-score .
 docker run -it --rm -p 8002:8002 test-credit-score 
 python test.py # To run the test on the container. Make sure port matches
 ```
+
+To deploy from a docker compose simply use `docker compose u -d` and `docker compose down` for deployment and tearing down of the app.
 
 The `flyctl` is at `/.fly/bin/flyctl`.
