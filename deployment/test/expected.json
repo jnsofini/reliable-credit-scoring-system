@@ -1,0 +1,20 @@
+{
+    "predictions": [
+          {
+                "model": "risk_score_model",
+                "version": "V1",
+                "prediction": {
+                      "cust_score": 665,
+                      "cust_id": 10105
+                }
+          },
+          {
+                "model": "risk_score_model",
+                "version": "V1",
+                "prediction": {
+                      "cust_score": 619,
+                      "cust_id": 30301
+                }
+          }
+    ]
+}
