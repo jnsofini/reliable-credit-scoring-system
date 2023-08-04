@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: >
-            flyctl deploy  deployment/webservice/app/
+            flyctl deploy  deployment/webservice/
             --build-only
             --dockerfile deployment/webservice/Dockerfile
         env:
