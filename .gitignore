@@ -24,10 +24,10 @@ mlflow-server-aws
 data
 HW
 artifacts_store
-models
+# models
 */refactored/etl
 # infrastructure
-*.pkl
+# *.pkl
 artifacts
 output
 wandb
