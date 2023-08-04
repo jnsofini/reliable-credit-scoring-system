@@ -27,7 +27,8 @@ artifacts_store
 # models
 */refactored/etl
 # infrastructure
-# *.pkl
+# Model and other pickles. Can be customized.
+*.pkl
 artifacts
 output
 wandb
