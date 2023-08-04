@@ -18,7 +18,7 @@ The components and the whole is testes for both deployment.
 
 ### Webservices deployment tests
 
-A _docker-compose.yml_ file was build to deploy the app. The docker deployment is tested with [unit test](test/test_docker.py). To deploy from a docker compose simply use `docker compose u -d` and `docker compose down` for deployment and tearing down of the app. To add CI we created a `run.sh`. To run from the directory, run `./run.sh` on the terminal. The test inside build a docker service, deploy it and runs test.
+A _docker-compose.yml_ file was build to deploy the app. The docker deployment is tested with [unit test](test/test_docker.py). To deploy from a docker compose simply use `docker compose u -d` and `docker compose down` for deployment and tearing down of the app. To add CI we created a `run.sh`. To run from the directory, run `./test.sh` on the terminal. The test inside build a docker service, deploy it and runs test.
 
 ## Docker build locally
  
