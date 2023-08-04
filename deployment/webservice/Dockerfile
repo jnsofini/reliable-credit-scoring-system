@@ -6,7 +6,7 @@ COPY [ "Pipfile", "Pipfile.lock", "./" ]
 RUN pipenv install --system --deploy
 
 WORKDIR /app
-COPY fastapi-app/ /app/
+COPY app/ /app/
 
 
 
