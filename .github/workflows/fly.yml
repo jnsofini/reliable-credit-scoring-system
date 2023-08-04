@@ -3,8 +3,8 @@ on:
   push:
     branches:
       - 'deploy/fly'
-    # paths:
-    #     - 'deployment/webservice/**'
+    paths:
+        - 'deployment/webservice/**'
 jobs:
   deploy:
     name: Deploy app
@@ -25,7 +25,10 @@ jobs:
 
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy deployment/webservice/ --image devwoobanten/deploy:webservice --now
+      - run: > 
+          flyctl deploy deployment/webservice/ 
+          --image devwoobanten/deploy:webservice 
+          --now
     #   - run: >
     #         flyctl deploy  deployment/webservice/
     #         --build-only
