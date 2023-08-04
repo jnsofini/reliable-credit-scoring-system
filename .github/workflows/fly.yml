@@ -15,6 +15,6 @@ jobs:
       - run: >
             flyctl deploy  deployment/webservice/
             --build-only
-            --dockerfile webservice/Dockerfile
+            --dockerfile Dockerfile
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
