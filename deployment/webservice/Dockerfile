@@ -7,6 +7,7 @@ RUN pipenv install --system --deploy
 
 WORKDIR /app
 COPY app/ /app/
+COPY [ "fly.toml", "/app/" ]
 
 
 
