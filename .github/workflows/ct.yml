@@ -1,0 +1,34 @@
+name: CI-Tests
+on:
+  push:
+    branches:
+      - 'deployment/testing'
+    # paths:
+    #   - 'deployment/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        # working-directory: "deployment/webservice"
+        run: pip install pipenv && pipenv install --dev --system --deploy
+
+      # - name: Run Unit tests
+      #   working-directory: "deployment"
+      #   run: pipenv run pytest test/
+
+      # - name: Lint
+      #   working-directory: "automation"
+      #   run: pipenv run pylint --recursive=y .
+
+      - name: Integration Test
+        working-directory: 'deployment'
+        run: |
+          . test.sh

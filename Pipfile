@@ -18,6 +18,8 @@ s3fs = "*"
 deepdiff = "*"
 yarl = "*"
 fire = "*"
+fastapi = "*"
+uvicorn = "*"
 
 [dev-packages]
 mlflow = "2.4"
