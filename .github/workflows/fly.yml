@@ -2,7 +2,7 @@ name: Fly Deploy
 on:
   push:
     branches:
-      - 'deploy/fly'
+      - 'deploy'
     paths:
         - 'deployment/webservice/**'
 jobs:
