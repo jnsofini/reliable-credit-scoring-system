@@ -18,7 +18,7 @@ We started by creating a free account and installing the fly.io cli as specified
     added fly.io
 ```
 
-You will see the following _Then imaged started building_. The app was created and deployed. The image of the app is also sent to a registry and the info displayed in the terminal [`image`](registry.fly.io/credit-scoring). The app is located in this [link](https://credit-scoring.fly.dev/docs).
+In this case we didnt add database or redis, however we added `.dockerignore & fly.toml`. When done, we the following message is sent to the terminal _`Then imaged started building`_. The app was created and deployed. The image of the app is also sent to a registry and the info displayed in the terminal [`image`](registry.fly.io/credit-scoring). The app is located in this [link](https://credit-scoring.fly.dev/docs).
 
 ## Deployment via GitHub Actions
 
