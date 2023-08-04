@@ -5,9 +5,10 @@ COPY [ "Pipfile", "Pipfile.lock", "./" ]
 #  --deploy ensures that the installation is from an upto date lockfile else error
 RUN pipenv install --system --deploy
 
-WORKDIR /app
+WORKDIR /root
 COPY app/ /app/
-COPY fly.toml ./
+COPY fly.toml /root/
+# COPY [ "fly.toml", "./" ]
 
 
 
