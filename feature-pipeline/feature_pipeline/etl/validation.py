@@ -1,16 +1,37 @@
-from great_expectations.core import ExpectationSuite, ExpectationConfiguration
+# pylint: disable=[missing-module-docstring,invalid-name,
+# broad-exception-caught, logging-fstring-interpolation]
 
-MODELLING_COLUMNS = ['riskperformance', 'externalriskestimate', 'msinceoldesttradeopen',
-       'msincemostrecenttradeopen', 'averageminfile', 'numsatisfactorytrades',
-       'numtrades60ever2derogpubrec', 'numtrades90ever2derogpubrec',
-       'percenttradesneverdelq', 'msincemostrecentdelq',
-       'maxdelq2publicreclast12m', 'maxdelqever', 'numtotaltrades',
-       'numtradesopeninlast12m', 'percentinstalltrades',
-       'msincemostrecentinqexcl7days', 'numinqlast6m', 'numinqlast6mexcl7days',
-       'netfractionrevolvingburden', 'netfractioninstallburden',
-       'numrevolvingtradeswbalance', 'numinstalltradeswbalance',
-       'numbank2natltradeswhighutilization', 'percenttradeswbalance',
-       'operation_date', 'id']
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+
+MODELLING_COLUMNS = [
+    "riskperformance",
+    "externalriskestimate",
+    "msinceoldesttradeopen",
+    "msincemostrecenttradeopen",
+    "averageminfile",
+    "numsatisfactorytrades",
+    "numtrades60ever2derogpubrec",
+    "numtrades90ever2derogpubrec",
+    "percenttradesneverdelq",
+    "msincemostrecentdelq",
+    "maxdelq2publicreclast12m",
+    "maxdelqever",
+    "numtotaltrades",
+    "numtradesopeninlast12m",
+    "percentinstalltrades",
+    "msincemostrecentinqexcl7days",
+    "numinqlast6m",
+    "numinqlast6mexcl7days",
+    "netfractionrevolvingburden",
+    "netfractioninstallburden",
+    "numrevolvingtradeswbalance",
+    "numinstalltradeswbalance",
+    "numbank2natltradeswhighutilization",
+    "percenttradeswbalance",
+    "operation_date",
+    "id",
+]
+
 
 def build_expectation_suite() -> ExpectationSuite:
     """
@@ -25,9 +46,7 @@ def build_expectation_suite() -> ExpectationSuite:
     expectation_suite_credit_score.add_expectation(
         ExpectationConfiguration(
             expectation_type="expect_table_columns_to_match_ordered_list",
-            kwargs={
-                "column_list": MODELLING_COLUMNS
-            },
+            kwargs={"column_list": MODELLING_COLUMNS},
         )
     )
     expectation_suite_credit_score.add_expectation(
@@ -65,8 +84,6 @@ def build_expectation_suite() -> ExpectationSuite:
                 kwargs={"column": col, "type_": "int"},
             )
         )
-
-    
 
     # RiskPerformance
     expectation_suite_credit_score.add_expectation(
