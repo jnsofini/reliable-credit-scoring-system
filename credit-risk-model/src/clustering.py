@@ -16,11 +16,10 @@ import pandas as pd
 from omegaconf import DictConfig
 from sklearn.feature_selection import VarianceThreshold
 from src.cluster import Cluster
-from src.tools import (
-    timeit,
-    stage_info,
+from src.tools import (  # read_json,; save_dict_to_json,
     set_destination_directory,
-    # read_json,; save_dict_to_json,
+    stage_info,
+    timeit,
 )
 
 # from typing import Dict, Union

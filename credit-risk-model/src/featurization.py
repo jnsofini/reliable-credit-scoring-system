@@ -20,11 +20,11 @@ from omegaconf import DictConfig  # , OmegaConf
 from sklearn.feature_selection import RFECV, SequentialFeatureSelector
 from sklearn.linear_model import LogisticRegression
 from src.tools import (
-    timeit,
     read_json,
-    stage_info,
     save_dict_to_json,
     set_destination_directory,
+    stage_info,
+    timeit,
 )
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)

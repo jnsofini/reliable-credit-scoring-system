@@ -1,3 +1,9 @@
+"""Module serving service.
+
+This might not be used. TBD if so then remove"""
+
+# pylint: disable=[missing-function-docstring,]
+
 import base64
 import json
 import os

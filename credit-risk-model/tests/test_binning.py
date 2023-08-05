@@ -3,6 +3,7 @@
 import pytest
 from deepdiff import DeepDiff
 from optbinning import BinningProcess
+
 # from src.tools import read_json
 
 
