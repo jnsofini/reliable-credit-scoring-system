@@ -54,7 +54,7 @@ Additional material on understanding Terraform concepts here: [Reference Materia
 ### CI/CD
 with GitHub Actions
 
-![image](ci_cd_zoomcamp.png)
+![image](/docs/image/rcss.png)
 
 #### Summary
 
@@ -98,6 +98,4 @@ Further info here: [Concepts of CI/CD and GitHub Actions](docs.md#concepts-of-ci
 
 ### Notes
 
-Did you take notes? Add them here:
 
-* Send a PR, add your notes above this line
