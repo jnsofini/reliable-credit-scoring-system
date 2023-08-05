@@ -2,7 +2,7 @@ name: Continuous-Tests
 on:
   push:
     branches:
-      - 'deployment/testing'
+      - 'deploy'
     paths:
       - 'deployment/**'
 

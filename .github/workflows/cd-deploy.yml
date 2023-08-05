@@ -2,7 +2,7 @@ name: CD-Deploy
 on:
   push:
     branches:
-      - 'develop'
+      - 'deploy'
     paths:
       - 'automation/**'
 
