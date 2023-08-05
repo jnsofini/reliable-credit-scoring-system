@@ -1,10 +1,10 @@
-name: CI-Tests
+name: Continuous-Tests
 on:
   push:
     branches:
       - 'deployment/testing'
-    # paths:
-    #   - 'deployment/**'
+    paths:
+      - 'deployment/**'
 
 jobs:
   test:
