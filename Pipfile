@@ -20,6 +20,7 @@ yarl = "*"
 fire = "*"
 fastapi = "*"
 uvicorn = "*"
+pydantic = "*"
 
 [dev-packages]
 mlflow = "2.4"
