@@ -1,9 +1,12 @@
+"""Module to run test of scripts."""
 
+import os
 
-import boto3
 # import mlflow
 import pickle
-import os
+
+import boto3
+
 
 # New code using boto3
 def load_model(run_id):
@@ -27,10 +30,11 @@ def load_model(run_id):
     )
 
     body = response['Body'].read()
-    model = pickle.loads(body)
+    model_ = pickle.loads(body)
 
-    return model
+    return model_
 
-run_id = "dev"
 
-model = load_model(run_id)
+RUN_ID = "dev"
+
+model = load_model(run_id=RUN_ID)
