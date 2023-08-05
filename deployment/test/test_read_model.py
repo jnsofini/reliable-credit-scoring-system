@@ -1,4 +1,4 @@
-"""Module to run test of scripts."""
+"""Module to download model from cloud."""
 
 import os
 

@@ -1,10 +1,14 @@
+"""Module that provide the model service."""
+
+import logging
 import os
-import logging as logging
 
 import pandas as pd
 from optbinning import Scorecard
 
 log = logging.getLogger(__name__)
+
+
 # Makes sure the data is preprocess in way to conform to what
 # the app expects
 def load_model():
