@@ -1,6 +1,6 @@
 # Credit Scoring System
 
-Implementation of and end to end credit system scoring system. This starts from data ingestion to a deployment and monitoring with a full CICD with best practices of MLOPS.
+Implementation of and end to end credit system scoring system. This starts from data ingestion to a deployment and monitoring with a full CICD with best practices of MLOPS. ![CICD](docs/image/rcss.png)
 
 The detail instructions for working with each of the sections is provided in readme files present in each of the directories.
 
