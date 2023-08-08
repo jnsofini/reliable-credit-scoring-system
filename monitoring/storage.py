@@ -32,4 +32,4 @@ if __name__ == "__main__":
         }
         )
     
-    insert_dataframe("Age", data=data, data_base=data_base)
+    insert_dataframe("Age", table_data=data, data_base=data_base)
