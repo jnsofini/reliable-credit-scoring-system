@@ -30,15 +30,6 @@ create table {metrics_table}(
 	bin VARCHAR
 )
 """
-num_features = [
-            "AverageMInFile",
-            "MSinceMostRecentInqexcl7days",
-            "PercentTradesNeverDelq",
-            "ExternalRiskEstimate",
-            "NetFractionRevolvingBurden",
-            "NumSatisfactoryTrades",
-            "PercentInstallTrades"
-      ]
 
 def get_data():
     x_train = pd.read_parquet(f"{DATA_BASE_PATH}/X_train.parquet")
@@ -48,7 +39,7 @@ def get_data():
     # train = x_train.assign(RiskPerformance=y_train.values)
     # val = x_val.assign(RiskPerformance=y_val.values)
 
-    return x_train[num_features], x_val[num_features], y_train, y_val
+    return x_train, x_val, y_train, y_val
 
     
 
