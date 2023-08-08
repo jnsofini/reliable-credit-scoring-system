@@ -14,12 +14,11 @@ psycopg-binary = "*"
 evidently = "*"
 pandas = "*"
 numpy = "*"
-scikit-learn = "*"
-jupyter = "*"
+scikit-learn = "==1.2.2"
 optbinning = "*"
-varclushi = "*"
 
 [dev-packages]
+sqlalchemy = "==2.0"
 
 [requires]
 python_version = "3.10"
