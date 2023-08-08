@@ -68,6 +68,15 @@ raw_data["operation_date"] = [datetime.datetime(2023, 2, day, 0, 0) for day in n
 begin = datetime.datetime(2023, 2, 1, 0, 0)
 
 # cat_features = []
+num_features = [
+            "AverageMInFile",
+            "MSinceMostRecentInqexcl7days",
+            "PercentTradesNeverDelq",
+            "ExternalRiskEstimate",
+            "NetFractionRevolvingBurden",
+            "NumSatisfactoryTrades",
+            "PercentInstallTrades"
+      ]
 column_mapping = ColumnMapping(
     target=None,
     prediction='prediction',
