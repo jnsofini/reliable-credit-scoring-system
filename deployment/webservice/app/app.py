@@ -1,9 +1,9 @@
 """FastAPI webservice to run scores."""
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 from fastapi.encoders import jsonable_encoder
 from model import ModelService, load_model
+from pydantic import BaseModel # pylint: disable=no-name-in-module
 
 model = load_model()
 model_service = ModelService(model=model, model_version="V1")
@@ -28,8 +28,10 @@ class Customer(BaseModel):
     cust: CustomerInfo
     cust_id: int
 
+
 class Records(BaseModel):
     records: list[Customer]
+
 
 class Prediction(BaseModel):
     cust_score: int
@@ -40,6 +42,7 @@ class PredictionInfo(BaseModel):
     model: str
     version: str
     prediction: Prediction
+
 
 class PredictionRecords(BaseModel):
     predictions: list[PredictionInfo]
@@ -55,7 +58,6 @@ async def pong():
 
 @app.post("/predict", status_code=200)  # response_model=Predictions,
 def get_prediction(payload: Records):
-
     # print("----===================================--------------")
     # record = jsonable_encoder(payload)
     # print(record)

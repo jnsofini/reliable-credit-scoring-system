@@ -19,7 +19,9 @@ TARGET = "RiskPerformance"
 # TODO: Add comments and logging to this code
 
 
-def get_data_splits(X:pd.DataFrame, y: pd.DataFrame, train_size: float=0.7, val_split: bool=False):
+def get_data_splits(
+    X: pd.DataFrame, y: pd.DataFrame, train_size: float = 0.7, val_split: bool = False
+):
     """Generate data splits for train and test.
 
     Args:

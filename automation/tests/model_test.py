@@ -1,3 +1,5 @@
+"""Module to run the unit tests."""
+# pylint: disable=missing-function-docstring
 from pathlib import Path
 
 import pandas as pd

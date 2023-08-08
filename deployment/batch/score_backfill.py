@@ -4,11 +4,10 @@ Runs the batch prediction to fill the data in the database.
 """
 
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
-
-from prefect import flow
 
 import score
+from dateutil.relativedelta import relativedelta
+from prefect import flow
 
 
 @flow

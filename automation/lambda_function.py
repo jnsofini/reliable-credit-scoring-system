@@ -15,5 +15,6 @@ model_service = model.init(
 
 
 def lambda_handler(event, context):
+    """Main function that dedicate work to the service."""
     # pylint: disable=unused-argument
     return model_service.lambda_handler(event)
