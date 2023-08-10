@@ -3,6 +3,7 @@ import psycopg
 import pandas as pd
 from sqlalchemy import create_engine
 import os
+import re
 
 table = "test_table"
 dummy_create_table_statement = f"""
@@ -22,32 +23,75 @@ data_base = os.getenv("data_base","test-db")
 
 # Connection: postgresql+psycopg://user:password@host:port/dbname[?key=value&key=value...]
 
-def db_connection_string(data_base: str = ""):
+def db_sync_connection_string(data_base: str = ""):
+    """Connection string to insert data dataframe to posgres"""
     if data_base == "":
         return None
     sync_engine = f"""postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{data_base}"""
     return sync_engine
 
-
-def prepare_database(conn_str:str | None = None, dbname="test", create_table_: str | None = None):
-    conn_str = conn_str 
+def prepare_database(conn_string : str, dbname: str = "test"):
 
     """Create database if it doesn't exist."""
-    with psycopg.connect(conn_str, autocommit=True) as conn:
+    with psycopg.connect(conn_string, autocommit=True) as conn:
         res = conn.execute(f"SELECT 1 FROM pg_database WHERE datname='{dbname}'")
         if len(res.fetchall()) == 0:
             conn.execute(f"create database {dbname};")
-        with psycopg.connect(f"{conn_str} dbname={dbname}") as conn:
+        
+        # with psycopg.connect(f"{conn_string} dbname={dbname}") as conn:
+        #     create_table_ = create_table_ or dummy_create_table_statement
+        #     conn.execute(create_table_)
+    return dbname, conn_string
+
+def prepare_table(db_conn: str, create_table_: str | None = None):
+    with psycopg.connect(db_conn) as conn:
+        create_table_ = create_table_ or dummy_create_table_statement
+        conn.execute(create_table_)
+
+    table_name = extract_from_create_statement(create_table_)
+    return table_name
+
+def prepare_database_and_table(conn_string : str , dbname: str = "test", create_table_: str | None = None):
+
+    """Create database if it doesn't exist."""
+    with psycopg.connect(conn_string, autocommit=True) as conn:
+        res = conn.execute(f"SELECT 1 FROM pg_database WHERE datname='{dbname}'")
+        if len(res.fetchall()) == 0:
+            conn.execute(f"create database {dbname};")
+        with psycopg.connect(f"{conn_string} dbname={dbname}") as conn:
             create_table_ = create_table_ or dummy_create_table_statement
             conn.execute(create_table_)
 
+# def prepare_table(db_conn_string : str, dbname: str = "test"):
+#     if not db_conn_string.endswith(f"/{dbname}"):
+#         db_conn_string = 
+#     with psycopg.connect(f"{db_conn_string} dbname={dbname}") as conn:
+#             create_table_ = create_table_ or dummy_create_table_statement
+#             conn.execute(create_table_)
+
+def extract_from_create_statement(create_statement: str):
+    """Extract table name from create statement."""
+
+    # Define a regular expression pattern to match the "create table" statement
+    pattern = r"create\s+table\s+(\w+)\s*\("
+
+    # Search for the pattern in the SQL code
+    match = re.search(pattern, create_statement, re.IGNORECASE)
+
+    if match:
+        table_name = match.group(1)
+        return table_name
+    
+    return None
 
 
-def insert_dataframe(table_name: str, table_data: pd.DataFrame, conn_str: str | None = None, data_base: str = ""):
-    if conn_str is None:
+
+
+def insert_dataframe(table_name: str, table_data: pd.DataFrame, db_conn_string: str | None = None):
+    if db_conn_string is None:
         raise Exception("No connection provided")
   
-    db = create_engine(conn_str)
+    db = create_engine(db_conn_string)
 
     with db.connect() as conn:
         print("connection established:")
@@ -56,7 +100,7 @@ def insert_dataframe(table_name: str, table_data: pd.DataFrame, conn_str: str | 
 
 if __name__ == "__main__":
     # our dataframe
-    data_base = os.getenv("data_base","test-db")
+    data_base = os.getenv("data_base", "test-db")
     data = pd.DataFrame(
         {
             'Name': ['Tom', 'dick', 'harry'],
