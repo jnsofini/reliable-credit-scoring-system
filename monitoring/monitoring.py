@@ -2,8 +2,6 @@ import datetime
 import time
 import logging 
 import pandas as pd
-import storage
-import psycopg
 from pathlib import Path
 
 from prefect import task, flow
