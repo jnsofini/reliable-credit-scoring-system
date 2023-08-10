@@ -12,6 +12,8 @@ import os
 from optbinning import Scorecard
 from optbinning.scorecard import ScorecardMonitoring
 
+from src.db import  prepare_database, insert_dataframe
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]: %(message)s")
 
 SEND_TIMEOUT = 10
@@ -48,20 +50,21 @@ POSTGRES_HOST = "localhost"
 POSTGRES_PORT = 5432
 POSTGRES_USER = "postgres"
 POSTGRES_PASSWORD = "password"
-DATA_BASE="test_prepare"
+DATA_BASE = os.getenv("data_base","test_db")
 
 sync_engine = f"""postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{DATA_BASE}"""
+create_conn_string = f"host={POSTGRES_HOST} port={POSTGRES_PORT} user={POSTGRES_USER} password={POSTGRES_PASSWORD}"
 
-def prepare_database(postgres_conn_str:str | None = None, dbname="test"):
-    postgres_conn_str = postgres_conn_str or f"""host={POSTGRES_HOST} port={POSTGRES_PORT} user={POSTGRES_USER} password={POSTGRES_PASSWORD}"""
+# def prepare_database(postgres_conn_str:str | None = None, dbname="test"):
+#     postgres_conn_str = postgres_conn_str or f"""host={POSTGRES_HOST} port={POSTGRES_PORT} user={POSTGRES_USER} password={POSTGRES_PASSWORD}"""
 
-    """Create database if it doesn't exist."""
-    with psycopg.connect(postgres_conn_str, autocommit=True) as conn:
-        res = conn.execute(f"SELECT 1 FROM pg_database WHERE datname='{dbname}'")
-        if len(res.fetchall()) == 0:
-            conn.execute(f"create database {dbname};")
-        with psycopg.connect(f"{postgres_conn_str} dbname={dbname}") as conn:
-            conn.execute(create_table_statement)
+#     """Create database if it doesn't exist."""
+#     with psycopg.connect(postgres_conn_str, autocommit=True) as conn:
+#         res = conn.execute(f"SELECT 1 FROM pg_database WHERE datname='{dbname}'")
+#         if len(res.fetchall()) == 0:
+#             conn.execute(f"create database {dbname};")
+#         with psycopg.connect(f"{postgres_conn_str} dbname={dbname}") as conn:
+#             conn.execute(create_table_statement)
 
 
 def calculate_metrics_psi(model, x_actual, y_actual, x_expected, y_expected): 
@@ -77,12 +80,13 @@ def get_model_location():
      """Gets the location of the model"""
      return os.getenv("MODEL_LOCATION", DATA_BASE_PATH / "model/model.pkl")
 
-def monitoring_psi():
+def monitoring_psi(create_conn_string: str):
     # dbname="test-prepare"
-    prepare_database(dbname=DATA_BASE)
+    dbname, create_conn_string = prepare_database(dbname=DATA_BASE, conn_string=create_conn_string)
+    
     x_expected, x_actual, y_expected, y_actual = get_data()
     model_location = get_model_location()
-    score_card_model = Scorecard.load(model_location)
+    score_card_model = Scorecard.load(str(model_location))
     score_psi, feature_psi = calculate_metrics_psi(
          model=score_card_model, 
          x_actual=x_actual, 
@@ -90,21 +94,23 @@ def monitoring_psi():
          x_expected=x_expected, 
          y_expected=y_expected.values
          )
-    storage.insert_dataframe(
+    insert_dataframe(
         table_name="score_psi", 
         table_data=score_psi, 
-        conn_str=sync_engine,
+        sync_engine=sync_engine,
         )
-    storage.insert_dataframe(
+    
+    insert_dataframe(
         table_name="feature_psi", 
         table_data=feature_psi, 
-        conn_str=sync_engine,
+        sync_engine=sync_engine,
         )
+    
     logging.info("data sent")
     time.sleep(2)
 
 if __name__ == '__main__':
-	monitoring_psi()
+	monitoring_psi(create_conn_string=create_conn_string)
     
 
 
