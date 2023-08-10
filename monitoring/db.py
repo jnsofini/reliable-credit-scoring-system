@@ -19,7 +19,7 @@ POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT", 5432)
 POSTGRES_USER = os.getenv("POSTGRES_USER","postgres")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD","password")
-data_base = os.getenv("data_base","test-db")
+data_base = os.getenv("data_base","test_db")
 
 # Connection: postgresql+psycopg://user:password@host:port/dbname[?key=value&key=value...]
 
@@ -87,11 +87,11 @@ def extract_from_create_statement(create_statement: str):
 
 
 
-def insert_dataframe(table_name: str, table_data: pd.DataFrame, db_conn_string: str | None = None):
-    if db_conn_string is None:
+def insert_dataframe(table_name: str, table_data: pd.DataFrame, sync_engine: str | None = None):
+    if sync_engine is None:
         raise Exception("No connection provided")
   
-    db = create_engine(db_conn_string)
+    db = create_engine(sync_engine)
 
     with db.connect() as conn:
         print("connection established:")
@@ -100,12 +100,23 @@ def insert_dataframe(table_name: str, table_data: pd.DataFrame, db_conn_string: 
 
 if __name__ == "__main__":
     # our dataframe
-    data_base = os.getenv("data_base", "test-db")
+    data_base = os.getenv("data_base", "test_db")
+    create_conn_string = f"host={POSTGRES_HOST} port={POSTGRES_PORT} user={POSTGRES_USER} password={POSTGRES_PASSWORD}"
+    db_name, conn_string = prepare_database(
+        conn_string=create_conn_string,
+        dbname=data_base,
+    )
+    table_name = prepare_table(
+        db_conn=f"{conn_string} dbname={db_name}",
+        create_table_=dummy_create_table_statement
+        )
+                                            
     data = pd.DataFrame(
         {
             'Name': ['Tom', 'dick', 'harry'],
             'Age': [22, 21, 24]
         }
         )
+    syn_engine_string = db_sync_connection_string(data_base=data_base)
     
-    insert_dataframe("Age", table_data=data, data_base=data_base)
+    insert_dataframe("Age", table_data=data, sync_engine=syn_engine_string)
