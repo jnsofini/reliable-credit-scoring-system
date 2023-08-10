@@ -53,7 +53,7 @@ DATA_BASE="test_prepare"
 sync_engine = f"""postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{DATA_BASE}"""
 
 def prepare_database(postgres_conn_str:str | None = None, dbname="test"):
-    postgres_conn_str = postgres_conn_str or f"host={POSTGRES_HOST} port={POSTGRES_PORT} user={POSTGRES_USER} password={POSTGRES_PASSWORD}"
+    postgres_conn_str = postgres_conn_str or f"""host={POSTGRES_HOST} port={POSTGRES_PORT} user={POSTGRES_USER} password={POSTGRES_PASSWORD}"""
 
     """Create database if it doesn't exist."""
     with psycopg.connect(postgres_conn_str, autocommit=True) as conn:
