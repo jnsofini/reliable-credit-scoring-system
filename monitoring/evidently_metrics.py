@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import io
 import psycopg
-import db
+import monitoring.src.db as db
 import storage
 from pathlib import Path
 

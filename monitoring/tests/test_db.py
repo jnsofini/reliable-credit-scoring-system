@@ -3,7 +3,7 @@ import psycopg
 import pandas as pd
 from sqlalchemy import create_engine
 
-from monitoring import db
+from monitoring.src import db
   
   
 POSTGRES_HOST = "localhost"
@@ -70,7 +70,7 @@ def test_create_database():
     assert conn_string == CREATE_CONN_STRING
     # prepare_table
 
-    
+
 def test_create_table():
     table_name = db.prepare_table(
         db_conn=f"{CREATE_CONN_STRING} dbname=test_db3", 
