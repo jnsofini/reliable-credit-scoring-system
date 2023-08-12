@@ -44,11 +44,11 @@ def get_data():
 
     
 
-POSTGRES_HOST = "localhost"
-POSTGRES_PORT = 5432
-POSTGRES_USER = "postgres"
-POSTGRES_PASSWORD = "password"
-DATA_BASE = os.getenv("data_base","test_db")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+POSTGRES_USER = os.getenv("POSTGRES_USER", "monitoring")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "monitoring")
+DATA_BASE = os.getenv("DATA_BASE","monitoring")
 
 sync_engine = f"""postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{DATA_BASE}"""
 create_conn_string = f"host={POSTGRES_HOST} port={POSTGRES_PORT} user={POSTGRES_USER} password={POSTGRES_PASSWORD}"
@@ -66,13 +66,13 @@ create_conn_string = f"host={POSTGRES_HOST} port={POSTGRES_PORT} user={POSTGRES_
 
 
 def calculate_metrics_psi(model, x_actual, y_actual, x_expected, y_expected): 
-    monitoring = ScorecardMonitoring(scorecard=model, psi_method="cart", psi_n_bins=10, verbose=True)
+    monitoring = ScorecardMonitoring(scorecard=model, psi_method="cart", psi_n_bins=10, show_digits=3, verbose=True)
     monitoring.fit(X_actual=x_actual, y_actual=y_actual, X_expected=x_expected, y_expected=y_expected)
     psi_table = monitoring.psi_table()
     # psi_table = _format_psi_table(psi_table)
     psi_feature_table = monitoring.psi_variable_table()
-    
-    return psi_table, psi_feature_table.rename(columns=str.lower) #.to_dict(orient="records")
+
+    return format_data(psi_table), format_data(psi_feature_table) #.rename(columns=str.lower) #.to_dict(orient="records")
 
 def get_model_location():
      """Gets the location of the model"""
@@ -92,20 +92,41 @@ def monitoring_psi(create_conn_string: str):
          x_expected=x_expected, 
          y_expected=y_expected.values
          )
+ 
+    logging.info("-------------------------------------------")
+
     insert_dataframe(
         table_name="score_psi", 
-        table_data=score_psi, 
+        table_data=format_data(score_psi), 
         sync_engine=sync_engine,
         )
-    
     insert_dataframe(
         table_name="feature_psi", 
-        table_data=feature_psi, 
+        table_data=format_data(feature_psi), 
         sync_engine=sync_engine,
         )
-    
+
     logging.info("data sent")
     time.sleep(2)
+
+    return None
+
+def validate_data_to_write(left_frame, right_frame):
+    if (left_frame is None):
+        if (right_frame is None):
+            return 'both'
+        else:
+             return "left"
+    if (right_frame is None):
+            return 'right'
+    return None
+    
+def format_data(df: pd.DataFrame, columns=None, dp=3):
+     logging.info(df)
+     if columns is None:
+          columns = {col: float for col in df.columns if (col.endswith("%") or col.endswith("PSI"))}
+     
+     return df.astype(columns).round(dp)
 
 if __name__ == '__main__':
 	monitoring_psi(create_conn_string=create_conn_string)
