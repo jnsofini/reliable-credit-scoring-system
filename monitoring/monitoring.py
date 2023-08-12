@@ -11,6 +11,7 @@ from optbinning import Scorecard
 from optbinning.scorecard import ScorecardMonitoring
 
 from src.db import  prepare_database, insert_dataframe
+from src.metrics import formatted_metrics
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]: %(message)s")
 
@@ -34,9 +35,9 @@ create table {metrics_table}(
 
 def get_data():
     x_train = pd.read_parquet(f"{DATA_BASE_PATH}/X_train.parquet")
-    y_train = pd.read_parquet(f"{DATA_BASE_PATH}/y_train.parquet")
+    y_train = pd.read_parquet(f"{DATA_BASE_PATH}/y_train.parquet").values.reshape(-1)
     x_val = pd.read_parquet(f"{DATA_BASE_PATH}/X_val.parquet")
-    y_val = pd.read_parquet(f"{DATA_BASE_PATH}/y_val.parquet")
+    y_val = pd.read_parquet(f"{DATA_BASE_PATH}/y_val.parquet").values.reshape(-1)
     # train = x_train.assign(RiskPerformance=y_train.values)
     # val = x_val.assign(RiskPerformance=y_val.values)
 
@@ -85,12 +86,26 @@ def monitoring_psi(create_conn_string: str):
     x_expected, x_actual, y_expected, y_actual = get_data()
     model_location = get_model_location()
     score_card_model = Scorecard.load(str(model_location))
+    reference_metrics_data = get_stats(model=score_card_model, x_data=x_expected, y_data=y_expected)
+    
+    insert_dataframe(
+        table_name="reference_model_stats", 
+        table_data=reference_metrics_data, 
+        sync_engine=sync_engine,
+        )
+    
+    metrics_data = get_stats(model=score_card_model, x_data=x_actual, y_data=y_actual)
+    insert_dataframe(
+        table_name="model_stats", 
+        table_data=metrics_data, 
+        sync_engine=sync_engine,
+        )
     score_psi, feature_psi = calculate_metrics_psi(
          model=score_card_model, 
          x_actual=x_actual, 
-         y_actual=y_actual.values, 
+         y_actual=y_actual, 
          x_expected=x_expected, 
-         y_expected=y_expected.values
+         y_expected=y_expected
          )
  
     logging.info("-------------------------------------------")
@@ -121,12 +136,24 @@ def validate_data_to_write(left_frame, right_frame):
             return 'right'
     return None
     
-def format_data(df: pd.DataFrame, columns=None, dp=3):
+def format_data(df: pd.DataFrame, columns=None, dp=3, order_by="PSI"):
      logging.info(df)
      if columns is None:
           columns = {col: float for col in df.columns if (col.endswith("%") or col.endswith("PSI"))}
      
-     return df.astype(columns).round(dp)
+     return df.astype(columns).round(dp).sort_values(by=[order_by])
+
+def get_stats(model, x_data, y_data):
+     
+     y_pred = model.predict_proba(x_data)[:, 1]
+     data = formatted_metrics(y_data, y_pred)
+     return pd.DataFrame(
+          {
+               "Metrics": list(data.keys()),
+               "Values": list(data.values())
+          }
+     ).sort_values(by=["Values"])
+    
 
 if __name__ == '__main__':
 	monitoring_psi(create_conn_string=create_conn_string)
