@@ -8,9 +8,28 @@ datasources:
     type: postgres
     access: proxy
     url: db.:5432
-    database: test
-    user: postgres
+    database: monitoring
+    user: monitoring
     secureJsonData:
-      password: 'password'
+      password: 'monitoring'
     jsonData:
       sslmode: 'disable'
+
+
+# # config file version
+# apiVersion: 1
+
+# # list of datasources to insert/update
+# # available in the database
+# datasources:
+#   - name: monitoring
+#     type: postgres
+#     access: proxy
+#     # url: db.:${PG_PORT}
+#     url: db.:${PG_PORT}
+#     database: ${PG_DATABASE}
+#     user: ${PG_USER}
+#     secureJsonData:
+#       password: ${PG_PASSWORD}
+#     jsonData:
+#       sslmode: 'disable'

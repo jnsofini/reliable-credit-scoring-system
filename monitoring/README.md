@@ -62,3 +62,8 @@ To stop all services, execute:
 ```bash
 docker-compose down
 ```
+
+
+### Variables
+
+To [export variables](https://stackoverflow.com/questions/19331497/set-environment-variables-from-file-of-key-value-pairs) in a config.env file while ignoring comments starting with # we run `export $(grep -v '^#' config.env | xargs)`. And if you want to unset all of the variables defined in the file, use this: `unset $(grep -v '^#' .env | sed -E 's/(.*)=.*/\1/' | xargs)`
