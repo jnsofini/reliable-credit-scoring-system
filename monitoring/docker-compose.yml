@@ -10,6 +10,7 @@ networks:
 services:
   db:
     image: postgres
+    container_name: monitoring_db
     restart: always
     environment:
       # - POSTGRES_PASSWORD: password
@@ -28,6 +29,7 @@ services:
 
   adminer:
     image: adminer
+    container_name: db_manager
     restart: always
     ports:
       - "8080:8080"
@@ -52,6 +54,11 @@ services:
       - back-tier
       - front-tier
     restart: always
+    environment:
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_DATABASE=${PG_DATABASE}
+      - POSTGRES_PORT=${PG_PORT}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${GRAFANA_PORT}/login"]
       interval: 30s
