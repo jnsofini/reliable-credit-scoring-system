@@ -81,3 +81,12 @@ To stop the services run
 ```sh
 docker compose --env-file config/config.env down
 ```
+
+## Database
+
+The connection to the database is performed in two ways. One via the postgres package `psycopg` and another via the `sqlalchemy`. The connections are as follows
+
+```python
+sync_engine = f"""postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{DATA_BASE}"""
+postgres_conn = f"host={POSTGRES_HOST} port={POSTGRES_PORT} user={POSTGRES_USER} password={POSTGRES_PASSWORD}"
+```
