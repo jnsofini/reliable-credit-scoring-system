@@ -36,7 +36,7 @@ def db_sync_connection_string(data_base: str = ""):
         f"postgresql+psycopg://{POSTGRES_USER}"
         f":{POSTGRES_PASSWORD}@{POSTGRES_HOST}"
         f":{POSTGRES_PORT}/{data_base}"
-        )
+    )
     return sync_engine
 
 
@@ -120,8 +120,8 @@ if __name__ == "__main__":
     # our dataframe
     # data_base = os.getenv("data_base", "test_db")
     create_conn_string = (
-    f"host={POSTGRES_HOST} port={POSTGRES_PORT} "
-    f"user={POSTGRES_USER} password={POSTGRES_PASSWORD}"
+        f"host={POSTGRES_HOST} port={POSTGRES_PORT} "
+        f"user={POSTGRES_USER} password={POSTGRES_PASSWORD}"
     )
     db_name, db_conn_string = prepare_database(
         conn_string=create_conn_string,

@@ -23,7 +23,7 @@ from evidently.report import Report
 from optbinning import Scorecard
 from prefect import flow, task
 import os
-from src.db import prepare_table, prepare_database # pylint: disable=import-error
+from src.db import prepare_table, prepare_database  # pylint: disable=import-error
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s]: %(message)s"
@@ -56,7 +56,8 @@ DATA_BASE = os.getenv("DATA_BASE", "monitoring")
 postgres_conn = (
     f"host={POSTGRES_HOST} port={POSTGRES_PORT} "
     f"user={POSTGRES_USER} password={POSTGRES_PASSWORD}"
-    )
+)
+
 
 def get_data(path):
     """Reads train and test fata from path."""
@@ -157,9 +158,8 @@ def batch_monitoring_backfill():
     """Backfil the data by adding the prediction to the develoment data"""
     prepare_database(conn_string=postgres_conn, dbname=DATA_BASE)
     table_name = prepare_table(
-        db_conn=postgres_conn, 
-        create_table_=CREATE_TABLE_STATEMENT
-        )
+        db_conn=postgres_conn, create_table_=CREATE_TABLE_STATEMENT
+    )
     # sync_connection = storage.db_connection_string(data_base=DATABASE)
     last_send = datetime.datetime.now() - datetime.timedelta(seconds=10)
     with psycopg.connect(
@@ -169,9 +169,9 @@ def batch_monitoring_backfill():
         for i in range(0, 27):
             with conn.cursor() as curr:
                 (
-                    prediction_drift, 
-                    num_drifted_columns, 
-                    share_missing_values 
+                    prediction_drift,
+                    num_drifted_columns,
+                    share_missing_values,
                 ) = calculate_metrics_postgresql(i)
 
                 # Send the data to database
@@ -186,7 +186,6 @@ def batch_monitoring_backfill():
                         share_missing_values,
                     ),
                 )
-                
 
             new_send = datetime.datetime.now()
             seconds_elapsed = (new_send - last_send).total_seconds()
