@@ -11,9 +11,10 @@ from pathlib import Path
 import pandas as pd
 from optbinning import Scorecard
 from optbinning.scorecard import ScorecardMonitoring
+
 # from prefect import flow, task
-from src.db import insert_dataframe, prepare_database # pylint: disable=import-error
-from src.metrics import formatted_metrics # pylint: disable=import-error
+from src.db import insert_dataframe, prepare_database  # pylint: disable=import-error
+from src.metrics import formatted_metrics  # pylint: disable=import-error
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s]: %(message)s"
@@ -60,11 +61,11 @@ sync_engine = (
     f"postgresql+psycopg://{POSTGRES_USER}"
     f":{POSTGRES_PASSWORD}@{POSTGRES_HOST}"
     f":{POSTGRES_PORT}/{DATA_BASE}"
-    )
+)
 postgres_conn = (
     f"host={POSTGRES_HOST} port={POSTGRES_PORT} "
     f"user={POSTGRES_USER} password={POSTGRES_PASSWORD}"
-    )
+)
 
 # def prepare_database(postgres_conn_str:str | None = None, dbname="test"):
 #     postgres_conn_str = postgres_conn_str or (
@@ -109,9 +110,7 @@ def get_model_location():
 def monitoring_psi(db_conn_string: str):
     """Computing metrics, writing to database."""
     # dbname="test-prepare"
-    dbname, _ = prepare_database(
-        dbname=DATA_BASE, conn_string=db_conn_string
-    )
+    dbname, _ = prepare_database(dbname=DATA_BASE, conn_string=db_conn_string)
 
     x_expected, x_actual, y_expected, y_actual = get_data()
     model_location = get_model_location()
