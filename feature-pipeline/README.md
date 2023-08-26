@@ -6,8 +6,6 @@ The work here is inspired by the inspiring work done Paul Iusztin. You can find 
 
 I this part of the project we demonstrate the process of pulling data from various sources, prepropocessing it and then storing it in a feature store. The pre processing includes treating for outliers, missing, special codes. As a results, an exploratory analysis should be done to determine the strategy for treatment and then incorporate into this pipeline.
 
-Our choice of feature store is Hopswork feature store. It provide a freemium plan with a generous  enough space for us to experiment with our project at no cost. The first step is to set a [Hopswork account](https://www.hopsworks.ai/) and get an feature store api key. The account information are then added in the `.env` file.
-
 To run the code we need to set the python environment as [explained below](#Development-environment-setup).
 
 
@@ -57,7 +55,7 @@ Initially, I tried to activate the environment created under the original repo a
 
 ## Features
 
-We didn't consult the data dictionary and just inferred the names using chatGPT. Here are the columns ans their descriotions
+We didn't consult the data dictionary and just inferred the names using chatGPT. Here are the columns ans their descriptions
 
 Based on the given list of column names, here are the descriptions inferred for each feature:
 
@@ -90,33 +88,38 @@ Based on the given list of column names, here are the descriptions inferred for 
 
 Here is the JSON format with feature names as keys and descriptions as values:
 
-```json
-{
-  "RiskPerformance": "Risk performance indicator",
-  "ExternalRiskEstimate": "Estimated external risk level",
-  "MSinceOldestTradeOpen": "Months since the oldest trade account was opened",
-  "MSinceMostRecentTradeOpen": "Months since the most recent trade account was opened",
-  "AverageMInFile": "Average months reported since the file was created",
-  "NumSatisfactoryTrades": "Number of satisfactory trades",
-  "NumTrades60Ever2DerogPubRec": "Number of trades with 60+ days past due or derogatory public records ever",
-  "NumTrades90Ever2DerogPubRec": "Number of trades with 90+ days past due or derogatory public records ever",
-  "PercentTradesNeverDelq": "Percentage of trades never delinquent",
-  "MSinceMostRecentDelq": "Months since the most recent delinquency",
-  "MaxDelq2PublicRecLast12M": "Maximum delinquency reported in the last 12 months",
-  "MaxDelqEver": "Maximum delinquency ever reported",
-  "NumTotalTrades": "Total number of trades",
-  "NumTradesOpeninLast12M": "Number of trades opened in the last 12 months",
-  "PercentInstallTrades": "Percentage of installment trades",
-  "MSinceMostRecentInqexcl7days": "Months since the most recent inquiry excluding the last 7 days",
-  "NumInqLast6M": "Number of inquiries in the last 6 months",
-  "NumInqLast6Mexcl7days": "Number of inquiries in the last 6 months excluding the last 7 days",
-  "NetFractionRevolvingBurden": "Net fraction revolving burden",
-  "NetFractionInstallBurden": "Net fraction installment burden",
-  "NumRevolvingTradesWBalance": "Number of revolving trades with balance",
-  "NumInstallTradesWBalance": "Number of installment trades with balance",
-  "NumBank2NatlTradesWHighUtilization": "Number of bank/national trades with high utilization",
-  "PercentTradesWBalance": "Percentage of trades with balance"
-}
+## Data Prep and Loading
+
+The data is prepared and loaded to a feature store. The store is set as explained below. The code is designed to follow process flows that are familiar, namely, ETL. 
+
+1. Extract the data with _extract.py_. This extracts the data from a dump.
+2. Transform the data with _cleaning.py_ by
+    - Renaming columns
+    - Casting to proper types
+3. Great Expectations was used to validate the data with _validate.py_ by checking
+    - Data types
+    - Expected number of columns
+    - Limits or set of values
+4. Load the data to Hopswork Feature Store with _load.py_.
+
+The script os orchestrated with `prefect`.
+
+The other part is to create feature views. This are just like views in database, or losely equivilently, filters when you filter data in pandas it simply create a view on the data.
+
+Because of limitation in the number of views, views can be cleaned to reduce the number and also keep the views to those that are used.
+
+## Feature Store
+
+We use [HopsWork](https://c.app.hopsworks.ai/p/45287/fs/45140/fg) for feature store. The login is via Google outh so no account was created. A free account is used with only one project permitted. It is named as _energyconsuption_ because that was the original project where I started. Every dataset is stored under that project. The data for  this project isn called _credit_score_.
+
+### Setting up HopsWork
+
+A HopsWork account is needed. The configuration file was used to send data to HopsWork. Add this as _.env_ file in the root of the `feature-pipeline` project directory with the following data, replacing the values with the appropriate values.
+
+```txt
+FS_API_KEY = "YOUR-HOPSWORK-API-KEY"
+FS_PROJECT_NAME = "YOUR-PROJECT-NAME"
 ```
+
 
 Please note that the inferred descriptions are based solely on the column names and may not accurately represent the actual data or its context.
