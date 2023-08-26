@@ -1,5 +1,7 @@
 # Feature Pipeline
 
+_code started to fail when hopswork was updated. Will be fixed later_
+
 The work here is inspired by the inspiring work done Paul Iusztin. You can find his seven-lecture full stack ML blog course in [Towards Data Science](https://medium.com/towards-data-science/a-framework-for-building-a-production-ready-feature-engineering-pipeline-f0b29609b20f).
 
 ## Introduction

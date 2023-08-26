@@ -28,6 +28,7 @@ def to_feature_store(
         api_key_value=SETTINGS["FS_API_KEY"], project=SETTINGS["FS_PROJECT_NAME"]
     )
     feature_store = project.get_feature_store()
+    # print("Feature store: ", feature_store)
 
     # Create feature group.
     store_feature_group = feature_store.get_or_create_feature_group(
@@ -39,6 +40,7 @@ def to_feature_store(
         online_enabled=False,
         expectation_suite=validation_expectation_suite,
     )
+    print("Feature group: ======\n", store_feature_group)
     # Upload data.
     store_feature_group.insert(
         features=data,

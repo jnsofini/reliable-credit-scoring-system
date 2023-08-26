@@ -3,7 +3,7 @@ This script combines everything together.
 """
 # pylint: disable=[invalid-name,logging-fstring-interpolation
 # broad-exception-caught]
-
+from pathlib import Path
 import fire
 import pandas as pd
 from feature_pipeline import utils
@@ -18,38 +18,10 @@ from prefect import flow, task  # pylint: disable=wrong-import-order
 logger = utils.get_logger(__name__)
 
 DATA_PATH = (
-    "/home/fini/github-projects/mlops/capstone/data/raw_heloc_dataset_v3.parquet"
+    "https://raw.githubusercontent.com/seanchen7/FICO-HELOC/master/heloc_dataset_v1.csv"
 )
-TARGET = "RiskPerformance"
-MODELLING_COLUMNS = [
-    "RiskPerformance",
-    "ExternalRiskEstimate",
-    "MSinceOldestTradeOpen",
-    "MSinceMostRecentTradeOpen",
-    "AverageMInFile",
-    "NumSatisfactoryTrades",
-    "NumTrades60Ever2DerogPubRec",
-    "NumTrades90Ever2DerogPubRec",
-    "PercentTradesNeverDelq",
-    "MSinceMostRecentDelq",
-    "MaxDelq2PublicRecLast12M",
-    "MaxDelqEver",
-    "NumTotalTrades",
-    "NumTradesOpeninLast12M",
-    "PercentInstallTrades",
-    "MSinceMostRecentInqexcl7days",
-    "NumInqLast6M",
-    "NumInqLast6Mexcl7days",
-    "NetFractionRevolvingBurden",
-    "NetFractionInstallBurden",
-    "NumRevolvingTradesWBalance",
-    "NumInstallTradesWBalance",
-    "NumBank2NatlTradesWHighUtilization",
-    "PercentTradesWBalance",
-    "operation_date",
-    "id",
-]
 
+TARGET = "RiskPerformance"
 FEATURE_GROUP_VERSION = 1
 
 
@@ -80,7 +52,7 @@ def run(
     logger.info("Transforming data.")
     data = transform(data)
     logger.info("Successfully transformed data.")
-    print(data.head())
+    # print("=================\n", data.head())
 
     logger.info("Building validation expectation suite.")
     validation_expectation_suite = validation.build_expectation_suite()
@@ -113,7 +85,7 @@ def transform(data: pd.DataFrame) -> pd.DataFrame:
     )
     logger.info("Cleaning data: Casting columns")
     # print(columns_types)
-    data = cleaning.cast_columns(df=data, columns_type=columns_types)
+    # data = cleaning.cast_columns(df=data, columns_type=columns_types)
     data = cleaning.replace(df=data, replacement={TARGET: {"Bad": 1, "Good": 0}})
     logger.info("Cleaning data: Renaming columns")
     data = cleaning.rename_columns(data)
