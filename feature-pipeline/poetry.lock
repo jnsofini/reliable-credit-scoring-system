@@ -218,13 +218,13 @@ tests-no-zope = ["cloudpickle", "hypothesis", "mypy (>=1.1.1)", "pympler", "pyte
 
 [[package]]
 name = "avro"
-version = "1.10.2"
+version = "1.11.0"
 description = "Avro is a serialization and RPC framework."
 category = "main"
 optional = false
-python-versions = ">=2.7"
+python-versions = ">=3.6"
 files = [
-    {file = "avro-1.10.2.tar.gz", hash = "sha256:381b990cc4c4444743c3297348ffd46e0c3a5d7a17e15b2f4a9042f6e955c31a"},
+    {file = "avro-1.11.0.tar.gz", hash = "sha256:1206365cc30ad561493f735329857dd078533459cee4e928aec2505f341ce445"},
 ]
 
 [package.extras]
@@ -1126,20 +1126,20 @@ hyperframe = ">=6.0,<7"
 
 [[package]]
 name = "hopsworks"
-version = "3.0.5"
+version = "3.2.0"
 description = "HOPSWORKS: An environment independent client to interact with the Hopsworks API"
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "hopsworks-3.0.5.tar.gz", hash = "sha256:72e31fab672c8f8616e699b767e55ff9c90609bbf2a5fe0eacaa916591a8255d"},
+    {file = "hopsworks-3.2.0.tar.gz", hash = "sha256:56733bf35fca6a5f9157349ee2a12da1ccddd8d308c8c8646c2bc4396be6a9a6"},
 ]
 
 [package.dependencies]
 boto3 = "*"
 furl = "*"
-hsfs = {version = ">=3.0.0,<3.1.0", extras = ["python"]}
-hsml = ">=3.0.0,<3.1.0"
+hsfs = {version = ">=3.2.0,<3.3.0", extras = ["python"]}
+hsml = ">=3.2.0,<3.3.0"
 mock = "*"
 pyhumps = "1.6.1"
 pyjks = "*"
@@ -1164,20 +1164,20 @@ files = [
 
 [[package]]
 name = "hsfs"
-version = "3.0.9"
+version = "3.2.1"
 description = "HSFS: An environment independent client to interact with the Hopsworks Featurestore"
 category = "main"
 optional = false
 python-versions = ">=3.7,<3.11"
 files = [
-    {file = "hsfs-3.0.9.tar.gz", hash = "sha256:732fcffc4e226f6b6bf89782bd3282c74f14968a3761eac79f22b133ef32ae84"},
+    {file = "hsfs-3.2.1.tar.gz", hash = "sha256:c865abe73bafb73c40e682c79faccff0eb53079f06007a9b6fae494161af094a"},
 ]
 
 [package.dependencies]
-avro = "1.10.2"
+avro = "1.11.0"
 boto3 = "*"
 confluent-kafka = {version = "<=1.9.0", optional = true, markers = "extra == \"python\""}
-fastavro = {version = "1.4.11", optional = true, markers = "extra == \"python\""}
+fastavro = {version = ">=1.4.11,<=1.8.2", optional = true, markers = "extra == \"python\""}
 furl = "*"
 great_expectations = "0.14.13"
 markupsafe = "<2.1.0"
@@ -1192,22 +1192,23 @@ PyMySQL = {version = "*", extras = ["rsa"]}
 requests = "*"
 sqlalchemy = "*"
 tqdm = {version = "*", optional = true, markers = "extra == \"python\""}
+tzlocal = "*"
 
 [package.extras]
-dev = ["black", "flake8", "moto[s3]", "pytest (==7.1.2)"]
-docs = ["keras_autodoc @ git+https://git@github.com/moritzmeister/keras-autodoc@split-tags-properties", "markdown (==3.3.7)", "markdown-include", "mike (==1.1.2)", "mkdocs (==1.3.0)", "mkdocs-jupyter (==0.21.0)", "mkdocs-material (==8.2.8)", "pymdown-extensions", "sphinx (==3.5.4)"]
-hive = ["confluent-kafka (<=1.9.0)", "fastavro (==1.4.11)", "pyarrow", "pyhopshive[thrift]"]
-python = ["confluent-kafka (<=1.9.0)", "fastavro (==1.4.11)", "pyarrow", "pyhopshive[thrift]", "tqdm"]
+dev = ["black", "flake8", "moto[s3]", "pyspark (==3.1.1)", "pytest (==7.1.2)", "pytest-mock (==3.8.2)"]
+docs = ["keras_autodoc @ git+https://git@github.com/moritzmeister/keras-autodoc@split-tags-properties", "markdown (==3.3.7)", "markdown-include", "mike (==1.1.2)", "mkdocs (==1.3.0)", "mkdocs-jupyter (==0.21.0)", "mkdocs-macros-plugin (==0.7.0)", "mkdocs-material (==8.2.8)", "pymdown-extensions", "sphinx (==3.5.4)"]
+hive = ["confluent-kafka (<=1.9.0)", "fastavro (>=1.4.11,<=1.8.2)", "pyarrow", "pyhopshive[thrift]"]
+python = ["confluent-kafka (<=1.9.0)", "fastavro (>=1.4.11,<=1.8.2)", "pyarrow", "pyhopshive[thrift]", "tqdm"]
 
 [[package]]
 name = "hsml"
-version = "3.0.3"
+version = "3.2.1"
 description = "HSML: An environment independent client to interact with the Hopsworks Model Registry"
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "hsml-3.0.3.tar.gz", hash = "sha256:1044fee9b7ce04ad93854c2680167607661c4d2f17ae79b856cc1ad75d4ae263"},
+    {file = "hsml-3.2.1.tar.gz", hash = "sha256:a0a3e6db8ef01b7189bbf4f046d7fbde2fa0b1ed019a8db5a1c5c058a4118f7f"},
 ]
 
 [package.dependencies]
@@ -3511,4 +3512,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10"
-content-hash = "146e374ee958af4da6d163d31aa4621d647ef48c51f68a5aa76dd17a56d96ec0"
+content-hash = "e2342f958d2bdec2d27c7448de2185c55f4ad2624fd434ce5965e7185bf2b5cb"
