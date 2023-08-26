@@ -21,6 +21,9 @@ fire = "*"
 fastapi = "*"
 uvicorn = "*"
 pydantic = "*"
+psycopg = "*"
+psycopg-binary = "*"
+evidently = "*"
 
 [dev-packages]
 mlflow = "2.4"
